@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'groovy'
     id 'io.quarkus'
 }
 
@@ -10,16 +11,33 @@ repositories {
 
 dependencies {
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
-    implementation 'io.quarkus:quarkus-rest-jackson'
-    implementation 'io.quarkus:quarkus-smallrye-jwt'
-    implementation 'io.quarkus:quarkus-flyway'
-    implementation 'io.quarkus:quarkus-jdbc-postgresql'
-    implementation 'io.quarkus:quarkus-mailer'
-    implementation 'io.quarkus:quarkus-oidc'
     implementation 'io.quarkus:quarkus-arc'
+
     implementation 'io.quarkus:quarkus-rest'
+    implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-mailer'
+    implementation 'com.twilio.sdk:twilio:11.0.0-rc.2'
+
+    implementation 'io.quarkus:quarkus-smallrye-jwt'
+    implementation 'io.quarkus:quarkus-oidc'
+    implementation 'de.mkammerer:argon2-jvm:2.12'
+
+    implementation 'io.quarkus:quarkus-jdbc-postgresql'
+    implementation 'io.quarkus:quarkus-agroal'
+    implementation 'io.quarkus:quarkus-flyway'
+    implementation 'io.github.hacihaciyev:jet-querious:1.0.7'
+
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
+    testImplementation("net.datafaker:datafaker:2.4.1")
+    testImplementation("org.assertj:assertj-core:3.27.2")
+    implementation("io.quarkiverse.mailpit:quarkus-mailpit:1.4.0")
+    testImplementation("org.spockframework:spock-core")
+    testImplementation("com.github.AinGrace:quarkus-spock-graceful:0.1")
+    testImplementation("org.testcontainers:testcontainers")
+    implementation("org.objenesis:objenesis:3.4")
+    implementation("net.bytebuddy:byte-buddy:1.17.5")
+    testImplementation("com.tngtech.archunit:archunit:1.4.1")
 }
 
 group 'org.project'
