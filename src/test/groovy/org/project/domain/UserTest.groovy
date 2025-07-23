@@ -1,10 +1,10 @@
 package org.project.domain
 
-import com.uyol.app.domain.shared.exceptions.IllegalDomainStateException
-import com.uyol.app.domain.user.entities.User
-import com.uyol.app.domain.user.exceptions.BannedUserException
-import com.uyol.app.infrastructure.security.HOTPGenerator
-import com.uyol.app.util.TestDataGenerator
+import org.project.domain.shared.exceptions.IllegalDomainStateException
+import org.project.domain.user.entities.User
+import org.project.domain.user.exceptions.BannedUserException
+import org.project.infrastructure.security.HOTPGenerator
+import org.project.util.TestDataGenerator
 import spock.lang.Specification
 
 class UserTest extends Specification {
