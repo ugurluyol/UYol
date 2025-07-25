@@ -54,15 +54,15 @@ public class AuthService {
 	}
 
 	public void registration(RegistrationForm registrationForm) {
-        if (registrationForm == null)
-            throw  responseException(Response.Status.BAD_REQUEST, "Registration form is null");
+		if (registrationForm == null)
+			throw responseException(Response.Status.BAD_REQUEST, "Registration form is null");
 
-        if (!Objects.equals(registrationForm.password(), registrationForm.passwordConfirmation())) {
-            Log.errorf("Registration failure, passwords do not match");
-            throw responseException(Response.Status.BAD_REQUEST, "Passwords do not match");
-        }
+		if (!Objects.equals(registrationForm.password(), registrationForm.passwordConfirmation())) {
+			Log.errorf("Registration failure, passwords do not match");
+			throw responseException(Response.Status.BAD_REQUEST, "Passwords do not match");
+		}
 
-        Password.validate(registrationForm.password());
+		Password.validate(registrationForm.password());
 
 		if (registrationForm.email() != null) {
 			Email email = new Email(registrationForm.email());
@@ -76,24 +76,23 @@ public class AuthService {
 				throw responseException(Response.Status.CONFLICT, "Phone already used");
 		}
 
-        String encodedPassword = passwordEncoder.encode(registrationForm.password());
+		String encodedPassword = passwordEncoder.encode(registrationForm.password());
 
-        PersonalData personalData = new PersonalData(
-                registrationForm.firstname(),
-                registrationForm.surname(),
-                registrationForm.phone(),
-                encodedPassword,
-                registrationForm.email(),
-                registrationForm.birthDate()
-        );
-        String secretKey = HOTPGenerator.generateSecretKey();
+		PersonalData personalData = new PersonalData(
+				registrationForm.firstname(),
+				registrationForm.surname(),
+				registrationForm.phone(),
+				encodedPassword,
+				registrationForm.email(),
+				registrationForm.birthDate());
+		String secretKey = HOTPGenerator.generateSecretKey();
 
-        User user = User.of(personalData, secretKey);
-        userRepository.save(user)
-                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-                        "Unable to register your account at the moment. Please try again later."));
+		User user = User.of(personalData, secretKey);
+		userRepository.save(user)
+				.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+						"Unable to register your account at the moment. Please try again later."));
 
-        generateAndSendOTP(user);
+		generateAndSendOTP(user);
 		if (registrationForm.email() != null)
 			emailInteractionService.sendSoftVerificationMessage(new Email(registrationForm.email()));
 	}
