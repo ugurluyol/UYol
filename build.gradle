@@ -42,7 +42,7 @@ dependencies {
     testImplementation 'org.testcontainers:postgresql:1.19.3'
     testImplementation 'org.flywaydb:flyway-core'
     testImplementation 'org.mockito:mockito-core:4.+'
-    testImplementation 'io.quarkus:quarkus-junit5-mockito
+    testImplementation 'io.quarkus:quarkus-junit5-mockito'
     testImplementation 'io.quarkus:quarkus-junit5-mockito'
     testImplementation("org.objenesis:objenesis:3.4")
     testImplementation("net.bytebuddy:byte-buddy:1.17.5")
