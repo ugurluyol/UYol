@@ -1,20 +1,29 @@
 package org.project.infrastructure.repository;
 
-import com.hadzhy.jetquerious.jdbc.JetQuerious;
-import io.quarkus.logging.Log;
-import jakarta.enterprise.context.ApplicationScoped;
-import org.project.domain.shared.containers.Result;
-import org.project.domain.user.entities.User;
-import org.project.domain.user.repositories.UserRepository;
-import org.project.domain.user.value_objects.*;
+import static com.hadzhy.jetquerious.sql.QueryForge.insert;
+import static com.hadzhy.jetquerious.sql.QueryForge.select;
+import static com.hadzhy.jetquerious.sql.QueryForge.update;
+import static org.project.infrastructure.repository.JetOTPRepository.mapTransactionResult;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import static com.hadzhy.jetquerious.sql.QueryForge.*;
-import static org.project.infrastructure.repository.JetOTPRepository.mapTransactionResult;
+import org.project.domain.shared.containers.Result;
+import org.project.domain.user.entities.User;
+import org.project.domain.user.repositories.UserRepository;
+import org.project.domain.user.value_objects.AccountDates;
+import org.project.domain.user.value_objects.Email;
+import org.project.domain.user.value_objects.KeyAndCounter;
+import org.project.domain.user.value_objects.PersonalData;
+import org.project.domain.user.value_objects.Phone;
+import org.project.domain.user.value_objects.RefreshToken;
+
+import com.hadzhy.jetquerious.jdbc.JetQuerious;
+
+import io.quarkus.logging.Log;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class JetUserRepository implements UserRepository {
@@ -126,9 +135,8 @@ public class JetUserRepository implements UserRepository {
                 user.id().toString(),
                 personalData.firstname(),
                 personalData.surname(),
-                personalData.phone().orElse(null),
-                personalData.email(),
-                personalData.password().orElse(null),
+				personalData.phone().orElse(null), personalData.email().orElse(null),
+				personalData.password().orElse(null),
                 personalData.birthDate(),
                 user.isVerified(),
                 user.isBanned(),

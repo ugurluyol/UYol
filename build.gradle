@@ -7,11 +7,26 @@ plugins {
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        url = 'https://jitpack.io'
+    }
 }
 
 dependencies {
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-arc'
+    
+    // Testcontainers core
+    testImplementation 'org.testcontainers:testcontainers:1.19.3'
+
+    // Testcontainers for PostgreSQL
+    testImplementation 'org.testcontainers:postgresql:1.19.3'
+
+    // Əgər Flyway istifadə edirsənsə
+    testImplementation 'org.flywaydb:flyway-core'
+    
+    testImplementation 'org.mockito:mockito-core:4.+'
+    testImplementation 'io.quarkus:quarkus-junit5-mockito'
 
     implementation 'io.quarkus:quarkus-rest'
     implementation 'io.quarkus:quarkus-rest-jackson'
@@ -49,6 +64,7 @@ java {
 }
 
 test {
+	useJUnitPlatform()
     systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
 }
 compileJava {

@@ -1,25 +1,25 @@
 package org.project.infrastructure.security;
 
-import io.quarkus.logging.Log;
-import io.smallrye.jwt.auth.principal.JWTParser;
-import io.smallrye.jwt.auth.principal.ParseException;
-import io.smallrye.jwt.build.Jwt;
-import jakarta.inject.Singleton;
-import org.apache.commons.codec.binary.Base64;
-import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.project.domain.shared.containers.Result;
-import org.project.domain.user.entities.User;
-
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
+
+import org.apache.commons.codec.binary.Base64;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.project.domain.shared.containers.Result;
+import org.project.domain.user.entities.User;
+
+import io.quarkus.logging.Log;
+import io.smallrye.jwt.auth.principal.JWTParser;
+import io.smallrye.jwt.auth.principal.ParseException;
+import io.smallrye.jwt.build.Jwt;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class JWTUtility {
@@ -80,11 +80,13 @@ public class JWTUtility {
     }
 
     private static RSAPublicKey readX509PublicKey() {
-        try {
-            String key = Files.readString(Path.of("src/main/resources/keycloackPublicKey.pem"), Charset.defaultCharset())
+		try (InputStream is = JWTUtility.class.getClassLoader().getResourceAsStream("keycloackPublicKey.pem")) {
+			if (is == null) {
+				throw new IllegalStateException("Public key file not found in resources");
+			}
+			String key = new String(is.readAllBytes(), StandardCharsets.UTF_8)
                     .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replaceAll(System.lineSeparator(), "")
-                    .replace("-----END PUBLIC KEY-----", "");
+					.replace("-----END PUBLIC KEY-----", "").replaceAll("\\s+", "");
 
             byte[] encoded = Base64.decodeBase64(key);
 

@@ -7,6 +7,7 @@ import org.project.infrastructure.security.HOTPGenerator
 import org.project.util.TestDataGenerator
 import spock.lang.Specification
 
+
 class UserTest extends Specification {
 
     def "should create user with valida properties"() {

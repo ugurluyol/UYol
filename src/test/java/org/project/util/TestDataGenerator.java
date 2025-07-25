@@ -1,11 +1,19 @@
 package org.project.util;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import net.datafaker.Faker;
+import org.project.application.dto.auth.RegistrationForm;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.User;
-import org.project.domain.user.value_objects.*;
+import org.project.domain.user.value_objects.Birthdate;
+import org.project.domain.user.value_objects.Email;
+import org.project.domain.user.value_objects.Firstname;
+import org.project.domain.user.value_objects.Password;
+import org.project.domain.user.value_objects.PersonalData;
+import org.project.domain.user.value_objects.Phone;
+import org.project.domain.user.value_objects.Surname;
 import org.project.infrastructure.security.HOTPGenerator;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import net.datafaker.Faker;
 
 @ApplicationScoped
 public class TestDataGenerator {
@@ -88,4 +96,12 @@ public class TestDataGenerator {
             return birthdateResult.value();
         }
     }
+
+	public static RegistrationForm generateRegistrationForm() {
+		String password = generatePassword().password();
+		return new RegistrationForm(generateFirstname().firstname(), generateSurname().surname(),
+				generatePhone().phoneNumber(), generateEmail().email(), password, password,
+				generateBirthdate().birthDate());
+	}
+
 }

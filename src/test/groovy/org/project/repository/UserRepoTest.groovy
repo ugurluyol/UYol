@@ -14,8 +14,9 @@ import org.project.util.PostgresTestResource
 import org.project.util.TestDataGenerator
 import spock.lang.Specification
 
-@Dependent
-@QuarkusSpockTest
+import io.quarkus.test.junit.QuarkusTest
+
+@QuarkusTest
 @QuarkusTestResource(value = PostgresTestResource.class)
 class UserRepoTest extends Specification {
 
