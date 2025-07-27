@@ -10,7 +10,7 @@ import spock.lang.Specification
 
 class UserTest extends Specification {
 
-    def "should create user with valida properties"() {
+    def "should create user with valid properties"() {
         given:
         def personalData = TestDataGenerator.personalData()
         def secretKey = HOTPGenerator.generateSecretKey()
@@ -48,7 +48,7 @@ class UserTest extends Specification {
         user.keyAndCounter().counter() == 1
     }
 
-    def "should throw an exception when trying ti verify user without generated OTP(mean incremented counter)"() {
+    def "should throw an exception when trying to verify user without generated OTP(mean incremented counter)"() {
         given:
         def user = TestDataGenerator.user()
 
