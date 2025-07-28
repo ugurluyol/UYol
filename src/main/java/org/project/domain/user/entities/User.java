@@ -20,7 +20,7 @@ public class User {
     private boolean isBanned;
     private KeyAndCounter keyAndCounter;
     private AccountDates accountDates;
-	private boolean is2FAEnabled;
+    private boolean is2FAEnabled;
 
     private User(
             UUID id,
@@ -28,9 +28,12 @@ public class User {
             boolean isVerified,
             boolean isBanned,
             KeyAndCounter keyAndCounter,
-			AccountDates accountDates, boolean is2FAEnabled) {
+            AccountDates accountDates,
+            boolean is2FAEnabled) {
 
-        if (isBanned) throw new BannedUserException("Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance.");
+        if (isBanned)
+            throw new BannedUserException(
+                    "Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance.");
 
         this.id = id;
         this.personalData = personalData;
@@ -38,15 +41,15 @@ public class User {
         this.isVerified = isVerified;
         this.keyAndCounter = keyAndCounter;
         this.accountDates = accountDates;
-		this.is2FAEnabled = is2FAEnabled;
+        this.is2FAEnabled = is2FAEnabled;
     }
 
     public static User of(PersonalData personalData, String secretKey) {
         required("personalData", personalData);
         required("secretKey", secretKey);
 
-		return new User(UUID.randomUUID(), personalData, false, false, new KeyAndCounter(secretKey, 0),
-				AccountDates.defaultDates(), false);
+        return new User(UUID.randomUUID(), personalData, false, false, new KeyAndCounter(secretKey, 0),
+                AccountDates.defaultDates(), false);
     }
 
     public static User fromRepository(
@@ -55,9 +58,10 @@ public class User {
             boolean isVerified,
             boolean isBanned,
             KeyAndCounter keyAndCounter,
-			AccountDates accountDates, boolean is2FAEnabled) {
+            AccountDates accountDates,
+            boolean is2FAEnabled) {
 
-		return new User(id, personalData, isVerified, isBanned, keyAndCounter, accountDates, is2FAEnabled);
+        return new User(id, personalData, isVerified, isBanned, keyAndCounter, accountDates, is2FAEnabled);
     }
 
     public UUID id() {
@@ -76,9 +80,9 @@ public class User {
         return isVerified;
     }
 
-	public boolean is2FAEnabled() {
-		return is2FAEnabled;
-	}
+    public boolean is2FAEnabled() {
+        return is2FAEnabled;
+    }
 
     public boolean isBanned() {
         return isBanned;
@@ -101,10 +105,27 @@ public class User {
         if (isVerified)
             throw new IllegalDomainStateException("You can`t active already verified user.");
         if (keyAndCounter.counter() == 0)
-            throw new IllegalDomainStateException("It is prohibited to activate an account that has not been verified.");
+            throw new IllegalDomainStateException(
+                    "It is prohibited to activate an account that has not been verified.");
 
         this.isVerified = true;
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter());
+    }
+
+    public boolean canLogin() {
+        return isVerified && !isBanned;
+    }
+
+    public void enable2FA() {
+        verifyPotentialBan();
+        if (!isVerified)
+            throw new IllegalDomainStateException("You can`t enable 2FA on not verified account");
+        if (keyAndCounter.counter() == 0 || keyAndCounter.counter() == 1)
+            throw new IllegalDomainStateException("Counter need to be incremented");
+        if (is2FAEnabled)
+            throw new IllegalDomainStateException("You can`t activate 2FA twice");
+
+        this.is2FAEnabled = true;
     }
 
     public void ban() {
@@ -114,46 +135,25 @@ public class User {
         this.isBanned = true;
     }
 
-    public boolean ableToLogin() {
-        return isVerified && !isBanned;
-    }
-
     private void verifyPotentialBan() {
-        if (isBanned) throw new BannedUserException("Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance.");
+        if (isBanned)
+            throw new BannedUserException(
+                    "Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance.");
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass())
+            return false;
         User user = (User) o;
         return isVerified == user.isVerified &&
                 isBanned == user.isBanned &&
-                Objects.equals(id, user.id) &&
-                Objects.equals(personalData, user.personalData) &&
-                Objects.equals(keyAndCounter, user.keyAndCounter) &&
-                Objects.equals(accountDates, user.accountDates);
+                is2FAEnabled == user.is2FAEnabled &&
+                id.equals(user.id());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, personalData, isVerified, isBanned, keyAndCounter, accountDates);
+        return Objects.hash(id, isVerified, isBanned, isVerified);
     }
-
-
-	public boolean canLogin() {
-		return isVerified && !isBanned;
-	}
-
-	public void enable2FA() {
-		verifyPotentialBan();
-		if (!isVerified)
-			throw new IllegalDomainStateException("You can`t enable 2FA on not verified account");
-		if (keyAndCounter.counter() == 0 || keyAndCounter.counter() == 1)
-			throw new IllegalDomainStateException("Counter need to be incremented");
-		if (is2FAEnabled)
-			throw new IllegalDomainStateException("You can`t activate 2FA twice");
-
-		this.is2FAEnabled = true;
-	}
-
 }
