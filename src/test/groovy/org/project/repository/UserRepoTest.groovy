@@ -114,6 +114,30 @@ class UserRepoTest extends Specification {
         repo.updateBan(user)
     }
 
+    void "successfully update 2fa"() {
+        when:
+        def result = repo.save(user)
+
+        then:
+        result.success()
+        result.value() == 1
+
+        when:
+        user.incrementCounter()
+        user.enable()
+        user.incrementCounter()
+        user.enable2FA()
+        def _2faResult = repo.update2FA(user)
+
+        then:
+        notThrown(Exception)
+        _2faResult.success()
+        _2faResult.value() == 1
+
+        where:
+        user << (1..10).collect({ TestDataGenerator.generateUser()})
+    }
+
     void "successful is email exists"() {
         when:
         def result = repo.save(user)
@@ -253,35 +277,5 @@ class UserRepoTest extends Specification {
 
         where:
         user << (1..10).collect({ TestDataGenerator.user()})
-    }
-
-    void "OTP contains user id success"() {
-        given:
-        def otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()))
-
-        when:
-        def userSaveResult = userRepo.save(user)
-
-        then:
-        userSaveResult.success()
-        userSaveResult.value() == 1
-
-        when:
-        def result = otpRepo.save(otp)
-
-        then:
-        notThrown(Exception)
-        result.success()
-        result.value() == 1
-
-        when:
-        def containsResult = otpRepo.contains(user.id())
-
-        then:
-        notThrown(Exception)
-        containsResult
-
-        where:
-        user << (1..10).collect({ TestDataGenerator.generateUser()})
     }
 }
