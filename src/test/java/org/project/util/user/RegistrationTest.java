@@ -5,20 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.project.application.service.AuthService;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.OTP;
@@ -37,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
@@ -45,7 +37,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
 @QuarkusTest
-
 @QuarkusTestResource(PostgresTestResource.class)
 public class RegistrationTest {
 
@@ -53,26 +44,8 @@ public class RegistrationTest {
 			.addModule(new JavaTimeModule())
 			.build();
 
-	@InjectMock
-	PhoneInteractionService phoneInteractionService;
-
-	@InjectMock
-	EmailInteractionService emailService;
-	
-	@InjectMock
-	UserRepository userRepository;
-
 	@Inject
 	AuthService authService;
-
-	@InjectMock
-	OTPRepository otpRepository;
-
-
-	@BeforeEach
-	void setup() {
-		Mockito.doNothing().when(emailService).sendSoftVerificationMessage(Mockito.any());
-	}
 
 	@Test
 	void validRegistration() throws JsonProcessingException {
@@ -100,7 +73,6 @@ public class RegistrationTest {
 				.then()
 				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
-
 
 	@Test
 	void shouldReturnVerifiedUserByPhone() {
@@ -143,7 +115,6 @@ public class RegistrationTest {
 		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), exception.getResponse().getStatus());
 	}
 
-
 	@Test
 	void shouldThrowForbiddenWhenUserNotVerified() {
 		String identifier = "test@example.com";
@@ -158,35 +129,34 @@ public class RegistrationTest {
 
 		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
 	}
+
 	@Test
-    void verification_shouldSucceed_whenValidOTPGiven() {
-        String otpCode = "123456";
-        UUID userId = UUID.randomUUID();
+	void verification_shouldSucceed_whenValidOTPGiven() {
+		String otpCode = "123456";
+		UUID userId = UUID.randomUUID();
 
-        OTP otp = Mockito.mock(OTP.class);
-        User user = Mockito.mock(User.class);
+		OTP otp = Mockito.mock(OTP.class);
+		User user = Mockito.mock(User.class);
 
-        try (MockedStatic<OTP> mockedStatic = Mockito.mockStatic(OTP.class)) {
-            mockedStatic.when(() -> OTP.validate(otpCode)).thenAnswer(invocation -> null);
+		try (MockedStatic<OTP> mockedStatic = Mockito.mockStatic(OTP.class)) {
+			mockedStatic.when(() -> OTP.validate(otpCode)).thenAnswer(invocation -> null);
 
-            Optional<OTP> of = Optional.of(otp);
-            Mockito.when(otpRepository.findBy(otpCode)).thenReturn(Result.success(otp));
-            Mockito.when(otp.userID()).thenReturn(userId);
-            Mockito.when(userRepository.findBy(userId)).thenReturn(Result.success(user));
+			Mockito.when(otpRepository.findBy(otpCode)).thenReturn(Result.success(otp));
+			Mockito.when(otp.userID()).thenReturn(userId);
+			Mockito.when(userRepository.findBy(userId)).thenReturn(Result.success(user));
 
-            Mockito.when(user.isVerified()).thenReturn(false);
-            Mockito.when(otp.isExpired()).thenReturn(false);
+			Mockito.when(user.isVerified()).thenReturn(false);
+			Mockito.when(otp.isExpired()).thenReturn(false);
 
-            Mockito.doNothing().when(otp).confirm();
+			Mockito.doNothing().when(otp).confirm();
 			Mockito.when(otpRepository.updateConfirmation(otp)).thenReturn(Result.success(1));
-            Mockito.doNothing().when(user).enable();
+			Mockito.doNothing().when(user).enable();
 			Mockito.when(userRepository.updateVerification(user)).thenReturn(Result.success(1));
 
-            assertDoesNotThrow(() -> authService.verification(otpCode));
+			assertDoesNotThrow(() -> authService.verification(otpCode));
 
-            Mockito.verify(otpRepository).updateConfirmation(otp);
-            Mockito.verify(userRepository).updateVerification(user);
-        }
+			Mockito.verify(otpRepository).updateConfirmation(otp);
+			Mockito.verify(userRepository).updateVerification(user);
+		}
 	}
 }
-
