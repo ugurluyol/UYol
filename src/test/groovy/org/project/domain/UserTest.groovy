@@ -86,4 +86,61 @@ class UserTest extends Specification {
         def e = thrown(BannedUserException)
         e.getMessage() == "Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance."
     }
+
+    def "should enable 2FA successfully when all conditions are met"() {
+        given: "verified user with counter > 1"
+        def user = TestDataGenerator.generateUser()
+        user.incrementCounter() // counter = 1
+        user.enable()           // user verified
+        user.incrementCounter() // counter = 2
+
+        when: "enabling 2FA"
+        user.enable2FA()
+
+        then: "2FA is enabled"
+        user.is2FAEnabled()
+    }
+
+    def "should throw exception when enabling 2FA on unverified user"() {
+        given: "unverified user"
+        def user = TestDataGenerator.generateUser()
+        user.incrementCounter()
+        user.incrementCounter()
+
+        when: "trying to enable 2FA"
+        user.enable2FA()
+
+        then: "IllegalDomainStateException is thrown"
+        def exception = thrown(IllegalDomainStateException)
+        exception.message == "You can`t enable 2FA on not verified account"
+    }
+
+    def "should throw exception when enabling 2FA twice"() {
+        given: "user with 2FA already enabled"
+        def user = TestDataGenerator.generateUser()
+        user.incrementCounter()
+        user.enable()
+        user.incrementCounter()
+        user.enable2FA()
+
+        when: "trying to enable 2FA again"
+        user.enable2FA()
+
+        then: "IllegalDomainStateException is thrown"
+        def exception = thrown(IllegalDomainStateException)
+        exception.message == "You can`t activate 2FA twice"
+    }
+
+    def "should disable user successfully"() {
+        given: "verified user"
+        def user = TestDataGenerator.generateUser()
+        user.incrementCounter()
+        user.enable()
+
+        when: "disabling user"
+        user.disable()
+
+        then: "user is not verified"
+        !user.isVerified()
+    }
 }
