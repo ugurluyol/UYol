@@ -1,14 +1,16 @@
 package org.project.domain.user.entities;
 
-import org.project.domain.shared.enumerations.UserRole;
-import org.project.domain.shared.exceptions.IllegalDomainStateException;
-import org.project.domain.user.exceptions.BannedUserException;
-import org.project.domain.user.value_objects.*;
+import static org.project.domain.shared.util.Utils.required;
 
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.project.domain.shared.util.Utils.required;
+import org.project.domain.shared.enumerations.UserRole;
+import org.project.domain.shared.exceptions.IllegalDomainStateException;
+import org.project.domain.user.exceptions.BannedUserException;
+import org.project.domain.user.value_objects.AccountDates;
+import org.project.domain.user.value_objects.KeyAndCounter;
+import org.project.domain.user.value_objects.PersonalData;
 
 public class User {
     private final UUID id;
@@ -18,6 +20,7 @@ public class User {
     private boolean isBanned;
     private KeyAndCounter keyAndCounter;
     private AccountDates accountDates;
+	private boolean is2FAEnabled;
 
     private User(
             UUID id,
@@ -25,7 +28,7 @@ public class User {
             boolean isVerified,
             boolean isBanned,
             KeyAndCounter keyAndCounter,
-            AccountDates accountDates) {
+			AccountDates accountDates, boolean is2FAEnabled) {
 
         if (isBanned) throw new BannedUserException("Access denied: this user account has been banned due to a violation of platform rules. Contact support for further assistance.");
 
@@ -35,13 +38,15 @@ public class User {
         this.isVerified = isVerified;
         this.keyAndCounter = keyAndCounter;
         this.accountDates = accountDates;
+		this.is2FAEnabled = is2FAEnabled;
     }
 
     public static User of(PersonalData personalData, String secretKey) {
         required("personalData", personalData);
         required("secretKey", secretKey);
 
-        return new User(UUID.randomUUID(), personalData, false, false, new KeyAndCounter(secretKey, 0), AccountDates.defaultDates());
+		return new User(UUID.randomUUID(), personalData, false, false, new KeyAndCounter(secretKey, 0),
+				AccountDates.defaultDates(), false);
     }
 
     public static User fromRepository(
@@ -50,9 +55,9 @@ public class User {
             boolean isVerified,
             boolean isBanned,
             KeyAndCounter keyAndCounter,
-            AccountDates accountDates) {
+			AccountDates accountDates, boolean is2FAEnabled) {
 
-        return new User(id, personalData, isVerified, isBanned, keyAndCounter, accountDates);
+		return new User(id, personalData, isVerified, isBanned, keyAndCounter, accountDates, is2FAEnabled);
     }
 
     public UUID id() {
@@ -70,6 +75,10 @@ public class User {
     public boolean isVerified() {
         return isVerified;
     }
+
+	public boolean is2FAEnabled() {
+		return is2FAEnabled;
+	}
 
     public boolean isBanned() {
         return isBanned;
@@ -129,4 +138,22 @@ public class User {
     public int hashCode() {
         return Objects.hash(id, personalData, isVerified, isBanned, keyAndCounter, accountDates);
     }
+
+
+	public boolean canLogin() {
+		return isVerified && !isBanned;
+	}
+
+	public void enable2FA() {
+		verifyPotentialBan();
+		if (!isVerified)
+			throw new IllegalDomainStateException("You can`t enable 2FA on not verified account");
+		if (keyAndCounter.counter() == 0 || keyAndCounter.counter() == 1)
+			throw new IllegalDomainStateException("Counter need to be incremented");
+		if (is2FAEnabled)
+			throw new IllegalDomainStateException("You can`t activate 2FA twice");
+
+		this.is2FAEnabled = true;
+	}
+
 }

@@ -42,6 +42,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-flyway'
     implementation 'io.github.hacihaciyev:jet-querious:1.0.7'
 
+	testImplementation 'io.rest-assured:rest-assured'
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
     testImplementation("net.datafaker:datafaker:2.4.1")

@@ -1,10 +1,10 @@
 package org.project.infrastructure.security;
 
+import java.util.Objects;
+
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import jakarta.inject.Singleton;
-
-import java.util.Objects;
 
 @Singleton
 public class PasswordEncoder {
@@ -25,4 +25,6 @@ public class PasswordEncoder {
         Objects.requireNonNull(hashed);
         return argon2.verify(hashed, password.toCharArray());
     }
+
+
 }

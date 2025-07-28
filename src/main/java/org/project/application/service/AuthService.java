@@ -2,9 +2,16 @@ package org.project.application.service;
 
 import static org.project.application.util.RestUtil.responseException;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
+import org.project.application.dto.auth.LoginForm;
 import org.project.application.dto.auth.RegistrationForm;
+import org.project.application.dto.auth.Token;
+import org.project.application.dto.auth.Tokens;
+import org.project.domain.shared.containers.Result;
+import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.user.entities.OTP;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.OTPRepository;
@@ -13,6 +20,7 @@ import org.project.domain.user.value_objects.Email;
 import org.project.domain.user.value_objects.Password;
 import org.project.domain.user.value_objects.PersonalData;
 import org.project.domain.user.value_objects.Phone;
+import org.project.domain.user.value_objects.RefreshToken;
 import org.project.infrastructure.communication.EmailInteractionService;
 import org.project.infrastructure.communication.PhoneInteractionService;
 import org.project.infrastructure.security.HOTPGenerator;
@@ -113,5 +121,172 @@ public class AuthService {
 		});
 
 		phoneInteractionService.sendOTP(new Phone(user.personalData().phone().orElseThrow()), otp);
+	}
+
+	public User login(LoginForm form) {
+		if (form.identifier() == null || form.identifier().isBlank()) {
+	        throw responseException(Response.Status.BAD_REQUEST, "Email or phone must be provided");
+	    }
+
+		User user = getVerifiedUserByIdentifier(form.identifier());
+		String hashedPassword = user.personalData().password().orElseThrow(
+				() -> responseException(Response.Status.INTERNAL_SERVER_ERROR, "User password is missing"));
+		if (!passwordEncoder.verify(form.password(), hashedPassword)) {
+	        throw responseException(Response.Status.UNAUTHORIZED, "Invalid credentials");
+	    }
+
+	    return user;
+	}
+
+	public User getVerifiedUserByIdentifier(String identifier) {
+		Result<User, Throwable> result;
+
+		if (identifier.contains("@")) {
+			result = userRepository.findBy(new Email(identifier));
+		} else {
+			result = userRepository.findBy(new Phone(identifier));
+		}
+
+		if (result.isFailure()) {
+			throw responseException(Response.Status.UNAUTHORIZED, "Invalid credentials");
+		}
+
+		User user = result.get();
+
+		if (!user.isVerified()) {
+			throw responseException(Response.Status.FORBIDDEN, "Account not verified");
+		}
+
+		return user;
+	}
+	public void resendOTP(String identifier) {
+		if (identifier == null || identifier.isBlank()) {
+			throw responseException(Response.Status.BAD_REQUEST, "Identifier is required");
+		}
+		User user = getVerifiedUserByIdentifier(identifier);
+		OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
+
+		otpRepository.save(otp)
+				.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to save OTP"));
+
+		user.incrementCounter();
+
+		userRepository.updateCounter(user).orElseThrow(() -> {
+			otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can't remove OTP", throwable));
+			return responseException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to update user counter");
+		});
+
+		user.personalData().phone().map(Phone::new).ifPresent(phone -> phoneInteractionService.sendOTP(phone, otp));
+
+		user.personalData().email().map(Email::new)
+				.ifPresent(email -> emailInteractionService.sendSoftVerificationMessage(email));
+	}
+
+	
+
+	public void verification(String receivedOTP) {
+        try {
+            OTP.validate(receivedOTP);
+            OTP otp = otpRepository.findBy(receivedOTP)
+                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+            User user = userRepository.findBy(otp.userID()).orElseThrow();
+
+            if (user.isVerified())
+                throw responseException(Response.Status.BAD_REQUEST, "User already verified.");
+
+            if (otp.isExpired())
+                throw responseException(Response.Status.GONE, "OTP is gone.");
+
+            otp.confirm();
+            otpRepository.updateConfirmation(otp)
+                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to confirm you account at the moment. Please try again later."));
+
+            user.enable();
+            userRepository.updateVerification(user)
+                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                            "Unable to update your verification status at the moment. Please try again later."));
+        } catch (IllegalDomainStateException e) {
+            throw responseException(Response.Status.FORBIDDEN, e.getMessage());
+        }
+	}
+
+	public Token refreshToken(String refreshToken) {
+		if (refreshToken == null)
+			throw responseException(Response.Status.BAD_REQUEST, "Refresh token can`t be null");
+
+		RefreshToken foundedPairResult = userRepository.findRefreshToken(refreshToken)
+				.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "This refresh token is not found."));
+
+		long tokenExpirationDate = jwtUtility.parse(foundedPairResult.refreshToken())
+				.orElseThrow(
+						() -> responseException(Response.Status.BAD_REQUEST, "Something went wrong, try again later."))
+				.getExpirationTime();
+
+		var tokenExpiration = LocalDateTime.ofEpochSecond(tokenExpirationDate, 0, ZoneOffset.UTC);
+
+		if (LocalDateTime.now(ZoneOffset.UTC).isAfter(tokenExpiration))
+			throw responseException(Response.Status.BAD_REQUEST, "Refresh token is expired, you need to login.");
+
+		final User user = userRepository.findBy(foundedPairResult.userID()).orElseThrow();
+
+		String token = jwtUtility.generateToken(user);
+		return new Token(token);
+	}
+
+	public Tokens twoFactorAuth(String receivedOTP) {
+		try {
+			OTP.validate(receivedOTP);
+			OTP otp = otpRepository.findBy(receivedOTP)
+					.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+			User user = userRepository.findBy(otp.userID()).orElseThrow();
+
+			if (!user.canLogin())
+				throw responseException(Response.Status.FORBIDDEN,
+						"You can`t login with unverified or banned account.");
+
+			if (!user.is2FAEnabled()) {
+				Log.info("Two factor authentication is enabled and verified for user.");
+				user.enable2FA();
+				userRepository.update2FA(user)
+						.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+								"Unable to enable your account 2FA at the moment. Please try again later."));
+			}
+
+			Tokens tokens = generateTokens(user);
+			userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()))
+					.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+							"Unable to authenticate your account at the moment. Please try again later."));
+			return tokens;
+		} catch (IllegalDomainStateException e) {
+			throw responseException(Response.Status.FORBIDDEN, e.getMessage());
+		}
+	}
+
+	private Tokens generateTokens(User user) {
+		String token = jwtUtility.generateToken(user);
+		String refreshToken = jwtUtility.generateRefreshToken(user);
+		return new Tokens(token, refreshToken);
+	}
+
+	public void enable2FA(LoginForm loginForm) {
+		if (loginForm == null)
+			throw responseException(Response.Status.BAD_REQUEST, "Please fill the login form.");
+
+		User user = getVerifiedUserByIdentifier(loginForm.identifier());
+		Password.validate(loginForm.password());
+
+		if (!user.canLogin())
+			throw responseException(Response.Status.FORBIDDEN, "You can`t login with unverified or banned account.");
+
+		final boolean isValidPasswordProvided = passwordEncoder.verify(loginForm.password(),
+				user.personalData().password().orElseThrow());
+		if (!isValidPasswordProvided)
+			throw responseException(Response.Status.BAD_REQUEST, "Password do not match.");
+
+		if (otpRepository.contains(user.id()))
+			throw responseException(Response.Status.BAD_REQUEST, "You can`t request 2FA activation twice");
+
+		generateAndSendOTP(user);
 	}
 }

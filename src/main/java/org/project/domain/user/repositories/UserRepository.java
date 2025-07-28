@@ -1,12 +1,12 @@
 package org.project.domain.user.repositories;
 
+import java.util.UUID;
+
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.value_objects.Email;
 import org.project.domain.user.value_objects.Phone;
 import org.project.domain.user.value_objects.RefreshToken;
-
-import java.util.UUID;
 
 public interface UserRepository {
 
@@ -21,6 +21,8 @@ public interface UserRepository {
     Result<Integer, Throwable> updateVerification(User user);
 
     Result<Integer, Throwable> updateBan(User user);
+
+	Result<Integer, Throwable> update2FA(User user);
 
     boolean isEmailExists(Email email);
 

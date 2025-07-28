@@ -1,9 +1,10 @@
 package org.project.domain.user.value_objects;
 
-import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
-
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 
 public record Phone(String phoneNumber) {
 
@@ -28,4 +29,20 @@ public record Phone(String phoneNumber) {
     public String toString() {
         return phoneNumber;
     }
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Phone))
+			return false;
+		Phone phone = (Phone) o;
+		return Objects.equals(phoneNumber, phone.phoneNumber);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(phoneNumber);
+	}
+
 }

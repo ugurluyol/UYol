@@ -1,10 +1,10 @@
 package org.project.domain.user.value_objects;
 
-import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
-
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 
 public record Email(String email) {
 
@@ -41,4 +41,19 @@ public record Email(String email) {
     public String toString() {
         return email;
     }
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Email))
+			return false;
+		Email other = (Email) o;
+		return Objects.equals(email, other.email);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(email);
+	}
 }

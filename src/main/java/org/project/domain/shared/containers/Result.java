@@ -3,6 +3,7 @@ package org.project.domain.shared.containers;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -133,4 +134,16 @@ public record Result<V, E extends Throwable>(V value,
     private <E extends Throwable> void sneakyThrow(Throwable e) throws E {
         throw (E) e;
     }
+
+	public boolean isFailure() {
+		return !this.success;
+	}
+
+	public V get() {
+		return this.orElseThrow();
+	}
+
+	public boolean matches(Predicate<? super V> predicate) {
+		return success() && predicate.test(value());
+	}
 }

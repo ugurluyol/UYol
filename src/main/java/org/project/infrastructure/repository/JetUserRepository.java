@@ -45,6 +45,7 @@ public class JetUserRepository implements UserRepository {
             .column("counter")
             .column("creation_date")
             .column("last_updated")
+			.column("is_2fa_enabled")
             .values()
             .build()
             .sql();
@@ -143,7 +144,7 @@ public class JetUserRepository implements UserRepository {
                 user.keyAndCounter().key(),
                 user.keyAndCounter().counter(),
                 user.accountDates().createdAt(),
-                user.accountDates().lastUpdated()));
+				user.accountDates().lastUpdated(), user.is2FAEnabled()));
     }
 
     @Override
@@ -175,6 +176,8 @@ public class JetUserRepository implements UserRepository {
         return mapTransactionResult(jet.write(UPDATE_BAN, user.isBanned(), user.id()));
     }
 
+	static final String UPDATE_2FA = update("user_account").set("is_2fa_enabled = ?").where("id = ?").build().sql();
+
     @Override
     public boolean isEmailExists(Email email) {
         return jet.readObjectOf(IS_EMAIL_EXISTS, Integer.class, email.email())
@@ -194,6 +197,11 @@ public class JetUserRepository implements UserRepository {
                     return false;
                 });
     }
+
+	@Override
+	public Result<Integer, Throwable> update2FA(User user) {
+		return mapTransactionResult(jet.write(UPDATE_2FA, user.is2FAEnabled(), user.id().toString()));
+	}
 
     @Override
     public Result<User, Throwable> findBy(UUID id) {
@@ -241,6 +249,7 @@ public class JetUserRepository implements UserRepository {
                 rs.getBoolean("is_banned"),
                 new KeyAndCounter(rs.getString("secret_key"), rs.getInt("counter")),
                 new AccountDates(rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
-                rs.getObject("last_updated", Timestamp.class).toLocalDateTime()));
+						rs.getObject("last_updated", Timestamp.class).toLocalDateTime()),
+				rs.getBoolean("is_2fa_enabled"));
     }
 }
