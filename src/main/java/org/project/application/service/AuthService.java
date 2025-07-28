@@ -101,68 +101,21 @@ public class AuthService {
 						"Unable to register your account at the moment. Please try again later."));
 
 		generateAndSendOTP(user);
-		if (registrationForm.email() != null)
-			emailInteractionService.sendSoftVerificationMessage(new Email(registrationForm.email()));
-	}
-
-	private void generateAndSendOTP(User user) {
-		OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
-
-		otpRepository.save(otp).orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-				"Unable to process your request at the moment. Please try again."));
-
-		user.incrementCounter();
-
-		userRepository.updateCounter(user).orElseThrow(() -> {
-			otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t remove otp.", throwable));
-			return responseException(Response.Status.INTERNAL_SERVER_ERROR,
-					"Unable to process your request at the moment. Please try again.");
-		});
-
-		phoneInteractionService.sendOTP(new Phone(user.personalData().phone().orElseThrow()), otp);
 	}
 
 	public User login(LoginForm form) {
-		if (form.identifier() == null || form.identifier().isBlank()) {
-	        throw responseException(Response.Status.BAD_REQUEST, "Email or phone must be provided");
-	    }
-
-		User user = getVerifiedUserByIdentifier(form.identifier());
+		User user = verifiedUserBy(form.identifier());
 		String hashedPassword = user.personalData().password().orElseThrow(
-				() -> responseException(Response.Status.INTERNAL_SERVER_ERROR, "User password is missing"));
-		if (!passwordEncoder.verify(form.password(), hashedPassword)) {
-	        throw responseException(Response.Status.UNAUTHORIZED, "Invalid credentials");
-	    }
+				() -> responseException(Response.Status.FORBIDDEN, "User password is missing"));
 
-	    return user;
-	}
-
-	public User getVerifiedUserByIdentifier(String identifier) {
-		Result<User, Throwable> result;
-
-		if (identifier.contains("@")) {
-			result = userRepository.findBy(new Email(identifier));
-		} else {
-			result = userRepository.findBy(new Phone(identifier));
-		}
-
-		if (result.isFailure()) {
+		if (!passwordEncoder.verify(form.password(), hashedPassword))
 			throw responseException(Response.Status.UNAUTHORIZED, "Invalid credentials");
-		}
-
-		User user = result.get();
-
-		if (!user.isVerified()) {
-			throw responseException(Response.Status.FORBIDDEN, "Account not verified");
-		}
 
 		return user;
 	}
+
 	public void resendOTP(String identifier) {
-		if (identifier == null || identifier.isBlank()) {
-			throw responseException(Response.Status.BAD_REQUEST, "Identifier is required");
-		}
-		User user = getVerifiedUserByIdentifier(identifier);
+		User user = verifiedUserBy(identifier);
 		OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
 
 		otpRepository.save(otp)
@@ -181,33 +134,31 @@ public class AuthService {
 				.ifPresent(email -> emailInteractionService.sendSoftVerificationMessage(email));
 	}
 
-	
-
 	public void verification(String receivedOTP) {
-        try {
-            OTP.validate(receivedOTP);
-            OTP otp = otpRepository.findBy(receivedOTP)
-                    .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
-            User user = userRepository.findBy(otp.userID()).orElseThrow();
+		try {
+			OTP.validate(receivedOTP);
+			OTP otp = otpRepository.findBy(receivedOTP)
+					.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+			User user = userRepository.findBy(otp.userID()).orElseThrow();
 
-            if (user.isVerified())
-                throw responseException(Response.Status.BAD_REQUEST, "User already verified.");
+			if (user.isVerified())
+				throw responseException(Response.Status.BAD_REQUEST, "User already verified.");
 
-            if (otp.isExpired())
-                throw responseException(Response.Status.GONE, "OTP is gone.");
+			if (otp.isExpired())
+				throw responseException(Response.Status.GONE, "OTP is gone.");
 
-            otp.confirm();
-            otpRepository.updateConfirmation(otp)
-                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-                            "Unable to confirm you account at the moment. Please try again later."));
+			otp.confirm();
+			otpRepository.updateConfirmation(otp)
+					.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+							"Unable to confirm you account at the moment. Please try again later."));
 
-            user.enable();
-            userRepository.updateVerification(user)
-                    .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-                            "Unable to update your verification status at the moment. Please try again later."));
-        } catch (IllegalDomainStateException e) {
-            throw responseException(Response.Status.FORBIDDEN, e.getMessage());
-        }
+			user.enable();
+			userRepository.updateVerification(user)
+					.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+							"Unable to update your verification status at the moment. Please try again later."));
+		} catch (IllegalDomainStateException e) {
+			throw responseException(Response.Status.FORBIDDEN, e.getMessage());
+		}
 	}
 
 	public Token refreshToken(String refreshToken) {
@@ -262,17 +213,11 @@ public class AuthService {
 		}
 	}
 
-	private Tokens generateTokens(User user) {
-		String token = jwtUtility.generateToken(user);
-		String refreshToken = jwtUtility.generateRefreshToken(user);
-		return new Tokens(token, refreshToken);
-	}
-
 	public void enable2FA(LoginForm loginForm) {
 		if (loginForm == null)
 			throw responseException(Response.Status.BAD_REQUEST, "Please fill the login form.");
 
-		User user = getVerifiedUserByIdentifier(loginForm.identifier());
+		User user = verifiedUserBy(loginForm.identifier());
 		Password.validate(loginForm.password());
 
 		if (!user.canLogin())
@@ -288,5 +233,53 @@ public class AuthService {
 
 		generateAndSendOTP(user);
 	}
-}
 
+	private Result<User, Throwable> findUserByIdentifier(String identifier) {
+		try {
+			return userRepository.findBy(new Email(identifier));
+		} catch (IllegalArgumentException e) {
+			return userRepository.findBy(new Phone(identifier));
+		}
+	}
+
+	private User verifiedUserBy(String identifier) {
+		Result<User, Throwable> result = findUserByIdentifier(identifier);
+
+		if (result.isFailure())
+			throw responseException(Response.Status.UNAUTHORIZED, "Invalid credentials");
+
+		User user = result.get();
+		if (!user.isVerified())
+			throw responseException(Response.Status.FORBIDDEN, "Account not verified");
+
+		return user;
+	}
+
+	private void generateAndSendOTP(User user) {
+		OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()));
+
+		otpRepository.save(otp).orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+				"Unable to process your request at the moment. Please try again."));
+
+		user.incrementCounter();
+
+		userRepository.updateCounter(user).orElseThrow(() -> {
+			otpRepository.remove(otp).ifFailure(throwable -> Log.error("Can`t remove otp.", throwable));
+			return responseException(Response.Status.INTERNAL_SERVER_ERROR,
+					"Unable to process your request at the moment. Please try again.");
+		});
+
+		if (user.personalData().email().isPresent()) {
+			emailInteractionService.sendOTP(otp, new Email(user.personalData().email().get()));
+			return;
+		}
+
+		phoneInteractionService.sendOTP(new Phone(user.personalData().phone().orElseThrow()), otp);
+	}
+
+	private Tokens generateTokens(User user) {
+		String token = jwtUtility.generateToken(user);
+		String refreshToken = jwtUtility.generateRefreshToken(user);
+		return new Tokens(token, refreshToken);
+	}
+}
