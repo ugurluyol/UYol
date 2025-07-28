@@ -63,7 +63,7 @@ public class JetOTPRepository implements OTPRepository {
             .build()
             .sql();
 
-    public JetOTPRepository() {
+    JetOTPRepository() {
         jet = JetQuerious.instance();
     }
 
@@ -123,7 +123,8 @@ public class JetOTPRepository implements OTPRepository {
                 rs.getObject("expiration_date", Timestamp.class).toLocalDateTime());
     }
 
-    static Result<Integer, Throwable> mapTransactionResult(com.hadzhy.jetquerious.util.Result<Integer, Throwable> result) {
+    static Result<Integer, Throwable> mapTransactionResult(
+            com.hadzhy.jetquerious.util.Result<Integer, Throwable> result) {
         return new Result<>(result.value(), result.throwable(), result.success());
     }
 }

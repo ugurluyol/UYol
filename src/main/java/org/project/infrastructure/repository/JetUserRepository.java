@@ -41,11 +41,11 @@ public class JetUserRepository implements UserRepository {
             .column("birth_date")
             .column("is_verified")
             .column("is_banned")
+            .column("is_2fa_enabled")
             .column("secret_key")
             .column("counter")
             .column("creation_date")
             .column("last_updated")
-			.column("is_2fa_enabled")
             .values()
             .build()
             .sql();
@@ -60,25 +60,31 @@ public class JetUserRepository implements UserRepository {
             .sql();
 
     static final String UPDATE_PHONE = update("user_account")
-            .set("phone = ?")
+            .set("phone = ?, last_updated = ?")
             .where("id = ?")
             .build()
             .sql();
 
     static final String UPDATE_COUNTER = update("user_account")
-            .set("counter = ?")
+            .set("counter = ?, last_updated = ?")
             .where("id = ?")
             .build()
             .sql();
 
     static final String UPDATE_VERIFICATION = update("user_account")
-            .set("is_verified = ?")
+            .set("is_verified = ?, last_updated = ?")
+            .where("id = ?")
+            .build()
+            .sql();
+
+    static final String UPDATE_2FA = update("user_account")
+            .set("is_2FA_enabled = ?, last_updated = ?")
             .where("id = ?")
             .build()
             .sql();
 
     static final String UPDATE_BAN = update("user_account")
-            .set("is_banned = ?")
+            .set("is_banned = ?, last_updated = ?")
             .where("id = ?")
             .build()
             .sql();
@@ -125,7 +131,7 @@ public class JetUserRepository implements UserRepository {
             .build()
             .sql();
 
-    public JetUserRepository() {
+    JetUserRepository() {
         jet = JetQuerious.instance();
     }
 
@@ -136,15 +142,17 @@ public class JetUserRepository implements UserRepository {
                 user.id().toString(),
                 personalData.firstname(),
                 personalData.surname(),
-				personalData.phone().orElse(null), personalData.email().orElse(null),
-				personalData.password().orElse(null),
+                personalData.phone().orElse(null),
+                personalData.email().orElse(null),
+                personalData.password().orElse(null),
                 personalData.birthDate(),
                 user.isVerified(),
                 user.isBanned(),
+                user.is2FAEnabled(),
                 user.keyAndCounter().key(),
                 user.keyAndCounter().counter(),
                 user.accountDates().createdAt(),
-				user.accountDates().lastUpdated(), user.is2FAEnabled()));
+                user.accountDates().lastUpdated()));
     }
 
     @Override
@@ -152,31 +160,44 @@ public class JetUserRepository implements UserRepository {
         return mapTransactionResult(jet.write(SAVE_REFRESH_TOKEN,
                 refreshToken.userID().toString(),
                 refreshToken.refreshToken(),
-                refreshToken.refreshToken())
-        );
+                refreshToken.refreshToken()));
     }
 
     @Override
     public Result<Integer, Throwable> updatePhone(User user) {
-        return mapTransactionResult(jet.write(UPDATE_PHONE, user.personalData().phone().orElseThrow(), user.id().toString()));
+        return mapTransactionResult(
+                jet.write(UPDATE_PHONE,
+                        user.personalData().phone().orElseThrow(),
+                        user.accountDates().lastUpdated(),
+                        user.id().toString()));
     }
 
     @Override
     public Result<Integer, Throwable> updateCounter(User user) {
-        return mapTransactionResult(jet.write(UPDATE_COUNTER, user.keyAndCounter().counter(), user.id().toString()));
+        return mapTransactionResult(jet.write(UPDATE_COUNTER,
+                user.keyAndCounter().counter(),
+                user.accountDates().lastUpdated(),
+                user.id().toString()));
     }
 
     @Override
     public Result<Integer, Throwable> updateVerification(User user) {
-        return mapTransactionResult(jet.write(UPDATE_VERIFICATION, user.isVerified(), user.id().toString()));
+        return mapTransactionResult(jet.write(UPDATE_VERIFICATION,
+                user.isVerified(),
+                user.accountDates().lastUpdated(),
+                user.id().toString()));
     }
 
     @Override
     public Result<Integer, Throwable> updateBan(User user) {
-        return mapTransactionResult(jet.write(UPDATE_BAN, user.isBanned(), user.id()));
+        return mapTransactionResult(
+                jet.write(UPDATE_BAN, user.isBanned(), user.accountDates().lastUpdated(), user.id()));
     }
 
-	static final String UPDATE_2FA = update("user_account").set("is_2fa_enabled = ?").where("id = ?").build().sql();
+    @Override
+    public Result<Integer, Throwable> update2FA(User user) {
+        return mapTransactionResult(jet.write(UPDATE_2FA, user.is2FAEnabled(), user.id().toString()));
+    }
 
     @Override
     public boolean isEmailExists(Email email) {
@@ -197,11 +218,6 @@ public class JetUserRepository implements UserRepository {
                     return false;
                 });
     }
-
-	@Override
-	public Result<Integer, Throwable> update2FA(User user) {
-		return mapTransactionResult(jet.write(UPDATE_2FA, user.is2FAEnabled(), user.id().toString()));
-	}
 
     @Override
     public Result<User, Throwable> findBy(UUID id) {
@@ -249,7 +265,7 @@ public class JetUserRepository implements UserRepository {
                 rs.getBoolean("is_banned"),
                 new KeyAndCounter(rs.getString("secret_key"), rs.getInt("counter")),
                 new AccountDates(rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
-						rs.getObject("last_updated", Timestamp.class).toLocalDateTime()),
-				rs.getBoolean("is_2fa_enabled"));
+                        rs.getObject("last_updated", Timestamp.class).toLocalDateTime()),
+                rs.getBoolean("is_2fa_enabled"));
     }
 }
