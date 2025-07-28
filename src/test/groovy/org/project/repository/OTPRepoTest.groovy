@@ -10,10 +10,8 @@ import org.project.infrastructure.security.HOTPGenerator
 import org.project.util.PostgresTestResource
 import spock.lang.Specification
 
-
-import io.quarkus.test.junit.QuarkusTest
-
-@QuarkusTest
+@Dependent
+@QuarkusSpockTest
 @QuarkusTestResource(value = PostgresTestResource.class)
 class OTPRepoTest extends Specification {
 

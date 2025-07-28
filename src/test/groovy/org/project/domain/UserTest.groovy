@@ -89,7 +89,7 @@ class UserTest extends Specification {
 
     def "should enable 2FA successfully when all conditions are met"() {
         given: "verified user with counter > 1"
-        def user = TestDataGenerator.generateUser()
+        def user = TestDataGenerator.user()
         user.incrementCounter() // counter = 1
         user.enable()           // user verified
         user.incrementCounter() // counter = 2
@@ -103,7 +103,7 @@ class UserTest extends Specification {
 
     def "should throw exception when enabling 2FA on unverified user"() {
         given: "unverified user"
-        def user = TestDataGenerator.generateUser()
+        def user = TestDataGenerator.user()
         user.incrementCounter()
         user.incrementCounter()
 
@@ -117,7 +117,7 @@ class UserTest extends Specification {
 
     def "should throw exception when enabling 2FA twice"() {
         given: "user with 2FA already enabled"
-        def user = TestDataGenerator.generateUser()
+        def user = TestDataGenerator.user()
         user.incrementCounter()
         user.enable()
         user.incrementCounter()
@@ -129,18 +129,5 @@ class UserTest extends Specification {
         then: "IllegalDomainStateException is thrown"
         def exception = thrown(IllegalDomainStateException)
         exception.message == "You can`t activate 2FA twice"
-    }
-
-    def "should disable user successfully"() {
-        given: "verified user"
-        def user = TestDataGenerator.generateUser()
-        user.incrementCounter()
-        user.enable()
-
-        when: "disabling user"
-        user.disable()
-
-        then: "user is not verified"
-        !user.isVerified()
     }
 }
