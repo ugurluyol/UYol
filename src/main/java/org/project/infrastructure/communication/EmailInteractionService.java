@@ -11,18 +11,18 @@ public class EmailInteractionService {
 
     private final Mailer mailer;
 
-    public static final String SOFT_VERIFICATION_SUBJECT = "You’ve been signed up on Karto";
+    public static final String SOFT_VERIFICATION_SUBJECT = "You’ve been signed up on UYol";
 
     public static final String SOFT_VERIFICATION_BODY = """
             Hello,
-            
+
             This email address was used to sign up for an account on Karto.
             If this was you, no further action is required.
-            
+
             If you did not create this account, please contact our support team immediately so we can investigate and secure your information.
-            
+
             Thank you,
-            The Karto Team
+            The UYol Team
             """;
 
     EmailInteractionService(Instance<Mailer> mailer) {
