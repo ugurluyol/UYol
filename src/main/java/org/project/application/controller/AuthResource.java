@@ -4,20 +4,15 @@ import org.project.application.dto.auth.LoginForm;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.service.AuthService;
 
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Path("/auth")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
 	private final AuthService authService;
@@ -73,3 +68,4 @@ public class AuthResource {
 		return Response.ok(authService.twoFactorAuth(otp)).build();
 	}
 }
+

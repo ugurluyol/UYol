@@ -1,35 +1,42 @@
 package org.project.util;
 
-import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
-import org.testcontainers.containers.GenericContainer;
-
 import java.util.Map;
+
+import org.testcontainers.containers.PostgreSQLContainer;
+
+import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
 public class PostgresTestResource implements QuarkusTestResourceLifecycleManager {
 
-    GenericContainer<?> postgresContainer;
+	private PostgreSQLContainer<?> postgresContainer;
 
-    @Override
-    public Map<String, String> start() {
-        postgresContainer = new GenericContainer<>("postgres:latest")
-                .withExposedPorts(5432)
-                .withEnv("POSTGRES_USER", "root")
-                .withEnv("POSTGRES_PASSWORD", "password")
-                .withEnv("POSTGRES_DB", "karto");
+	@Override
+	public Map<String, String> start() {
+		postgresContainer = new PostgreSQLContainer<>("postgres:latest")
+				.withExposedPorts(5432)
+				.withDatabaseName("mydb")
+				.withUsername("something")
+				.withPassword("root");
 
-        postgresContainer.start();
+		postgresContainer.start();
 
-        String host = postgresContainer.getHost();
-        int port = postgresContainer.getMappedPort(5432);
-        String jdbcURL = "jdbc:postgresql://%s:%s/karto".formatted(host, port);
-        return Map.of("flyway-url", jdbcURL, "datasource-url", jdbcURL);
-    }
+		String jdbcUrl = postgresContainer.getJdbcUrl();
 
-    @Override
-    public void stop() {
-        if (postgresContainer != null) {
-            postgresContainer.stop();
-            postgresContainer = null;
-        }
-    }
+		return Map.of(
+				"quarkus.datasource.jdbc.url", jdbcUrl,
+				"quarkus.datasource.username", postgresContainer.getUsername(),
+				"quarkus.datasource.password", postgresContainer.getPassword(),
+				"quarkus.flyway.url", jdbcUrl,
+				"quarkus.flyway.user", postgresContainer.getUsername(),
+				"quarkus.flyway.password", postgresContainer.getPassword());
+	}
+
+	@Override
+	public void stop() {
+		if (postgresContainer != null) {
+			postgresContainer.stop();
+			postgresContainer.close();
+			postgresContainer = null;
+		}
+	}
 }

@@ -44,14 +44,14 @@ import io.restassured.http.ContentType;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-
 @QuarkusTest
+
 @QuarkusTestResource(PostgresTestResource.class)
 public class RegistrationTest {
 
 	static final ObjectMapper objectMapper = JsonMapper.builder()
-            .addModule(new JavaTimeModule())
-            .build();
+			.addModule(new JavaTimeModule())
+			.build();
 
 	@InjectMock
 	PhoneInteractionService phoneInteractionService;
@@ -70,25 +70,37 @@ public class RegistrationTest {
 
 
 	@BeforeEach
-    void setup() {
+	void setup() {
 		Mockito.doNothing().when(emailService).sendSoftVerificationMessage(Mockito.any());
-    }
+	}
 
 	@Test
 	void validRegistration() throws JsonProcessingException {
 
-		doNothing().when(phoneInteractionService).sendOTP(any(Phone.class), any(OTP.class));
+		doNothing()
+				.when(phoneInteractionService)
+				.sendOTP(any(Phone.class), any(OTP.class));
+
 		given().contentType(ContentType.JSON)
-				.body(objectMapper.writeValueAsString(TestDataGenerator.generateRegistrationForm())).when()
-				.post("/auth/registration").then().assertThat()
+				.body(objectMapper.writeValueAsString(TestDataGenerator.generateRegistrationForm()))
+				.when()
+				.post("/auth/registration")
+				.then()
+				.assertThat()
 				.statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
 
 	@Test
 	void registrationFailsWhenFormIsNull() {
-		given().contentType(ContentType.JSON).body("").when().post("/auth/registration").then()
+		given()
+				.contentType(ContentType.JSON)
+				.body("")
+				.when()
+				.post("/auth/registration")
+				.then()
 				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
+
 
 	@Test
 	void shouldReturnVerifiedUserByPhone() {
@@ -175,6 +187,6 @@ public class RegistrationTest {
             Mockito.verify(otpRepository).updateConfirmation(otp);
             Mockito.verify(userRepository).updateVerification(user);
         }
-    }
+	}
 }
 
