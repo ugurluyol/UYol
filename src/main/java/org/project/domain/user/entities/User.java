@@ -12,6 +12,7 @@ import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.user.exceptions.BannedUserException;
 import org.project.domain.user.value_objects.AccountDates;
 import org.project.domain.user.value_objects.KeyAndCounter;
+import org.project.domain.user.value_objects.Password;
 import org.project.domain.user.value_objects.PersonalData;
 import org.project.domain.user.value_objects.ProfilePicture;
 
@@ -86,6 +87,22 @@ public class User {
 
     public boolean is2FAEnabled() {
         return is2FAEnabled;
+    }
+
+    public void changePassword(Password newPassword) {
+        required("newPassword", newPassword);
+        if (!isVerified)
+            throw new IllegalDomainStateException("You cannot change password on unverified.");
+        if (isBanned)
+            throw new IllegalDomainStateException("You cannot change password with banned account.");
+
+        this.personalData = new PersonalData(
+                personalData.firstname(),
+                personalData.surname(),
+                personalData.phone().orElse(null),
+                newPassword.password(),
+                personalData.email().orElse(null),
+                personalData.birthDate());
     }
 
     public boolean isBanned() {
