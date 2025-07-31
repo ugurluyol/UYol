@@ -7,6 +7,7 @@ import org.project.domain.user.entities.User;
 import org.project.domain.user.value_objects.Email;
 import org.project.domain.user.value_objects.Phone;
 import org.project.domain.user.value_objects.RefreshToken;
+import org.project.domain.user.value_objects.Identifier;
 
 public interface UserRepository {
 
@@ -22,7 +23,7 @@ public interface UserRepository {
 
     Result<Integer, Throwable> updateBan(User user);
 
-	Result<Integer, Throwable> update2FA(User user);
+    Result<Integer, Throwable> update2FA(User user);
 
     boolean isEmailExists(Email email);
 
@@ -33,6 +34,8 @@ public interface UserRepository {
     Result<User, Throwable> findBy(Email email);
 
     Result<User, Throwable> findBy(Phone phone);
+
+    Result<User, Throwable> findBy(Identifier identifier);
 
     Result<RefreshToken, Throwable> findRefreshToken(String refreshToken);
 }

@@ -19,6 +19,7 @@ import org.project.domain.user.value_objects.KeyAndCounter;
 import org.project.domain.user.value_objects.PersonalData;
 import org.project.domain.user.value_objects.Phone;
 import org.project.domain.user.value_objects.RefreshToken;
+import org.project.domain.user.value_objects.Identifier;
 
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 
@@ -235,6 +236,14 @@ public class JetUserRepository implements UserRepository {
     public Result<User, Throwable> findBy(Phone phone) {
         var result = jet.read(USER_BY_PHONE, this::userMapper, phone.phoneNumber());
         return new Result<>(result.value(), result.throwable(), result.success());
+    }
+
+    @Override
+    public Result<User, Throwable> findBy(Identifier identifier) {
+        return switch (identifier) {
+            case Email e -> findBy(e);
+            case Phone p -> findBy(p);
+        };
     }
 
     @Override
