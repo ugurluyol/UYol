@@ -49,7 +49,7 @@ public class DBManagementUtils {
 
 	public OTP saveUser(RegistrationForm form) throws JsonProcessingException {
 		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
-				.post("/auth/registration").then().assertThat()
+				.post("/uyol/auth/registration").then().assertThat()
 				.statusCode(Response.Status.ACCEPTED.getStatusCode());
 
 		Result<User, Throwable> user = userRepository.findBy(new Phone(form.phone()));
@@ -64,7 +64,7 @@ public class DBManagementUtils {
 	public void saveAndVerifyUser(RegistrationForm form) throws JsonProcessingException {
 		OTP otp = saveUser(form);
 
-		given().queryParam("otp", otp.otp()).when().patch("/auth/verification").then().assertThat()
+		given().queryParam("otp", otp.otp()).when().patch("/uyol/auth/verification").then().assertThat()
 				.statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
 

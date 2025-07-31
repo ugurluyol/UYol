@@ -55,7 +55,7 @@ class AuthResourceTest {
 				.contentType(ContentType.JSON)
 				.body("")
 				.when()
-				.post("/auth/registration")
+				.post("/uyol/auth/registration")
 				.then()
 				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
@@ -67,7 +67,7 @@ class AuthResourceTest {
 		given().contentType(ContentType.JSON)
 				.body(objectMapper.writeValueAsString(form))
 				.when()
-				.post("/auth/registration")
+				.post("/uyol/auth/registration")
 				.then()
 				.statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
@@ -81,11 +81,10 @@ class AuthResourceTest {
 				generateEmail().email(),
 				"password1984",
 				"password1063231",
-				generateBirthdate().birthDate()
-		);
+				generateBirthdate().birthDate());
 
 		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
-				.post("/auth/registration").then().statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+				.post("/uyol/auth/registration").then().statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
 
 	@Test
@@ -93,10 +92,10 @@ class AuthResourceTest {
 		RegistrationForm form = TestDataGenerator.generateRegistrationForm();
 
 		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
-				.post("/auth/registration").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
+				.post("/uyol/auth/registration").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
 
 		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
-				.post("/auth/registration").then().statusCode(Response.Status.CONFLICT.getStatusCode());
+				.post("/uyol/auth/registration").then().statusCode(Response.Status.CONFLICT.getStatusCode());
 	}
 
 	@Test
@@ -104,10 +103,10 @@ class AuthResourceTest {
 		RegistrationForm form = TestDataGenerator.generateRegistrationForm();
 
 		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
-				.post("/auth/registration").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
+				.post("/uyol/auth/registration").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
 
 		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
-				.post("/auth/registration").then().statusCode(Response.Status.CONFLICT.getStatusCode());
+				.post("/uyol/auth/registration").then().statusCode(Response.Status.CONFLICT.getStatusCode());
 	}
 
 	@Test
@@ -118,7 +117,7 @@ class AuthResourceTest {
 		Tokens tokens = given().contentType(ContentType.JSON)
 				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), form.password())))
 				.when()
-				.post("/auth/login")
+				.post("/uyol/auth/login")
 				.then()
 				.assertThat()
 				.contentType(MediaType.APPLICATION_JSON)
@@ -142,7 +141,7 @@ class AuthResourceTest {
 		given().contentType(ContentType.JSON)
 				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), "password")))
 				.when()
-				.post("/auth/login")
+				.post("/uyol/auth/login")
 				.then()
 				.assertThat()
 				.statusCode(Response.Status.UNAUTHORIZED.getStatusCode())
@@ -151,7 +150,7 @@ class AuthResourceTest {
 
 	@Test
 	void otpVerificationShouldFailWithInvalidOTP() {
-		given().queryParam("otp", "invalid-otp").when().patch("/auth/verification").then()
+		given().queryParam("otp", "invalid-otp").when().patch("/uyol/auth/verification").then()
 				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
 
@@ -159,7 +158,7 @@ class AuthResourceTest {
 	void validVerification() throws JsonProcessingException {
 		OTP otp = dbManagement.saveUser(TestDataGenerator.generateRegistrationForm());
 
-		given().queryParam("otp", otp.otp()).when().patch("/auth/verification").then().assertThat()
+		given().queryParam("otp", otp.otp()).when().patch("/uyol/auth/verification").then().assertThat()
 				.statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
 
@@ -167,7 +166,7 @@ class AuthResourceTest {
 	void verificationWithInvalidOTP() throws JsonProcessingException {
 		OTP ignore = dbManagement.saveUser(TestDataGenerator.generateRegistrationForm());
 
-		given().queryParam("otp", "invalidotp").when().patch("/auth/verification").then().assertThat()
+		given().queryParam("otp", "invalidotp").when().patch("/uyol/auth/verification").then().assertThat()
 				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
 
@@ -179,7 +178,7 @@ class AuthResourceTest {
 		Tokens tokens = given().contentType(ContentType.JSON)
 				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), form.password())))
 				.when()
-				.post("/auth/login").then().assertThat()
+				.post("/uyol/auth/login").then().assertThat()
 				.statusCode(Response.Status.OK.getStatusCode())
 				.extract()
 				.as(Tokens.class);
@@ -187,7 +186,7 @@ class AuthResourceTest {
 		Token token = given()
 				.header("Refresh-Token", tokens.refreshToken())
 				.when()
-				.patch("/auth/refresh-token")
+				.patch("/uyol/auth/refresh-token")
 				.then()
 				.assertThat()
 				.statusCode(Response.Status.OK.getStatusCode())
@@ -202,12 +201,12 @@ class AuthResourceTest {
 
 	@Test
 	void refreshTokenShouldFailIfMissing() {
-		given().when().patch("/auth/refresh-token").then().statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+		given().when().patch("/uyol/auth/refresh-token").then().statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
 
 	@Test
 	void twoFactorVerificationFailsWithWrongOTP() {
-		given().queryParam("otp", "000000").when().patch("/auth/2FA/verification").then()
+		given().queryParam("otp", "000000").when().patch("/uyol/auth/2FA/verification").then()
 				.statusCode(Response.Status.NOT_FOUND.getStatusCode());
 	}
 }
