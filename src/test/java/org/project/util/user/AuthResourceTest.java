@@ -1,12 +1,15 @@
 package org.project.util.user;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.project.util.TestDataGenerator.*;
 
 import java.time.LocalDate;
 
+import jakarta.ws.rs.core.MediaType;
 import org.junit.jupiter.api.Test;
 import org.project.application.dto.auth.LoginForm;
 import org.project.application.dto.auth.RegistrationForm;
@@ -31,7 +34,7 @@ import jakarta.ws.rs.core.Response;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
-public class AuthResourceTest {
+class AuthResourceTest {
 
 	static final ObjectMapper objectMapper = JsonMapper.builder()
 			.addModule(new JavaTimeModule())
@@ -39,17 +42,13 @@ public class AuthResourceTest {
 
 	private final JWTParser jwtParser;
 
-	private final HOTPGenerator hotpGenerator;
-
 	private final DBManagementUtils dbManagement;
 
-	AuthResourceTest(JWTParser jwtParser, DBManagementUtils dbManagement, HOTPGenerator hotpGenerator) {
-        this.jwtParser = jwtParser;
-        this.dbManagement = dbManagement;
-		this.hotpGenerator = new HOTPGenerator();
-    }
+	AuthResourceTest(JWTParser jwtParser, DBManagementUtils dbManagement) {
+		this.jwtParser = jwtParser;
+		this.dbManagement = dbManagement;
+	}
 
-// register
 	@Test
 	void registrationFailsWhenFormIsNull() {
 		given()
@@ -63,17 +62,27 @@ public class AuthResourceTest {
 
 	@Test
 	void validRegistration() throws JsonProcessingException {
-		RegistrationForm form = new RegistrationForm("Gunel", "Aslanova", "+994501234567", "gunel@mail.com",
-				"StrongPassword123!", "StrongPassword123!", LocalDate.of(2005, 3, 15));
+		RegistrationForm form = TestDataGenerator.generateRegistrationForm();
 
-		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
-				.post("/auth/registration").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
+		given().contentType(ContentType.JSON)
+				.body(objectMapper.writeValueAsString(form))
+				.when()
+				.post("/auth/registration")
+				.then()
+				.statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
 
 	@Test
 	void registrationFailsWhenPasswordMismatch() throws JsonProcessingException {
-		RegistrationForm form = new RegistrationForm("Gunel", "Aslanova", "+994501234567", "gunel@mail.com",
-				"StrongPassword123!", "Password123!", LocalDate.of(2005, 3, 15));
+		RegistrationForm form = new RegistrationForm(
+				generateFirstname().firstname(),
+				generateSurname().surname(),
+				generatePhone().phoneNumber(),
+				generateEmail().email(),
+				"password1984",
+				"password1063231",
+				generateBirthdate().birthDate()
+		);
 
 		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
 				.post("/auth/registration").then().statusCode(Response.Status.BAD_REQUEST.getStatusCode());
@@ -101,15 +110,19 @@ public class AuthResourceTest {
 				.post("/auth/registration").then().statusCode(Response.Status.CONFLICT.getStatusCode());
 	}
 
-	// login
 	@Test
 	void validLogin() throws JsonProcessingException {
 		RegistrationForm form = TestDataGenerator.generateRegistrationForm();
 		dbManagement.saveAndVerifyUser(form);
 
 		Tokens tokens = given().contentType(ContentType.JSON)
-				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), form.password()))).when()
-				.post("/auth/login").then().assertThat().statusCode(Response.Status.OK.getStatusCode()).extract()
+				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), form.password())))
+				.when()
+				.post("/auth/login")
+				.then()
+				.assertThat()
+				.contentType(MediaType.APPLICATION_JSON)
+				.statusCode(Response.Status.OK.getStatusCode()).extract()
 				.as(Tokens.class);
 
 		assertNotNull(tokens);
@@ -127,17 +140,21 @@ public class AuthResourceTest {
 		dbManagement.saveAndVerifyUser(form);
 
 		given().contentType(ContentType.JSON)
-				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), "password"))).when()
-				.post("/auth/login").then().assertThat().statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), "password")))
+				.when()
+				.post("/auth/login")
+				.then()
+				.assertThat()
+				.statusCode(Response.Status.UNAUTHORIZED.getStatusCode())
+				.body(containsString("Invalid credentials"));
 	}
 
 	@Test
 	void otpVerificationShouldFailWithInvalidOTP() {
 		given().queryParam("otp", "invalid-otp").when().patch("/auth/verification").then()
-				.statusCode(Response.Status.NOT_FOUND.getStatusCode());
+				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
 
-	// verification
 	@Test
 	void validVerification() throws JsonProcessingException {
 		OTP otp = dbManagement.saveUser(TestDataGenerator.generateRegistrationForm());
@@ -154,19 +171,27 @@ public class AuthResourceTest {
 				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
 
-	// refresh token
 	@Test
 	void refreshToken() throws JsonProcessingException {
 		RegistrationForm form = TestDataGenerator.generateRegistrationForm();
 		dbManagement.saveAndVerifyUser(form);
 
 		Tokens tokens = given().contentType(ContentType.JSON)
-				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), form.password()))).when()
-				.post("/auth/login").then().assertThat().statusCode(Response.Status.OK.getStatusCode()).extract()
+				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), form.password())))
+				.when()
+				.post("/auth/login").then().assertThat()
+				.statusCode(Response.Status.OK.getStatusCode())
+				.extract()
 				.as(Tokens.class);
 
-		Token token = given().header("Refresh-Token", tokens.refreshToken()).when().patch("/auth/refresh-token").then()
-				.assertThat().statusCode(Response.Status.OK.getStatusCode()).contentType(ContentType.JSON).extract()
+		Token token = given()
+				.header("Refresh-Token", tokens.refreshToken())
+				.when()
+				.patch("/auth/refresh-token")
+				.then()
+				.assertThat()
+				.statusCode(Response.Status.OK.getStatusCode())
+				.contentType(ContentType.JSON).extract()
 				.as(Token.class);
 
 		assertNotNull(token);
@@ -180,8 +205,6 @@ public class AuthResourceTest {
 		given().when().patch("/auth/refresh-token").then().statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 	}
 
-
-	// twoFactorVerification
 	@Test
 	void twoFactorVerificationFailsWithWrongOTP() {
 		given().queryParam("otp", "000000").when().patch("/auth/2FA/verification").then()
