@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 
-public record Email(String email) {
+public record Email(String email) implements Identifier {
 
     private static final String emailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
 
@@ -19,13 +19,17 @@ public record Email(String email) {
     }
 
     public static void validate(String email) {
-        if (Objects.isNull(email)) throw new IllegalDomainArgumentException("Email can`t be null");
-        if (email.isBlank()) throw new IllegalDomainArgumentException("Email can`t be blank");
-        if (email.length() > MAX_SIZE) throw new IllegalDomainArgumentException("Email is too long");
+        if (Objects.isNull(email))
+            throw new IllegalDomainArgumentException("Email can`t be null");
+        if (email.isBlank())
+            throw new IllegalDomainArgumentException("Email can`t be blank");
+        if (email.length() > MAX_SIZE)
+            throw new IllegalDomainArgumentException("Email is too long");
 
         String[] splitEmail = email.split("@");
 
-        if (splitEmail.length != 2) throw new IllegalDomainArgumentException("Invalid email format.");
+        if (splitEmail.length != 2)
+            throw new IllegalDomainArgumentException("Invalid email format.");
         if (splitEmail[0].isEmpty() || splitEmail[0].length() > 64)
             throw new IllegalDomainArgumentException("Invalid email format.");
 
@@ -42,18 +46,18 @@ public record Email(String email) {
         return email;
     }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof Email))
-			return false;
-		Email other = (Email) o;
-		return Objects.equals(email, other.email);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Email))
+            return false;
+        Email other = (Email) o;
+        return Objects.equals(email, other.email);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(email);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
+    }
 }
