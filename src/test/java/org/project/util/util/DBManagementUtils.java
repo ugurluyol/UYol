@@ -5,12 +5,8 @@ import static com.hadzhy.jetquerious.sql.QueryForge.delete;
 import static io.restassured.RestAssured.given;
 
 import java.util.Objects;
-import java.util.UUID;
 
-import org.project.application.dto.auth.CompanyRegistrationForm;
 import org.project.application.dto.auth.RegistrationForm;
-import org.project.domain.companies.entities.PartnerVerificationOTP;
-import org.project.domain.companies.repository.PartnerVerificationOTPRepository;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.OTP;
 import org.project.domain.user.entities.User;
@@ -36,8 +32,6 @@ public class DBManagementUtils {
 
 	private final UserRepository userRepository;
 
-	private final PartnerVerificationOTPRepository companyOTPRepository;
-
 	private final JetQuerious jetQuerious = JetQuerious.instance();
 
 	private static final ObjectMapper objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
@@ -48,12 +42,9 @@ public class DBManagementUtils {
 					.toSQlQuery(),
 			delete().from("user_account").where("email = ?").build().toSQlQuery());
 
-	DBManagementUtils(UserRepository userRepository, OTPRepository otpRepository,
-			PartnerVerificationOTPRepository companyOTPRepository) {
-
+	DBManagementUtils(UserRepository userRepository, OTPRepository otpRepository) {
 		this.userRepository = userRepository;
 		this.otpRepository = otpRepository;
-		this.companyOTPRepository = companyOTPRepository;
 	}
 
 	public OTP saveUser(RegistrationForm form) throws JsonProcessingException {
@@ -79,10 +70,5 @@ public class DBManagementUtils {
 
 	public void removeUser(String email) {
 		jetQuerious.write(DELETE_USER, email, email, email);
-	}
-
-	public PartnerVerificationOTP getCompanyOTP(CompanyRegistrationForm form) {
-		var result = jetQuerious.readObjectOf("SELECT id FROM companies WHERE phone = ?", String.class, form.phone());
-		return companyOTPRepository.findBy(UUID.fromString(result.value())).orElseThrow();
 	}
 }
