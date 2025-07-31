@@ -35,7 +35,7 @@ public class JWTUtility {
     public String generateToken(User user) {
         Duration oneDayAndSecond = Duration.ofDays(1).plusSeconds(1);
 
-        return Jwt.issuer("Karto")
+        return Jwt.issuer("UYol")
                 .upn(retrieveUPN(user))
                 .groups(user.role().name())
                 .claim("firstname", user.personalData().firstname())
@@ -48,7 +48,7 @@ public class JWTUtility {
     public String generateRefreshToken(User user) {
         Duration year = Duration.ofDays(365);
 
-        return Jwt.issuer("Karto")
+        return Jwt.issuer("UYol")
                 .upn(retrieveUPN(user))
                 .groups(user.role().name())
                 .expiresIn(year)
