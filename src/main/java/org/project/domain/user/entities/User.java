@@ -3,14 +3,17 @@ package org.project.domain.user.entities;
 import static org.project.domain.shared.util.Utils.required;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.project.domain.shared.annotations.Nullable;
 import org.project.domain.shared.enumerations.UserRole;
 import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.user.exceptions.BannedUserException;
 import org.project.domain.user.value_objects.AccountDates;
 import org.project.domain.user.value_objects.KeyAndCounter;
 import org.project.domain.user.value_objects.PersonalData;
+import org.project.domain.user.value_objects.ProfilePicture;
 
 public class User {
     private final UUID id;
@@ -21,6 +24,7 @@ public class User {
     private KeyAndCounter keyAndCounter;
     private AccountDates accountDates;
     private boolean is2FAEnabled;
+    private @Nullable ProfilePicture profilePicture;
 
     private User(
             UUID id,
@@ -98,6 +102,16 @@ public class User {
 
     public void incrementCounter() {
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter() + 1);
+    }
+
+    public void profilePicture(ProfilePicture profilePicture) {
+        required("profilePicture", profilePicture);
+
+        this.profilePicture = profilePicture;
+    }
+
+    public Optional<ProfilePicture> profilePicture() {
+        return Optional.ofNullable(profilePicture);
     }
 
     public void enable() {
