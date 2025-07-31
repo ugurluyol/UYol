@@ -22,6 +22,7 @@ import org.project.domain.user.value_objects.Password;
 import org.project.domain.user.value_objects.PersonalData;
 import org.project.domain.user.value_objects.Phone;
 import org.project.domain.user.value_objects.RefreshToken;
+import org.project.domain.user.factories.IdentifierFactory;
 import org.project.infrastructure.communication.EmailInteractionService;
 import org.project.infrastructure.communication.PhoneInteractionService;
 import org.project.infrastructure.security.HOTPGenerator;
@@ -118,7 +119,8 @@ public class AuthService {
 		String token = jwtUtility.generateToken(user);
 		String refreshToken = jwtUtility.generateRefreshToken(user);
 		userRepository.saveRefreshToken(new RefreshToken(user.id(), refreshToken))
-				.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR, "Cannot save refresh token"));
+				.orElseThrow(
+						() -> responseException(Response.Status.INTERNAL_SERVER_ERROR, "Cannot save refresh token"));
 
 		return new Tokens(token, refreshToken);
 	}
@@ -245,16 +247,8 @@ public class AuthService {
 		generateAndSendOTP(user);
 	}
 
-	private Result<User, Throwable> findUserByIdentifier(String identifier) {
-		try {
-			return userRepository.findBy(new Email(identifier));
-		} catch (IllegalDomainArgumentException e) {
-			return userRepository.findBy(new Phone(identifier));
-		}
-	}
-
 	private User verifiedUserBy(String identifier) {
-		Result<User, Throwable> result = findUserByIdentifier(identifier);
+		Result<User, Throwable> result = userRepository.findBy(IdentifierFactory.from(identifier));
 
 		if (result.isFailure())
 			throw responseException(Response.Status.UNAUTHORIZED, "Invalid credentials");
