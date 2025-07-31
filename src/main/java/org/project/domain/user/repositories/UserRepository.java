@@ -25,6 +25,8 @@ public interface UserRepository {
 
     Result<Integer, Throwable> update2FA(User user);
 
+    Result<Integer, Throwable> updatePassword(User user);
+
     boolean isEmailExists(Email email);
 
     boolean isPhoneExists(Phone phone);
