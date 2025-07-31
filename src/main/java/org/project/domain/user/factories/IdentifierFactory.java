@@ -10,12 +10,12 @@ public final class IdentifierFactory {
   public static Identifier from(String raw) {
     try {
       return new Email(raw);
-    } catch (IllegalArgumentException ignored) {
+    } catch (IllegalDomainArgumentException ignored) {
     }
 
     try {
       return new Phone(raw);
-    } catch (IllegalArgumentException ignored) {
+    } catch (IllegalDomainArgumentException ignored) {
     }
 
     throw new IllegalDomainArgumentException("Unknown identifier format");
