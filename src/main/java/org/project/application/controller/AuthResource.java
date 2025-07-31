@@ -22,11 +22,11 @@ public class AuthResource {
 	}
 
 	@POST
-  @Path("/registration")
-  public Response registration(RegistrationForm registrationForm) {
+	@Path("/registration")
+	public Response registration(RegistrationForm registrationForm) {
 		authService.registration(registrationForm);
-    return Response.accepted().build();
-  }
+		return Response.accepted().build();
+	}
 
 	@POST
 	@Path("/login")
