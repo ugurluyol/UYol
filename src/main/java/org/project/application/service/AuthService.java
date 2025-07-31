@@ -104,15 +104,23 @@ public class AuthService {
 		generateAndSendOTP(user);
 	}
 
-	public User login(LoginForm form) {
+	public Tokens login(LoginForm form) {
 		User user = verifiedUserBy(form.identifier());
 		String hashedPassword = user.personalData().password().orElseThrow(
 				() -> responseException(Response.Status.FORBIDDEN, "User password is missing"));
 
+		if (!user.canLogin())
+			throw responseException(Response.Status.UNAUTHORIZED, "User is not allowed to login");
+
 		if (!passwordEncoder.verify(form.password(), hashedPassword))
 			throw responseException(Response.Status.UNAUTHORIZED, "Invalid credentials");
 
-		return user;
+		String token = jwtUtility.generateToken(user);
+		String refreshToken = jwtUtility.generateRefreshToken(user);
+		userRepository.saveRefreshToken(new RefreshToken(user.id(), refreshToken))
+				.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR, "Cannot save refresh token"));
+
+		return new Tokens(token, refreshToken);
 	}
 
 	public void resendOTP(String identifier) {
@@ -129,10 +137,12 @@ public class AuthService {
 			return responseException(Response.Status.INTERNAL_SERVER_ERROR, "Failed to update user counter");
 		});
 
-		user.personalData().phone().map(Phone::new).ifPresent(phone -> phoneInteractionService.sendOTP(phone, otp));
+		if (user.personalData().email().isPresent()) {
+			emailInteractionService.sendOTP(otp, new Email(user.personalData().email().get()));
+			return;
+		}
 
-		user.personalData().email().map(Email::new)
-				.ifPresent(email -> emailInteractionService.sendSoftVerificationMessage(email));
+		user.personalData().phone().map(Phone::new).ifPresent(phone -> phoneInteractionService.sendOTP(phone, otp));
 	}
 
 	public void verification(String receivedOTP) {
