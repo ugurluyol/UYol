@@ -11,6 +11,7 @@ import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.dto.auth.Token;
 import org.project.application.dto.auth.Tokens;
 import org.project.domain.shared.containers.Result;
+import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.user.entities.OTP;
 import org.project.domain.user.entities.User;
@@ -237,7 +238,7 @@ public class AuthService {
 	private Result<User, Throwable> findUserByIdentifier(String identifier) {
 		try {
 			return userRepository.findBy(new Email(identifier));
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalDomainArgumentException e) {
 			return userRepository.findBy(new Phone(identifier));
 		}
 	}
