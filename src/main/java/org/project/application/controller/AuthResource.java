@@ -1,18 +1,15 @@
 package org.project.application.controller;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import org.project.application.dto.auth.LoginForm;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.service.AuthService;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.PATCH;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
 @Path("/auth")
+@Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
 	private final AuthService authService;
@@ -31,8 +28,7 @@ public class AuthResource {
 	@POST
 	@Path("/login")
 	public Response login(LoginForm loginForm) {
-		authService.login(loginForm);
-		return Response.ok().build();
+		return Response.ok(authService.login(loginForm)).build();
 	}
 
 	@GET
