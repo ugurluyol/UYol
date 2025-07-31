@@ -1,5 +1,6 @@
 package org.project.application.service;
 
+import static org.project.application.util.RestUtil.required;
 import static org.project.application.util.RestUtil.responseException;
 
 import java.time.LocalDateTime;
@@ -7,6 +8,7 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 
 import org.project.application.dto.auth.LoginForm;
+import org.project.application.dto.auth.PasswordChangeForm;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.dto.auth.Token;
 import org.project.application.dto.auth.Tokens;
@@ -32,6 +34,7 @@ import org.project.infrastructure.security.PasswordEncoder;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @ApplicationScoped
 public class AuthService {
@@ -202,6 +205,15 @@ public class AuthService {
 			OTP.validate(receivedOTP);
 			OTP otp = otpRepository.findBy(receivedOTP)
 					.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+
+			if (otp.isExpired())
+				throw responseException(Response.Status.GONE, "OTP is gone.");
+
+			otp.confirm();
+			otpRepository.updateConfirmation(otp)
+					.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+							"Unable to confirm you account at the moment. Please try again later."));
+
 			User user = userRepository.findBy(otp.userID()).orElseThrow();
 
 			if (!user.canLogin())
@@ -245,6 +257,43 @@ public class AuthService {
 			throw responseException(Response.Status.BAD_REQUEST, "You can`t request 2FA activation twice");
 
 		generateAndSendOTP(user);
+	}
+
+	public void startPasswordChange(String identifier) {
+		User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
+
+		if (!user.isVerified())
+			throw responseException(Status.FORBIDDEN, "You cannot change password on unverified account.");
+
+		generateAndSendOTP(user);
+	}
+
+	public void applyPasswordChange(PasswordChangeForm changeForm) {
+		required("password change form", changeForm);
+
+		if (!Objects.equals(changeForm.newPassword(), changeForm.passwordConfirmation()))
+			throw responseException(Status.BAD_REQUEST, "Passwords do not match.");
+
+		Password.validate(changeForm.newPassword());
+
+		OTP.validate(changeForm.otp());
+		OTP otp = otpRepository.findBy(changeForm.otp())
+				.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "OTP not found."));
+
+		if (otp.isExpired())
+			throw responseException(Response.Status.GONE, "OTP is gone.");
+
+		otp.confirm();
+		otpRepository.updateConfirmation(otp)
+				.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+						"Unable to confirm you account at the moment. Please try again later."));
+
+		User user = userRepository.findBy(otp.userID()).orElseThrow();
+		user.changePassword(new Password(passwordEncoder.encode(changeForm.newPassword())));
+
+		userRepository.updatePassword(user)
+				.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+						"Unable to process you`re request at moment. Please try again later."));
 	}
 
 	private User verifiedUserBy(String identifier) {

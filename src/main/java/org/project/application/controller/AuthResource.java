@@ -3,6 +3,7 @@ package org.project.application.controller;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.project.application.dto.auth.LoginForm;
+import org.project.application.dto.auth.PasswordChangeForm;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.service.AuthService;
 
@@ -63,5 +64,18 @@ public class AuthResource {
 	public Response verify2FA(@QueryParam("otp") String otp) {
 		return Response.ok(authService.twoFactorAuth(otp)).build();
 	}
-}
 
+	@POST
+	@Path("/start/password/change")
+	public Response startPasswordChange(@QueryParam("identifier") String identifier) {
+		authService.startPasswordChange(identifier);
+		return Response.ok("Confirm OTP.").build();
+	}
+
+	@PATCH
+	@Path("/apply/password/change")
+	public Response initializiPasswordChange(PasswordChangeForm passwordChangeForm) {
+		authService.applyPasswordChange(passwordChangeForm);
+		return Response.accepted().build();
+	}
+}
