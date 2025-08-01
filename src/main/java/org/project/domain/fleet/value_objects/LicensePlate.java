@@ -12,6 +12,10 @@ public record LicensePlate(String value) {
 
     public LicensePlate {
         required("licensePlate", value);
+
+        if (value.length() > 12)
+            throw new IllegalDomainArgumentException("licensePlate is too long");
+
         if (!PATTERN.matcher(value).matches())
             throw new IllegalDomainArgumentException("Invalid license plate: " + value);
     }
