@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.project.domain.shared.value_objects.AccountDates;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
-import org.project.domain.user.value_objects.AccountDates;
 import org.project.domain.user.value_objects.KeyAndCounter;
 import org.project.domain.user.value_objects.PersonalData;
 import org.project.util.PostgresTestResource;
