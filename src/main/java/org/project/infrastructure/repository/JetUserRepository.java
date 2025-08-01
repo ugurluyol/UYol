@@ -13,7 +13,7 @@ import java.util.UUID;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
-import org.project.domain.user.value_objects.AccountDates;
+import org.project.domain.shared.value_objects.AccountDates;
 import org.project.domain.user.value_objects.Email;
 import org.project.domain.user.value_objects.KeyAndCounter;
 import org.project.domain.user.value_objects.PersonalData;
