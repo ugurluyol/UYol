@@ -1,11 +1,11 @@
-package org.project.domain.driver.entities;
+package org.project.domain.fleet.entities;
 
 import java.util.Objects;
 import java.util.UUID;
 
-import org.project.domain.driver.value_objects.DriverID;
-import org.project.domain.driver.value_objects.DriverLicense;
-import org.project.domain.driver.value_objects.UserID;
+import org.project.domain.fleet.value_objects.DriverID;
+import org.project.domain.fleet.value_objects.DriverLicense;
+import org.project.domain.fleet.value_objects.UserID;
 
 import static org.project.domain.shared.util.Utils.required;
 

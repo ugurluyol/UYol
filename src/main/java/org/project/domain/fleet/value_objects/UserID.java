@@ -1,4 +1,4 @@
-package org.project.domain.driver.value_objects;
+package org.project.domain.fleet.value_objects;
 
 import java.util.UUID;
 
