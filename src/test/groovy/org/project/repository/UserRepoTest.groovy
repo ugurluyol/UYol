@@ -4,6 +4,7 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
+import org.project.domain.shared.containers.Result
 import org.project.domain.user.entities.User
 import org.project.domain.user.value_objects.Email
 import org.project.domain.user.value_objects.Phone
@@ -27,7 +28,7 @@ class UserRepoTest extends Specification {
 
     void "successfully save user"() {
         when:
-        def result = repo.save(user)
+        Result<Integer, Throwable> result = repo.save(user)
 
         then:
         result.success()
@@ -39,7 +40,7 @@ class UserRepoTest extends Specification {
 
     void "successfully save refresh token"() {
         given:
-        def token = new RefreshToken(user.id(), jwtUtility.generateRefreshToken(user))
+        RefreshToken token = new RefreshToken(user.id(), jwtUtility.generateRefreshToken(user))
 
         when:
         def userSaveResult = repo.save(user)

@@ -61,11 +61,13 @@ public class DBManagementUtils {
 		return otpRepository.findBy(user.id()).orElseThrow();
 	}
 
-	public void saveAndVerifyUser(RegistrationForm form) throws JsonProcessingException {
+	public OTP saveAndVerifyUser(RegistrationForm form) throws JsonProcessingException {
 		OTP otp = saveUser(form);
 
 		given().queryParam("otp", otp.otp()).when().patch("/uyol/auth/verification").then().assertThat()
 				.statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+		return otp;
 	}
 
 	public void removeUser(String email) {

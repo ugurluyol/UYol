@@ -7,16 +7,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.project.util.TestDataGenerator.*;
 
-import java.time.LocalDate;
-
 import jakarta.ws.rs.core.MediaType;
 import org.junit.jupiter.api.Test;
 import org.project.application.dto.auth.LoginForm;
+import org.project.application.dto.auth.PasswordChangeForm;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.dto.auth.Token;
 import org.project.application.dto.auth.Tokens;
 import org.project.domain.user.entities.OTP;
-import org.project.infrastructure.security.HOTPGenerator;
 import org.project.util.PostgresTestResource;
 import org.project.util.TestDataGenerator;
 import org.project.util.util.DBManagementUtils;
@@ -208,5 +206,60 @@ class AuthResourceTest {
 	void twoFactorVerificationFailsWithWrongOTP() {
 		given().queryParam("otp", "000000").when().patch("/uyol/auth/2FA/verification").then()
 				.statusCode(Response.Status.NOT_FOUND.getStatusCode());
+	}
+
+	@Test
+	void validPasswordChange() throws JsonProcessingException {
+		RegistrationForm form = TestDataGenerator.generateRegistrationForm();
+		dbManagement.saveAndVerifyUser(form);
+		String newPassword = TestDataGenerator.generatePassword().password();
+
+		given()
+				.queryParam("identifier", form.email())
+				.when()
+				.post("/uyol/auth/start/password/change")
+				.then()
+				.assertThat()
+				.statusCode(Response.Status.OK.getStatusCode())
+				.body(containsString("Confirm OTP."));
+
+		OTP userOTP = dbManagement.getUserOTP(form.email());
+
+		given()
+				.contentType(ContentType.JSON)
+				.body(objectMapper.writeValueAsString(new PasswordChangeForm(userOTP.otp(), newPassword, newPassword)))
+				.when()
+				.patch("/uyol/auth/apply/password/change")
+				.then()
+				.assertThat()
+				.statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+		given()
+				.contentType(ContentType.JSON)
+				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), form.password())))
+				.when()
+				.post("/uyol/auth/login")
+				.then()
+				.assertThat()
+				.statusCode(Response.Status.UNAUTHORIZED.getStatusCode())
+				.body(containsString("Invalid credentials"));
+
+		Tokens tokens = given().contentType(ContentType.JSON)
+				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), newPassword)))
+				.when()
+				.post("/uyol/auth/login")
+				.then()
+				.assertThat()
+				.contentType(MediaType.APPLICATION_JSON)
+				.statusCode(Response.Status.OK.getStatusCode()).extract()
+				.as(Tokens.class);
+
+		assertNotNull(tokens);
+		assertNotNull(tokens.token());
+		assertFalse(tokens.token().isBlank());
+		assertDoesNotThrow(() -> jwtParser.parse(tokens.token()));
+		assertNotNull(tokens.refreshToken());
+		assertFalse(tokens.refreshToken().isBlank());
+		assertDoesNotThrow(() -> jwtParser.parse(tokens.refreshToken()));
 	}
 }

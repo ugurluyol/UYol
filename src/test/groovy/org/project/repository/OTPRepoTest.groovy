@@ -4,6 +4,9 @@ import com.aingrace.test.spock.QuarkusSpockTest
 import io.quarkus.test.common.QuarkusTestResource
 import jakarta.enterprise.context.Dependent
 import jakarta.inject.Inject
+import org.project.domain.shared.containers.Result
+import org.project.domain.user.entities.OTP
+import org.project.domain.user.entities.User
 import org.project.infrastructure.repository.JetOTPRepository
 import org.project.infrastructure.repository.JetUserRepository
 import org.project.infrastructure.security.HOTPGenerator
@@ -29,10 +32,10 @@ class OTPRepoTest extends Specification {
 
     void "successfully save OTP"() {
         given:
-        def otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()))
+        OTP otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()))
 
         when:
-        def userSaveResult = userRepo.save(user)
+        Result<Integer, Throwable> userSaveResult = userRepo.save(user)
 
         then:
         userSaveResult.success()
@@ -288,7 +291,7 @@ class OTPRepoTest extends Specification {
 
     void "fail find by non existent user ID"() {
         given:
-        def noNameUser = TestDataGenerator.user()
+        User noNameUser = TestDataGenerator.user()
         def otp = OTP.of(user, hotpGenerator.generateHOTP(user.keyAndCounter().key(), user.keyAndCounter().counter()))
 
         when:
