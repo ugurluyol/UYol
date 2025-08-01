@@ -10,6 +10,7 @@ import org.project.domain.fleet.value_objects.UserID;
 
 import static org.project.domain.shared.util.Utils.required;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ public class Car {
     private final CarModel carModel;
     private final CarColor carColor;
     private final CarYear carYear;
+    private final LocalDateTime createdAt;
 
     private Car(
             CarID id,
@@ -29,7 +31,8 @@ public class Car {
             CarBrand carBrand,
             CarModel carModel,
             CarColor carColor,
-            CarYear carYear) {
+            CarYear carYear,
+            LocalDateTime createdAt) {
 
         this.id = id;
         this.owner = owner;
@@ -38,6 +41,7 @@ public class Car {
         this.carModel = carModel;
         this.carColor = carColor;
         this.carYear = carYear;
+        this.createdAt = createdAt;
     }
 
     public static Car of(
@@ -55,7 +59,8 @@ public class Car {
         required("carColor", carColor);
         required("carYear", carYear);
 
-        return new Car(new CarID(UUID.randomUUID()), owner, licensePlate, carBrand, carModel, carColor, carYear);
+        return new Car(new CarID(UUID.randomUUID()), owner, licensePlate, carBrand, carModel, carColor, carYear,
+                LocalDateTime.now());
     }
 
     public static Car fromRepository(
@@ -65,9 +70,11 @@ public class Car {
             CarBrand carBrand,
             CarModel carModel,
             CarColor carColor,
-            CarYear carYear) {
+            CarYear carYear,
+            LocalDateTime createdAt) {
 
-        return new Car(new CarID(UUID.randomUUID()), owner, licensePlate, carBrand, carModel, carColor, carYear);
+        return new Car(new CarID(UUID.randomUUID()), owner, licensePlate, carBrand, carModel, carColor, carYear,
+                createdAt);
     }
 
     public CarID id() {
@@ -96,6 +103,10 @@ public class Car {
 
     public CarYear carYear() {
         return carYear;
+    }
+
+    public LocalDateTime createdAt() {
+        return createdAt;
     }
 
     @Override
