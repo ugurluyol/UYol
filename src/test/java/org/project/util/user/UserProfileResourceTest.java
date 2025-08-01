@@ -4,7 +4,6 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.ByteArrayInputStream;
-import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,6 +15,7 @@ import org.project.domain.user.repositories.UserRepository;
 import org.project.domain.user.value_objects.KeyAndCounter;
 import org.project.domain.user.value_objects.PersonalData;
 import org.project.util.PostgresTestResource;
+import org.project.util.TestDataGenerator;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -32,8 +32,7 @@ class UserProfileResourceTest {
 
 	@BeforeEach
 	void setup() {
-		PersonalData personalData = new PersonalData("Test", "User", "+994501234567", "OldPassword123!",
-				"test@example.com", LocalDate.of(2000, 1, 1));
+		PersonalData personalData = TestDataGenerator.personalData();
 		KeyAndCounter keyAndCounter = new KeyAndCounter("test-secret-key", 2);
 
 		User userWithPicture = User.fromRepository(UUID.randomUUID(), personalData, true, false, keyAndCounter,

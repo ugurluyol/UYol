@@ -12,7 +12,6 @@ import static org.project.util.TestDataGenerator.generateFirstname;
 import static org.project.util.TestDataGenerator.generatePhone;
 import static org.project.util.TestDataGenerator.generateSurname;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -73,8 +72,7 @@ class AuthResourceTest {
 
 	@BeforeEach
 	void setup() {
-		PersonalData personalData = new PersonalData("Test", "User", "+994501234567", "OldPassword123!",
-				"test@example.com", LocalDate.of(2000, 1, 1));
+		PersonalData personalData = TestDataGenerator.personalData();
 
 		KeyAndCounter keyAndCounter = new KeyAndCounter("test-secret-key", 2);
 
