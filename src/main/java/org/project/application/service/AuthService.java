@@ -109,7 +109,7 @@ public class AuthService {
 
 	public Tokens login(LoginForm form) {
 		required("Login form", form);
-		
+
 		User user = verifiedUserBy(form.identifier());
 		String hashedPassword = user.personalData().password().orElseThrow(
 				() -> responseException(Response.Status.FORBIDDEN, "User password is missing"));

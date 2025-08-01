@@ -71,8 +71,6 @@ class AuthResourceTest {
 	@Inject
 	UserRepository userRepository;
 
-	private User testUser;
-
 	@BeforeEach
 	void setup() {
 		PersonalData personalData = new PersonalData("Test", "User", "+994501234567", "OldPassword123!",
@@ -263,6 +261,7 @@ class AuthResourceTest {
 	}
 
 	@Test
+
 	void applyPasswordChange_shouldReturn202_whenSuccess() {
 		PasswordChangeForm form = new PasswordChangeForm("validotp123", "Password1!", "Password1!");
 
@@ -316,5 +315,61 @@ class AuthResourceTest {
 	void applyPasswordChange_shouldReturn400_whenFormIsEmpty() {
 		given().contentType(ContentType.JSON).body("{}").when().patch("/uyol/auth/apply/password/change").then()
 				.statusCode(400);
+	}
+
+	@Test
+	void validPasswordChange() throws JsonProcessingException {
+		RegistrationForm form = TestDataGenerator.generateRegistrationForm();
+		dbManagement.saveAndVerifyUser(form);
+		String newPassword = TestDataGenerator.generatePassword().password();
+
+		given()
+				.queryParam("identifier", form.email())
+				.when()
+				.post("/uyol/auth/start/password/change")
+				.then()
+				.assertThat()
+				.statusCode(Response.Status.OK.getStatusCode())
+				.body(containsString("Confirm OTP."));
+
+		OTP userOTP = dbManagement.getUserOTP(form.email());
+
+		given()
+				.contentType(ContentType.JSON)
+				.body(objectMapper.writeValueAsString(new PasswordChangeForm(userOTP.otp(), newPassword, newPassword)))
+				.when()
+				.patch("/uyol/auth/apply/password/change")
+				.then()
+				.assertThat()
+				.statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+		given()
+				.contentType(ContentType.JSON)
+				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), form.password())))
+				.when()
+				.post("/uyol/auth/login")
+				.then()
+				.assertThat()
+				.statusCode(Response.Status.UNAUTHORIZED.getStatusCode())
+				.body(containsString("Invalid credentials"));
+
+		Tokens tokens = given().contentType(ContentType.JSON)
+				.body(objectMapper.writeValueAsString(new LoginForm(form.phone(), newPassword)))
+				.when()
+				.post("/uyol/auth/login")
+				.then()
+				.assertThat()
+				.contentType(MediaType.APPLICATION_JSON)
+				.statusCode(Response.Status.OK.getStatusCode()).extract()
+				.as(Tokens.class);
+
+		assertNotNull(tokens);
+		assertNotNull(tokens.token());
+		assertFalse(tokens.token().isBlank());
+		assertDoesNotThrow(() -> jwtParser.parse(tokens.token()));
+		assertNotNull(tokens.refreshToken());
+		assertFalse(tokens.refreshToken().isBlank());
+		assertDoesNotThrow(() -> jwtParser.parse(tokens.refreshToken()));
+
 	}
 }
