@@ -3,41 +3,43 @@ package org.project.domain.driver.entities;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.project.domain.driver.value_objects.DriverID;
 import org.project.domain.driver.value_objects.DriverLicense;
+import org.project.domain.driver.value_objects.UserID;
 
 import static org.project.domain.shared.util.Utils.required;
 
 public class Driver {
-  private final UUID id;
-  private final UUID userID;
+  private final DriverID id;
+  private final UserID userID;
   private DriverLicense license;
 
-  private Driver(UUID id, UUID userID, DriverLicense license) {
+  private Driver(DriverID id, UserID userID, DriverLicense license) {
     this.id = id;
     this.userID = userID;
     this.license = license;
   }
 
-  public static Driver of(UUID userID, DriverLicense license) {
+  public static Driver of(UserID userID, DriverLicense license) {
     required("userID", userID);
     required("licenseNumber", license);
 
-    return new Driver(UUID.randomUUID(), userID, license);
+    return new Driver(new DriverID(UUID.randomUUID()), userID, license);
   }
 
   public static Driver fromRepository(
-          UUID id,
-          UUID userID,
+          DriverID id,
+          UserID userID,
           DriverLicense license) {
 
     return new Driver(id, userID, license);
   }
 
-  public UUID id() {
+  public DriverID id() {
     return id;
   }
 
-  public UUID userID() {
+  public UserID userID() {
     return userID;
   }
 
