@@ -5,7 +5,7 @@ CREATE TABLE driver (
   created_at TIMESTAMP NOT NULL,
   last_updated TIMESTAMP NOT NULL,
   PRIMARY KEY(id),
-  CONSTRAINT fk_driver_user FOREIGN KEY(user_id) REFERENCES tableName(attribute)
+  CONSTRAINT fk_driver_user FOREIGN KEY(user_id) REFERENCES user_account(id)
 );
 
 CREATE UNIQUE INDEX unique_user_driver ON driver (user_id); 
