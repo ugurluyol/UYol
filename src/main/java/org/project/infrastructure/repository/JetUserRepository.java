@@ -203,7 +203,7 @@ public class JetUserRepository implements UserRepository {
 
     @Override
     public Result<Integer, Throwable> update2FA(User user) {
-        return mapTransactionResult(jet.write(UPDATE_2FA, user.is2FAEnabled(), user.id().toString()));
+        return mapTransactionResult(jet.write(UPDATE_2FA, user.is2FAEnabled(), user.accountDates().lastUpdated(), user.id().toString()));
     }
 
     @Override

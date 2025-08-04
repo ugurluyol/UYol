@@ -36,17 +36,11 @@ dependencies {
     testImplementation("net.datafaker:datafaker:2.4.1")
     testImplementation("org.assertj:assertj-core:3.27.2")
     implementation("io.quarkiverse.mailpit:quarkus-mailpit:1.4.0")
-    testImplementation("org.spockframework:spock-core:2.3-groovy-4.0")
-    testImplementation("com.github.AinGrace:quarkus-spock-graceful:0.1")
     testImplementation("org.testcontainers:testcontainers")
-    testImplementation 'org.testcontainers:testcontainers:1.19.3'
-    testImplementation 'org.testcontainers:postgresql:1.19.3'
+    testImplementation 'org.testcontainers:postgresql'
     testImplementation 'org.flywaydb:flyway-core'
     testImplementation 'org.mockito:mockito-core:4.+'
     testImplementation 'io.quarkus:quarkus-junit5-mockito'
-    testImplementation 'io.quarkus:quarkus-junit5-mockito'
-    testImplementation("org.objenesis:objenesis:3.4")
-    testImplementation("net.bytebuddy:byte-buddy:1.17.5")
     testImplementation("com.tngtech.archunit:archunit:1.4.1")
 }
 
@@ -61,6 +55,10 @@ java {
 test {
 	useJUnitPlatform()
     systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+
+    testLogging {
+        events "started", "passed", "skipped", "failed"
+    }
 }
 compileJava {
     options.encoding = 'UTF-8'
