@@ -13,7 +13,7 @@ import java.util.UUID;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
-import org.project.domain.shared.value_objects.AccountDates;
+import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.user.value_objects.Email;
 import org.project.domain.user.value_objects.KeyAndCounter;
 import org.project.domain.user.value_objects.PersonalData;
@@ -287,7 +287,7 @@ public class JetUserRepository implements UserRepository {
                 rs.getBoolean("is_verified"),
                 rs.getBoolean("is_banned"),
                 new KeyAndCounter(rs.getString("secret_key"), rs.getInt("counter")),
-                new AccountDates(rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
+                new Dates(rs.getObject("creation_date", Timestamp.class).toLocalDateTime(),
                         rs.getObject("last_updated", Timestamp.class).toLocalDateTime()),
                 rs.getBoolean("is_2fa_enabled"));
     }

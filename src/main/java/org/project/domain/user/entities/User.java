@@ -10,7 +10,7 @@ import org.project.domain.shared.annotations.Nullable;
 import org.project.domain.shared.enumerations.UserRole;
 import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.user.exceptions.BannedUserException;
-import org.project.domain.shared.value_objects.AccountDates;
+import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.user.value_objects.KeyAndCounter;
 import org.project.domain.user.value_objects.Password;
 import org.project.domain.user.value_objects.PersonalData;
@@ -23,7 +23,7 @@ public class User {
     private boolean isVerified;
     private boolean isBanned;
     private KeyAndCounter keyAndCounter;
-    private AccountDates accountDates;
+    private Dates dates;
     private boolean is2FAEnabled;
     private @Nullable ProfilePicture profilePicture;
 
@@ -33,7 +33,7 @@ public class User {
             boolean isVerified,
             boolean isBanned,
             KeyAndCounter keyAndCounter,
-            AccountDates accountDates,
+            Dates dates,
             boolean is2FAEnabled) {
 
         if (isBanned)
@@ -45,7 +45,7 @@ public class User {
         this.userRole = UserRole.USER;
         this.isVerified = isVerified;
         this.keyAndCounter = keyAndCounter;
-        this.accountDates = accountDates;
+        this.dates = dates;
         this.is2FAEnabled = is2FAEnabled;
     }
 
@@ -54,7 +54,7 @@ public class User {
         required("secretKey", secretKey);
 
         return new User(UUID.randomUUID(), personalData, false, false, new KeyAndCounter(secretKey, 0),
-                AccountDates.defaultDates(), false);
+                Dates.defaultDates(), false);
     }
 
     public static User fromRepository(
@@ -63,10 +63,10 @@ public class User {
             boolean isVerified,
             boolean isBanned,
             KeyAndCounter keyAndCounter,
-            AccountDates accountDates,
+            Dates dates,
             boolean is2FAEnabled) {
 
-        return new User(id, personalData, isVerified, isBanned, keyAndCounter, accountDates, is2FAEnabled);
+        return new User(id, personalData, isVerified, isBanned, keyAndCounter, dates, is2FAEnabled);
     }
 
     public UUID id() {
@@ -113,8 +113,8 @@ public class User {
         return keyAndCounter;
     }
 
-    public AccountDates accountDates() {
-        return accountDates;
+    public Dates accountDates() {
+        return dates;
     }
 
     public void incrementCounter() {

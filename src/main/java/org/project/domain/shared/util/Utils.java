@@ -8,7 +8,7 @@ public class Utils {
 
     public static <T> T required(String fieldName, T value) {
         if (value == null)
-            throw new IllegalDomainArgumentException(String.format("%s must not be null", fieldName));
+            throw new IllegalDomainArgumentException(fieldName + " must not be null");
 
         return value;
     }
