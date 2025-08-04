@@ -22,7 +22,7 @@ import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.dto.auth.Token;
 import org.project.application.dto.auth.Tokens;
 import org.project.domain.shared.containers.Result;
-import org.project.domain.shared.value_objects.AccountDates;
+import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.user.entities.OTP;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.OTPRepository;
@@ -77,7 +77,7 @@ class AuthResourceTest {
 		KeyAndCounter keyAndCounter = new KeyAndCounter("test-secret-key", 2);
 
 		User testUser = User.fromRepository(UUID.randomUUID(), personalData, true, false, keyAndCounter,
-				AccountDates.defaultDates(), false
+				Dates.defaultDates(), false
 		);
 
 		Result<Integer, Throwable> userSaveResult = userRepository.save(testUser);
