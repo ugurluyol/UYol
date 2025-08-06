@@ -1,5 +1,7 @@
 package org.project.domain.ride.value_object;
 
+import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
+
 import static org.project.domain.shared.util.Utils.required;
 
 import java.math.BigDecimal;
@@ -9,6 +11,6 @@ public record Price(BigDecimal amount) {
     required("priceAmount", amount);
 
     if (amount.compareTo(BigDecimal.ZERO) < 0)
-      throw new IllegalArgumentException("Invalid price: cannot be below zero");
+      throw new IllegalDomainArgumentException("Invalid price: cannot be below zero");
   }
 }
