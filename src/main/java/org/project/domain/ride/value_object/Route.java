@@ -30,4 +30,16 @@ public record Route(
     public List<Location> stops() {
         return new ArrayList<>(stops);
     }
+
+    public Route addStop(Location stop) {
+        List<Location> updatedStops = new ArrayList<>(stops);
+        updatedStops.add(stop);
+        return new Route(from, to, updatedStops);
+    }
+
+    public Route removeStop(Location stop) {
+        List<Location> updatedStops = new ArrayList<>(stops);
+        updatedStops.remove(stop);
+        return new Route(from, to, updatedStops);
+    }
 }
