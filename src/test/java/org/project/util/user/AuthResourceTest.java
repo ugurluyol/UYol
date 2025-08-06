@@ -69,35 +69,6 @@ class AuthResourceTest {
 	@Inject
 	UserRepository userRepository;
 
-
-	@BeforeEach
-	void setup() {
-		PersonalData personalData = TestDataGenerator.personalData();
-
-		KeyAndCounter keyAndCounter = new KeyAndCounter("test-secret-key", 2);
-
-		User testUser = User.fromRepository(UUID.randomUUID(), personalData, true, false, keyAndCounter,
-				Dates.defaultDates(), false
-		);
-
-		Result<Integer, Throwable> userSaveResult = userRepository.save(testUser);
-		userSaveResult.ifFailure(error -> fail("User save failed: " + error.getMessage()));
-
-
-		OTP expiredOtp = OTP.fromRepository("expiredOtp123", testUser.id(), false, LocalDateTime.now().minusMinutes(10),
-				LocalDateTime.now().minusMinutes(5));
-
-		OTP validOtp = OTP.fromRepository("validOtp123", testUser.id(), false, LocalDateTime.now(),
-				LocalDateTime.now().plusMinutes(5));
-
-		Result<Integer, Throwable> expiredOtpSaveResult = otpRepository.save(expiredOtp);
-		expiredOtpSaveResult.ifFailure(error -> fail("Expired OTP save failed: " + error.getMessage()));
-
-		Result<Integer, Throwable> validOtpSaveResult = otpRepository.save(validOtp);
-		validOtpSaveResult.ifFailure(error -> fail("Valid OTP save failed: " + error.getMessage()));
-
-	}
-
 	@Test
 	void registrationFailsWhenFormIsNull() {
 		given()
