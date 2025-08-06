@@ -3,7 +3,7 @@ package org.project.domain.fleet.entities;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.project.domain.fleet.value_objects.DriverID;
+import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.fleet.value_objects.DriverLicense;
 import org.project.domain.fleet.value_objects.UserID;
 import org.project.domain.shared.value_objects.Dates;

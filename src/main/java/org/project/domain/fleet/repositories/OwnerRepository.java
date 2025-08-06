@@ -1,7 +1,7 @@
 package org.project.domain.fleet.repositories;
 
 import org.project.domain.fleet.entities.Owner;
-import org.project.domain.fleet.value_objects.OwnerID;
+import org.project.domain.shared.value_objects.OwnerID;
 import org.project.domain.fleet.value_objects.UserID;
 import org.project.domain.shared.containers.Result;
 
