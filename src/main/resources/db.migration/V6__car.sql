@@ -5,12 +5,12 @@ CREATE TABLE car (
   car_brand VARCHAR(64) NOT NULL,
   car_model VARCHAR(64) NOT NULL,
   car_color VARCHAR(64) NOT NULL,
-  car_year SMALLING NOT NULL,
+  car_year SMALLINT NOT NULL,
   crested_at TIMESTAMP NOT NULL,
   PRIMARY KEY(id),
   CONSTRAINT fk_car_user FOREIGN KEY (owner) REFERENCES user_account(id) 
 );
 
-CREATE UNIQUE INDEX car_owner_idx ON car (user_id);
+CREATE UNIQUE INDEX car_owner_idx ON car (owner);
 
 CREATE UNIQUE INDEX license_plate ON car (license_plate);
