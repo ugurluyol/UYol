@@ -6,6 +6,7 @@ import org.project.domain.fleet.value_objects.CarID;
 import org.project.domain.fleet.value_objects.CarModel;
 import org.project.domain.fleet.value_objects.CarYear;
 import org.project.domain.fleet.value_objects.LicensePlate;
+import org.project.domain.fleet.value_objects.SeatCount;
 import org.project.domain.fleet.value_objects.UserID;
 
 import static org.project.domain.shared.util.Utils.required;
@@ -22,6 +23,7 @@ public class Car {
     private final CarModel carModel;
     private final CarColor carColor;
     private final CarYear carYear;
+    private final SeatCount seatCount;
     private final LocalDateTime createdAt;
 
     private Car(
@@ -32,6 +34,7 @@ public class Car {
             CarModel carModel,
             CarColor carColor,
             CarYear carYear,
+            SeatCount seatCount,
             LocalDateTime createdAt) {
 
         this.id = id;
@@ -41,6 +44,7 @@ public class Car {
         this.carModel = carModel;
         this.carColor = carColor;
         this.carYear = carYear;
+        this.seatCount = seatCount;
         this.createdAt = createdAt;
     }
 
@@ -50,7 +54,8 @@ public class Car {
             CarBrand carBrand,
             CarModel carModel,
             CarColor carColor,
-            CarYear carYear) {
+            CarYear carYear,
+            SeatCount seatCount) {
 
         required("owner", owner);
         required("licensePlate", licensePlate);
@@ -58,9 +63,11 @@ public class Car {
         required("carModel", carModel);
         required("carColor", carColor);
         required("carYear", carYear);
+        required("seatCount", seatCount);
 
         return new Car(new CarID(UUID.randomUUID()), owner, licensePlate, carBrand, carModel, carColor, carYear,
-                LocalDateTime.now());
+                seatCount, LocalDateTime.now());
+
     }
 
     public static Car fromRepository(
@@ -71,10 +78,11 @@ public class Car {
             CarModel carModel,
             CarColor carColor,
             CarYear carYear,
+            SeatCount seatCount,
             LocalDateTime createdAt) {
 
         return new Car(new CarID(UUID.randomUUID()), owner, licensePlate, carBrand, carModel, carColor, carYear,
-                createdAt);
+                seatCount, createdAt);
     }
 
     public CarID id() {
@@ -103,6 +111,10 @@ public class Car {
 
     public CarYear carYear() {
         return carYear;
+    }
+
+    public SeatCount seatCount() {
+        return seatCount;
     }
 
     public LocalDateTime createdAt() {
