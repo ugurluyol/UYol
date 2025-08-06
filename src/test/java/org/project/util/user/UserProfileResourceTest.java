@@ -3,7 +3,10 @@ package org.project.util.user;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,8 @@ import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
+
+import javax.imageio.ImageIO;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
@@ -47,20 +52,35 @@ class UserProfileResourceTest {
 	}
 
 	@Test
-	void shouldChangeProfilePictureSuccessfully() {
-		byte[] image = new byte[] { 1, 2, 3 };
-		ByteArrayInputStream stream = new ByteArrayInputStream(image);
+	void shouldChangeProfilePictureSuccessfully() throws IOException {
+		BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(image, "png", baos);
 
-		given().auth().oauth2(tokenWithPicture).contentType("application/octet-stream").body(stream).when()
-				.put("/uyol/user/profile/picture/change").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
+		ByteArrayInputStream stream = new ByteArrayInputStream(baos.toByteArray());
+
+		given()
+				.auth().oauth2(tokenWithPicture)
+				.contentType("application/octet-stream")
+				.body(stream)
+				.when()
+				.put("/uyol/user/profile/picture/change")
+				.then()
+				.statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
 
 	@Test
-	void shouldReturnProfilePictureIfExists() {
+	void shouldReturnProfilePictureIfExists() throws IOException {
 		shouldChangeProfilePictureSuccessfully();
 
-		given().auth().oauth2(tokenWithPicture).when().get("/uyol/user/profile/picture").then().statusCode(200)
-				.body("imageType", notNullValue()).body("data", notNullValue());
+		given()
+				.auth().oauth2(tokenWithPicture)
+				.when()
+				.get("/uyol/user/profile/picture")
+				.then()
+				.statusCode(200)
+				.body("imageType", notNullValue())
+				.body("profilePicture", notNullValue());
 	}
 
 	@Test
