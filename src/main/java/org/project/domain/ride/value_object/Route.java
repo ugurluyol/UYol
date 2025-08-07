@@ -32,14 +32,27 @@ public record Route(
     }
 
     public Route addStop(Location stop) {
-        List<Location> updatedStops = new ArrayList<>(stops);
+        required("stop", stop);
+
+        if (stop.equals(from) || stop.equals(to))
+            throw new IllegalDomainArgumentException("Stop cannot be the same as start or end location.");
+
+        List<Location> updatedStops = stops == null ? new ArrayList<>() : new ArrayList<>(stops);
+        if (updatedStops.contains(stop))
+            throw new IllegalDomainArgumentException("Stop already exists in the route.");
+
         updatedStops.add(stop);
         return new Route(from, to, updatedStops);
     }
 
     public Route removeStop(Location stop) {
+        required("stop", stop);
+
+        if (stops == null || !stops.contains(stop))
+            throw new IllegalDomainArgumentException("Stop not found in the route.");
+
         List<Location> updatedStops = new ArrayList<>(stops);
         updatedStops.remove(stop);
-        return new Route(from, to, updatedStops);
+        return new Route(from, to, updatedStops.isEmpty() ? null : updatedStops);
     }
 }
