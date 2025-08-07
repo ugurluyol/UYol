@@ -1,6 +1,7 @@
 package org.project.domain.ride.entities;
 
 import org.project.domain.ride.enumerations.RideStatus;
+import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.annotations.Nullable;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
@@ -15,7 +16,7 @@ public class Ride {
   private Route route;
   private final RideTime rideTime;
   private final Price price;
-  private final SeatMap seatMap;
+  private SeatMap seatMap;
   private RideStatus status;
   private boolean isDeliveryAvailable;
   private @Nullable Price deliveryPrice;
@@ -127,6 +128,22 @@ public class Ride {
   }
 
   public SeatMap seatMap() {
+    return seatMap;
+  }
+
+  public SeatMap changePassenger(int index, SeatStatus status) {
+    if (this.status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("Cannot add passenger when ride is already on the road");
+
+    this.seatMap = seatMap.changePassenger(index, status);
+    return seatMap;
+  }
+
+  public SeatMap removePassenger(int index) {
+    if (this.status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("Cannot remove passenger when ride is already on the road");
+
+    this.seatMap = seatMap.releaseSeat(index);
     return seatMap;
   }
 
