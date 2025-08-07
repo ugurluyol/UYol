@@ -6,6 +6,7 @@ import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.annotations.Nullable;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
+import org.project.domain.shared.value_objects.Dates;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -27,6 +28,7 @@ public class Ride {
   private @Nullable Price deliveryPrice;
   private final RideDesc rideDesc;
   private final Set<RideRule> rideRules;
+  private final Dates dates;
 
   private Ride(
           RideID id,
@@ -39,7 +41,8 @@ public class Ride {
           boolean isDeliveryAvailable,
           Price deliveryPrice,
           RideDesc rideDesc,
-          Set<RideRule> rideRules) {
+          Set<RideRule> rideRules,
+          Dates dates) {
 
     this.id = id;
     this.rideOwner = rideOwner;
@@ -52,6 +55,7 @@ public class Ride {
     this.deliveryPrice = deliveryPrice;
     this.rideRules = rideRules;
     this.rideDesc = rideDesc;
+    this.dates = dates;
   }
 
   public static Ride of(
@@ -73,7 +77,8 @@ public class Ride {
     if (rideRules.size() > MAX_RIDE_RULES)
       throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, false, null, rideDesc,rideRules);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap,
+            RideStatus.PENDING, false, null, rideDesc,rideRules, Dates.defaultDates());
   }
 
   public static Ride of(
@@ -98,7 +103,7 @@ public class Ride {
       throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
     return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap,
-            RideStatus.PENDING, true, deliveryPrice, rideDesc, rideRules);
+            RideStatus.PENDING, true, deliveryPrice, rideDesc, rideRules, Dates.defaultDates());
   }
 
   public static Ride fromRepository(
@@ -112,9 +117,10 @@ public class Ride {
           boolean isDeliveryAvailable,
           Price deliveryPrice,
           RideDesc rideDesc,
-          Set<RideRule> rideRules) {
+          Set<RideRule> rideRules,
+          Dates dates) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, isDeliveryAvailable, deliveryPrice, rideDesc, rideRules);
+    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, isDeliveryAvailable, deliveryPrice, rideDesc, rideRules, dates);
   }
 
   public RideID id() {
@@ -246,6 +252,10 @@ public class Ride {
       throw new IllegalDomainArgumentException("You can`t remove rules when ride is already active.");
 
     rideRules.remove(rideRule);
+  }
+
+  public Dates dates() {
+    return dates;
   }
 
   public boolean isModifiable() {
