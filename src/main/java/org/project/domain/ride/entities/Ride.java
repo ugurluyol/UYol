@@ -12,7 +12,7 @@ import static org.project.domain.shared.util.Utils.required;
 public class Ride {
   private final RideID id;
   private final RideOwner rideOwner;
-  private final Route route;
+  private Route route;
   private final RideTime rideTime;
   private final Price price;
   private final SeatMap seatMap;
@@ -102,6 +102,14 @@ public class Ride {
     return route;
   }
 
+  public Route addStop(Location location) {
+    if (status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("Cannot add stop when ride is already on the road");
+
+    this.route = this.route.addStop(location);
+    return route;
+  }
+
   public RideTime rideTime() {
     return rideTime;
   }
@@ -132,7 +140,7 @@ public class Ride {
 
     this.status = RideStatus.ON_THE_ROAD;
   }
-  
+
   public void cancell() {
     if (this.status != RideStatus.PENDING && this.status != RideStatus.ON_THE_ROAD)
       throw new IllegalDomainArgumentException("Ride cancellation is not possible if it`s already finished");
