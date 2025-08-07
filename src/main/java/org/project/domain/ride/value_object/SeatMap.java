@@ -130,4 +130,8 @@ public record SeatMap(List<SeatStatus> seats) {
     }
     return occupied;
   }
+
+  public boolean hasAvailableSeats() {
+    return seats.contains(SeatStatus.EMPTY);
+  }
 }

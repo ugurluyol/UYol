@@ -256,6 +256,14 @@ public class Ride {
     return status == RideStatus.ON_THE_ROAD;
   }
 
+  public boolean hasRule(RideRule rule) {
+    return rideRules.contains(rule);
+  }
+
+  public boolean canAcceptPassenger() {
+    return isModifiable() && seatMap.hasAvailableSeats();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
