@@ -158,11 +158,11 @@ public class Ride {
     this.status = RideStatus.ON_THE_ROAD;
   }
 
-  public void cancell() {
+  public void cancel() {
     if (this.status != RideStatus.PENDING && this.status != RideStatus.ON_THE_ROAD)
       throw new IllegalDomainArgumentException("Ride cancellation is not possible if it`s already finished");
 
-    this.status = RideStatus.CANCELLED;
+    this.status = RideStatus.CANCELED;
   }
 
   public void finish() {
@@ -191,6 +191,14 @@ public class Ride {
 
     this.isDeliveryAvailable = true;
     this.deliveryPrice = deliveryPrice;
+  }
+
+  public boolean isModifiable() {
+    return status == RideStatus.PENDING;
+  }
+
+  public boolean isActive() {
+    return status == RideStatus.ON_THE_ROAD;
   }
 
   @Override
