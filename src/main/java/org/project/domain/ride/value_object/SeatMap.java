@@ -4,6 +4,7 @@ import static org.project.domain.shared.util.Utils.required;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
@@ -25,6 +26,10 @@ public record SeatMap(List<SeatStatus> seats) {
       if (seats.get(i) == SeatStatus.DRIVER)
         throw new IllegalDomainArgumentException("Like how? There is no more than one driver");
     }
+  }
+
+  public static SeatMap of(SeatStatus... seats) {
+    return new SeatMap(Arrays.asList(seats));
   }
 
   public static SeatMap ofEmpty(int totalSeats) {
