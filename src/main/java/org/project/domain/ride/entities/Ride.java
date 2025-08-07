@@ -13,6 +13,7 @@ public class Ride {
   private final Route route;
   private final RideTime rideTime;
   private final Price price;
+  private final SeatMap seatMap;
   private final boolean isDeliveryAvailable;
   private final @Nullable Price deliveryPrice;
 
@@ -22,6 +23,7 @@ public class Ride {
           Route route,
           RideTime rideTime,
           Price price,
+          SeatMap seatMap,
           boolean isDeliveryAvailable,
           Price deliveryPrice) {
 
@@ -30,6 +32,7 @@ public class Ride {
     this.route = route;
     this.rideTime = rideTime;
     this.price = price;
+    this.seatMap = seatMap;
     this.isDeliveryAvailable = isDeliveryAvailable;
     this.deliveryPrice = deliveryPrice;
   }
@@ -38,20 +41,23 @@ public class Ride {
           RideOwner rideOwner,
           Route route,
           RideTime rideTime,
-          Price price) {
+          Price price,
+          SeatMap seatMap) {
 
     required("rideOwner", rideOwner);
     required("route", route);
     required("rideTime", rideTime);
     required("price", price);
+    required("seatMap", seatMap);
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, false, null);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, false, null);
   }
 
   public static Ride of(
           RideOwner rideOwner,
           Route route,
           RideTime rideTime,
+          SeatMap seatMap,
           Price price,
           Price deliveryPrice) {
 
@@ -60,8 +66,9 @@ public class Ride {
     required("rideTime", rideTime);
     required("price", price);
     required("deliveryPrice", deliveryPrice);
+    required("seatMap", seatMap);
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, true, deliveryPrice);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, true, deliveryPrice);
   }
 
   public static Ride fromRepository(
@@ -70,10 +77,11 @@ public class Ride {
           Route route,
           RideTime rideTime,
           Price price,
+          SeatMap seatMap,
           boolean isDeliveryAvailable,
           Price deliveryPrice) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, isDeliveryAvailable, deliveryPrice);
+    return new Ride(id, rideOwner, route, rideTime, price, seatMap, isDeliveryAvailable, deliveryPrice);
   }
 
   public RideID id() {
@@ -94,6 +102,10 @@ public class Ride {
 
   public Price price() {
     return price;
+  }
+
+  public SeatMap seatMap() {
+    return seatMap;
   }
 
   public boolean isDeliveryAvailable() {
