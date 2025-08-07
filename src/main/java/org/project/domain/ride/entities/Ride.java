@@ -3,6 +3,7 @@ package org.project.domain.ride.entities;
 import org.project.domain.ride.enumerations.RideStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.annotations.Nullable;
+import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 
 import java.util.Objects;
 
@@ -123,6 +124,27 @@ public class Ride {
 
   public Price deliveryPrice() {
     return deliveryPrice;
+  }
+
+  public void start() {
+    if (this.status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("Ride already started");
+
+    this.status = RideStatus.ON_THE_ROAD;
+  }
+  
+  public void cancell() {
+    if (this.status != RideStatus.PENDING && this.status != RideStatus.ON_THE_ROAD)
+      throw new IllegalDomainArgumentException("Ride cancellation is not possible if it`s already finished");
+
+    this.status = RideStatus.CANCELLED;
+  }
+
+  public void finish() {
+    if (this.status != RideStatus.ON_THE_ROAD)
+      throw new IllegalDomainArgumentException("You can`t finish the ride which was not going");
+
+    this.status = RideStatus.ENDED_SUCCESSFULLY;
   }
 
   @Override
