@@ -10,6 +10,7 @@ import org.project.domain.shared.value_objects.Dates;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.project.domain.shared.util.Utils.required;
@@ -208,8 +209,8 @@ public class Ride {
     return isDeliveryAvailable;
   }
 
-  public Price deliveryPrice() {
-    return deliveryPrice;
+  public Optional<Price> deliveryPrice() {
+    return Optional.ofNullable(deliveryPrice);
   }
 
   public void enableDelivery(Price deliveryPrice) {
