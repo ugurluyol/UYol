@@ -81,7 +81,7 @@ public class Car {
             SeatCount seatCount,
             LocalDateTime createdAt) {
 
-        return new Car(new CarID(UUID.randomUUID()), owner, licensePlate, carBrand, carModel, carColor, carYear,
+        return new Car(id, owner, licensePlate, carBrand, carModel, carColor, carYear,
                 seatCount, createdAt);
     }
 
