@@ -7,10 +7,14 @@ public enum SeatStatus {
   FEMALE_OCCUPIED;
 
   public boolean isOccupied() {
-    return this != EMPTY;
+    return this == MALE_OCCUPIED || this == FEMALE_OCCUPIED;
   }
 
   public boolean isAvailable() {
     return this == EMPTY;
+  }
+
+  public boolean isDriverSeat() {
+    return this == DRIVER;
   }
 }

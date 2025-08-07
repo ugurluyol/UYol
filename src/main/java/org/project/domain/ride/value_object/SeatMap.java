@@ -20,11 +20,13 @@ public record SeatMap(List<SeatStatus> seats) {
       throw new IllegalDomainArgumentException("Invalid seats count: min 2, max 12");
 
     if (seats.getFirst() != SeatStatus.DRIVER)
-      throw new IllegalDomainArgumentException("Where is a driver?...");
+      throw new IllegalDomainArgumentException("First seat must be for the driver");
 
     for (int i = 1; i < seats.size(); i++) {
+      required("seat", seats.get(i));
+
       if (seats.get(i) == SeatStatus.DRIVER)
-        throw new IllegalDomainArgumentException("Like how? There is no more than one driver");
+        throw new IllegalDomainArgumentException("There can be only one driver");
     }
   }
 
@@ -33,8 +35,8 @@ public record SeatMap(List<SeatStatus> seats) {
   }
 
   public static SeatMap ofEmpty(int totalSeats) {
-    if (totalSeats <= 1)
-      throw new IllegalDomainArgumentException("Seat count must be greater than 1, as first seat is for the driver");
+    if (totalSeats < 2 || totalSeats > 12)
+      throw new IllegalDomainArgumentException("Seat count must be between 2 and 12");
 
     List<SeatStatus> seats = new ArrayList<>(totalSeats);
     seats.add(SeatStatus.DRIVER);
@@ -50,16 +52,21 @@ public record SeatMap(List<SeatStatus> seats) {
   }
 
   public SeatStatus status(int index) {
+    if (index < 0 || index >= seats.size())
+      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
     return seats.get(index);
   }
 
-  public SeatMap updateStatus(int index, SeatStatus newStatus) {
+  private SeatMap updateStatus(int index, SeatStatus newStatus) {
     required("newStatus", newStatus);
-    if (index < 1)
-      throw new IllegalDomainArgumentException("You cannot change index below 1");
+    if (index < 0 || index >= seats.size())
+      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
 
-    if (newStatus == SeatStatus.DRIVER)
-      throw new IllegalDomainArgumentException("There is no second driver");
+    if (index == 0 && newStatus != SeatStatus.DRIVER)
+      throw new IllegalDomainArgumentException("First seat must always be for the driver");
+
+    if (index != 0 && newStatus == SeatStatus.DRIVER)
+      throw new IllegalDomainArgumentException("There can be only one driver");
 
     List<SeatStatus> updated = new ArrayList<>(seats);
     updated.set(index, newStatus);
@@ -67,24 +74,47 @@ public record SeatMap(List<SeatStatus> seats) {
   }
 
   public boolean isAvailable(int index) {
+    if (index < 0 || index >= seats.size())
+      return false;
     return seats.get(index) == SeatStatus.EMPTY;
   }
 
   public SeatMap occupy(int index, SeatStatus occupantStatus) {
     required("occupantStatus", occupantStatus);
-    if (index < 1)
-      throw new IllegalDomainArgumentException("You cannot change index below 1");
-
-    if (index > seats.size() - 1)
-      throw new IllegalDomainArgumentException("No more seats");
-
-    if (occupantStatus == SeatStatus.DRIVER)
-      throw new IllegalDomainArgumentException("There is no second driver");
+    if (index <= 0 || index >= seats.size())
+      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
 
     if (!occupantStatus.isOccupied())
       throw new IllegalDomainArgumentException("Seat must be occupied with valid occupant");
 
+    if (!isAvailable(index))
+      throw new IllegalDomainArgumentException("Seat is already occupied");
+
     return updateStatus(index, occupantStatus);
+  }
+
+  public SeatMap changePassenger(int index, SeatStatus newOccupantStatus) {
+    required("newOccupantStatus", newOccupantStatus);
+    if (index <= 0 || index >= seats.size())
+      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
+
+    if (!newOccupantStatus.isOccupied())
+      throw new IllegalDomainArgumentException("New occupant must be a valid passenger type");
+
+    if (seats.get(index) == SeatStatus.EMPTY)
+      throw new IllegalDomainArgumentException("Cannot change passenger on empty seat");
+
+    return updateStatus(index, newOccupantStatus);
+  }
+
+  public SeatMap releaseSeat(int index) {
+    if (index <= 0 || index >= seats.size())
+      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
+
+    if (seats.get(index) == SeatStatus.EMPTY)
+      throw new IllegalDomainArgumentException("Seat is already empty");
+
+    return updateStatus(index, SeatStatus.EMPTY);
   }
 
   public int size() {
