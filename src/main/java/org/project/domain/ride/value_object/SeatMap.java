@@ -75,6 +75,9 @@ public record SeatMap(List<SeatStatus> seats) {
     if (index < 1)
       throw new IllegalDomainArgumentException("You cannot change index below 1");
 
+    if (index > seats.size() - 1)
+      throw new IllegalDomainArgumentException("No more seats");
+
     if (occupantStatus == SeatStatus.DRIVER)
       throw new IllegalDomainArgumentException("There is no second driver");
 
