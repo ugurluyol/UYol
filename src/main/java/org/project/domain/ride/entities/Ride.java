@@ -110,6 +110,14 @@ public class Ride {
     return route;
   }
 
+  public Route removeStop(Location location) {
+    if (status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("Cannot remove stop when ride is already on the road");
+
+    this.route = this.route.removeStop(location);
+    return route;
+  }
+
   public RideTime rideTime() {
     return rideTime;
   }
