@@ -25,6 +25,7 @@ public class Ride {
   private RideStatus status;
   private boolean isDeliveryAvailable;
   private @Nullable Price deliveryPrice;
+  private final RideDesc rideDesc;
   private final Set<RideRule> rideRules;
 
   private Ride(
@@ -37,6 +38,7 @@ public class Ride {
           RideStatus status,
           boolean isDeliveryAvailable,
           Price deliveryPrice,
+          RideDesc rideDesc,
           Set<RideRule> rideRules) {
 
     this.id = id;
@@ -49,6 +51,7 @@ public class Ride {
     this.isDeliveryAvailable = isDeliveryAvailable;
     this.deliveryPrice = deliveryPrice;
     this.rideRules = rideRules;
+    this.rideDesc = rideDesc;
   }
 
   public static Ride of(
@@ -57,6 +60,7 @@ public class Ride {
           RideTime rideTime,
           Price price,
           SeatMap seatMap,
+          RideDesc rideDesc,
           Set<RideRule> rideRules) {
 
     required("rideOwner", rideOwner);
@@ -64,11 +68,12 @@ public class Ride {
     required("rideTime", rideTime);
     required("price", price);
     required("seatMap", seatMap);
+    required("rideDesc", rideDesc);
     required("rideRules", rideRules);
     if (rideRules.size() > MAX_RIDE_RULES)
       throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, false, null, rideRules);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, false, null, rideDesc,rideRules);
   }
 
   public static Ride of(
@@ -78,6 +83,7 @@ public class Ride {
           SeatMap seatMap,
           Price price,
           Price deliveryPrice,
+          RideDesc rideDesc,
           Set<RideRule> rideRules) {
 
     required("rideOwner", rideOwner);
@@ -86,11 +92,13 @@ public class Ride {
     required("price", price);
     required("deliveryPrice", deliveryPrice);
     required("seatMap", seatMap);
+    required("rideDesc", rideDesc);
     required("rideRules", rideRules);
     if (rideRules.size() > MAX_RIDE_RULES)
       throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, true, deliveryPrice, rideRules);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap,
+            RideStatus.PENDING, true, deliveryPrice, rideDesc, rideRules);
   }
 
   public static Ride fromRepository(
@@ -103,9 +111,10 @@ public class Ride {
           RideStatus status,
           boolean isDeliveryAvailable,
           Price deliveryPrice,
+          RideDesc rideDesc,
           Set<RideRule> rideRules) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, isDeliveryAvailable, deliveryPrice, rideRules);
+    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, isDeliveryAvailable, deliveryPrice, rideDesc, rideRules);
   }
 
   public RideID id() {
@@ -208,6 +217,10 @@ public class Ride {
 
     this.isDeliveryAvailable = true;
     this.deliveryPrice = deliveryPrice;
+  }
+
+  public RideDesc rideDesc() {
+    return rideDesc;
   }
 
   public Set<RideRule> rideRules() {
