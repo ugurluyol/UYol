@@ -1,5 +1,6 @@
 package org.project.domain.ride.entities;
 
+import org.project.domain.ride.enumerations.RideStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.annotations.Nullable;
 
@@ -14,6 +15,7 @@ public class Ride {
   private final RideTime rideTime;
   private final Price price;
   private final SeatMap seatMap;
+  private RideStatus status;
   private final boolean isDeliveryAvailable;
   private final @Nullable Price deliveryPrice;
 
@@ -24,6 +26,7 @@ public class Ride {
           RideTime rideTime,
           Price price,
           SeatMap seatMap,
+          RideStatus status,
           boolean isDeliveryAvailable,
           Price deliveryPrice) {
 
@@ -33,6 +36,7 @@ public class Ride {
     this.rideTime = rideTime;
     this.price = price;
     this.seatMap = seatMap;
+    this.status = status;
     this.isDeliveryAvailable = isDeliveryAvailable;
     this.deliveryPrice = deliveryPrice;
   }
@@ -50,7 +54,7 @@ public class Ride {
     required("price", price);
     required("seatMap", seatMap);
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, false, null);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, false, null);
   }
 
   public static Ride of(
@@ -68,7 +72,7 @@ public class Ride {
     required("deliveryPrice", deliveryPrice);
     required("seatMap", seatMap);
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, true, deliveryPrice);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, true, deliveryPrice);
   }
 
   public static Ride fromRepository(
@@ -78,10 +82,11 @@ public class Ride {
           RideTime rideTime,
           Price price,
           SeatMap seatMap,
+          RideStatus status,
           boolean isDeliveryAvailable,
           Price deliveryPrice) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, seatMap, isDeliveryAvailable, deliveryPrice);
+    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, isDeliveryAvailable, deliveryPrice);
   }
 
   public RideID id() {
@@ -106,6 +111,10 @@ public class Ride {
 
   public SeatMap seatMap() {
     return seatMap;
+  }
+
+  public RideStatus status() {
+    return status;
   }
 
   public boolean isDeliveryAvailable() {
