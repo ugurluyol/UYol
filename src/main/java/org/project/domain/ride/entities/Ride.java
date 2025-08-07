@@ -1,16 +1,21 @@
 package org.project.domain.ride.entities;
 
+import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.enumerations.RideStatus;
 import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.annotations.Nullable;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static org.project.domain.shared.util.Utils.required;
 
 public class Ride {
+  public static final int MAX_RIDE_RULES = 12;
+
   private final RideID id;
   private final RideOwner rideOwner;
   private Route route;
@@ -20,6 +25,7 @@ public class Ride {
   private RideStatus status;
   private boolean isDeliveryAvailable;
   private @Nullable Price deliveryPrice;
+  private final Set<RideRule> rideRules;
 
   private Ride(
           RideID id,
@@ -30,7 +36,8 @@ public class Ride {
           SeatMap seatMap,
           RideStatus status,
           boolean isDeliveryAvailable,
-          Price deliveryPrice) {
+          Price deliveryPrice,
+          Set<RideRule> rideRules) {
 
     this.id = id;
     this.rideOwner = rideOwner;
@@ -41,6 +48,7 @@ public class Ride {
     this.status = status;
     this.isDeliveryAvailable = isDeliveryAvailable;
     this.deliveryPrice = deliveryPrice;
+    this.rideRules = rideRules;
   }
 
   public static Ride of(
@@ -48,15 +56,19 @@ public class Ride {
           Route route,
           RideTime rideTime,
           Price price,
-          SeatMap seatMap) {
+          SeatMap seatMap,
+          Set<RideRule> rideRules) {
 
     required("rideOwner", rideOwner);
     required("route", route);
     required("rideTime", rideTime);
     required("price", price);
     required("seatMap", seatMap);
+    required("rideRules", rideRules);
+    if (rideRules.size() > MAX_RIDE_RULES)
+      throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, false, null);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, false, null, rideRules);
   }
 
   public static Ride of(
@@ -65,7 +77,8 @@ public class Ride {
           RideTime rideTime,
           SeatMap seatMap,
           Price price,
-          Price deliveryPrice) {
+          Price deliveryPrice,
+          Set<RideRule> rideRules) {
 
     required("rideOwner", rideOwner);
     required("route", route);
@@ -73,8 +86,11 @@ public class Ride {
     required("price", price);
     required("deliveryPrice", deliveryPrice);
     required("seatMap", seatMap);
+    required("rideRules", rideRules);
+    if (rideRules.size() > MAX_RIDE_RULES)
+      throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, true, deliveryPrice);
+    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap, RideStatus.PENDING, true, deliveryPrice, rideRules);
   }
 
   public static Ride fromRepository(
@@ -86,9 +102,10 @@ public class Ride {
           SeatMap seatMap,
           RideStatus status,
           boolean isDeliveryAvailable,
-          Price deliveryPrice) {
+          Price deliveryPrice,
+          Set<RideRule> rideRules) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, isDeliveryAvailable, deliveryPrice);
+    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, isDeliveryAvailable, deliveryPrice, rideRules);
   }
 
   public RideID id() {
@@ -191,6 +208,31 @@ public class Ride {
 
     this.isDeliveryAvailable = true;
     this.deliveryPrice = deliveryPrice;
+  }
+
+  public Set<RideRule> rideRules() {
+    return new HashSet<>(rideRules);
+  }
+
+  public void addRideRule(RideRule rideRule) {
+    required("rideRule", rideRule);
+
+    if (status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("You can`t add rules when ride is already active.");
+
+    if (rideRules.size() > MAX_RIDE_RULES)
+      throw new IllegalDomainArgumentException("Too much ride rules");
+
+    rideRules.add(rideRule);
+  }
+
+  public void removeRideRule(RideRule rideRule) {
+    required("rideRule", rideRule);
+
+    if (status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("You can`t remove rules when ride is already active.");
+
+    rideRules.remove(rideRule);
   }
 
   public boolean isModifiable() {
