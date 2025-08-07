@@ -17,8 +17,8 @@ public class Ride {
   private final Price price;
   private final SeatMap seatMap;
   private RideStatus status;
-  private final boolean isDeliveryAvailable;
-  private final @Nullable Price deliveryPrice;
+  private boolean isDeliveryAvailable;
+  private @Nullable Price deliveryPrice;
 
   private Ride(
           RideID id,
@@ -161,6 +161,19 @@ public class Ride {
 
   public Price deliveryPrice() {
     return deliveryPrice;
+  }
+
+  public void enableDelivery(Price deliveryPrice) {
+    required("deliveryPrice", deliveryPrice);
+
+    if (isDeliveryAvailable)
+      throw new IllegalDomainArgumentException("Delivery is already available");
+
+    if (status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("You cannot modify ride if it`s already started.");
+
+    this.isDeliveryAvailable = true;
+    this.deliveryPrice = deliveryPrice;
   }
 
   @Override
