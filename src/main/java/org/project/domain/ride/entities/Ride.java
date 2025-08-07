@@ -134,14 +134,6 @@ public class Ride {
     return status;
   }
 
-  public boolean isDeliveryAvailable() {
-    return isDeliveryAvailable;
-  }
-
-  public Price deliveryPrice() {
-    return deliveryPrice;
-  }
-
   public void start() {
     if (this.status != RideStatus.PENDING)
       throw new IllegalDomainArgumentException("Ride already started");
@@ -161,6 +153,14 @@ public class Ride {
       throw new IllegalDomainArgumentException("You can`t finish the ride which was not going");
 
     this.status = RideStatus.ENDED_SUCCESSFULLY;
+  }
+
+  public boolean isDeliveryAvailable() {
+    return isDeliveryAvailable;
+  }
+
+  public Price deliveryPrice() {
+    return deliveryPrice;
   }
 
   @Override
