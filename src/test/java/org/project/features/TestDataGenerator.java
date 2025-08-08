@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
+import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.value_objects.*;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.User;
@@ -48,6 +49,10 @@ public class TestDataGenerator {
         return Driver.of(UserID.newID(), driverLicense());
     }
 
+    public static Owner owner() {
+        return Owner.of(UserID.newID(), voen());
+    }
+
     public static Car car() {
         return Car.of(UserID.newID(),
                 generateLicensePlate(),
@@ -56,6 +61,12 @@ public class TestDataGenerator {
                 generateCarColor(),
                 generateCarYear(),
                 generateSeatCount());
+    }
+
+    public static Voen voen() {
+        int length = faker.random().nextBoolean() ? 7 : 10;
+        String voen = faker.number().digits(length);
+        return new Voen(voen);
     }
 
     public static DriverLicense driverLicense() {
