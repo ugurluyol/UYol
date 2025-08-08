@@ -9,8 +9,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.project.infrastructure.repository.JetOTPRepository;
 import org.project.infrastructure.repository.JetUserRepository;
 import org.project.infrastructure.security.HOTPGenerator;
-import org.project.util.PostgresTestResource;
-import org.project.util.TestDataGenerator;
+import org.project.features.PostgresTestResource;
+import org.project.features.TestDataGenerator;
 import org.project.domain.user.entities.OTP;
 import org.project.domain.user.entities.User;
 

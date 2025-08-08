@@ -12,8 +12,8 @@ import org.project.domain.user.value_objects.Phone;
 import org.project.domain.user.value_objects.RefreshToken;
 import org.project.infrastructure.repository.JetUserRepository;
 import org.project.infrastructure.security.JWTUtility;
-import org.project.util.PostgresTestResource;
-import org.project.util.TestDataGenerator;
+import org.project.features.PostgresTestResource;
+import org.project.features.TestDataGenerator;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
