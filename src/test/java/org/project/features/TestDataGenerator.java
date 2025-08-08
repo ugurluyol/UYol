@@ -1,6 +1,9 @@
 package org.project.features;
 
+import org.jetbrains.annotations.NotNull;
 import org.project.application.dto.auth.RegistrationForm;
+import org.project.domain.fleet.entities.Car;
+import org.project.domain.fleet.value_objects.*;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.value_objects.Birthdate;
@@ -14,6 +17,8 @@ import org.project.infrastructure.security.HOTPGenerator;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import net.datafaker.Faker;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 @ApplicationScoped
 public class TestDataGenerator {
@@ -36,6 +41,49 @@ public class TestDataGenerator {
 
     public static User user() {
         return User.of(personalData(), HOTPGenerator.generateSecretKey());
+    }
+
+    public static Car car() {
+        return Car.of(UserID.newID(),
+                generateLicensePlate(),
+                generateCarBrand(),
+                generateCarModel(),
+                generateCarColor(),
+                generateCarYear(),
+                generateSeatCount());
+    }
+
+    private static @NotNull SeatCount generateSeatCount() {
+        return new SeatCount(ThreadLocalRandom.current().nextInt(2, 10));
+    }
+
+    private static CarYear generateCarYear() {
+        return new CarYear(ThreadLocalRandom.current().nextInt(2010, 2022));
+    }
+
+    private static @NotNull CarColor generateCarColor() {
+        return new CarColor(faker.color().name());
+    }
+
+    public static LicensePlate generateLicensePlate() {
+        int length = ThreadLocalRandom.current().nextInt(3, 13);
+        String allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int idx = ThreadLocalRandom.current().nextInt(allowed.length());
+            sb.append(allowed.charAt(idx));
+        }
+
+        return new LicensePlate(sb.toString());
+    }
+
+    private static @NotNull CarModel generateCarModel() {
+        return new CarModel(faker.vehicle().model());
+    }
+
+    private static CarBrand generateCarBrand() {
+        return new CarBrand(faker.vehicle().manufacturer());
     }
 
     public static PersonalData personalData() {
