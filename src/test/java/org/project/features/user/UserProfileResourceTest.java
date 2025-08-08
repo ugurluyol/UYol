@@ -1,4 +1,4 @@
-package org.project.util.user;
+package org.project.features.user;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
 import org.project.infrastructure.security.JWTUtility;
-import org.project.util.PostgresTestResource;
-import org.project.util.TestDataGenerator;
+import org.project.features.PostgresTestResource;
+import org.project.features.TestDataGenerator;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;

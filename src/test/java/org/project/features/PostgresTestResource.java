@@ -1,4 +1,4 @@
-package org.project.util;
+package org.project.features;
 
 import java.util.Map;
 

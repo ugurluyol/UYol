@@ -1,4 +1,4 @@
-package org.project.util.util;
+package org.project.features.util;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.batchOf;
 import static com.hadzhy.jetquerious.sql.QueryForge.delete;

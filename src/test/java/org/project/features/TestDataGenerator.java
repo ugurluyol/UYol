@@ -1,4 +1,4 @@
-package org.project.util;
+package org.project.features;
 
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.domain.shared.containers.Result;

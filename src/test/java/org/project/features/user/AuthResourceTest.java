@@ -1,37 +1,28 @@
-package org.project.util.user;
+package org.project.features.user;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.project.util.TestDataGenerator.generateBirthdate;
-import static org.project.util.TestDataGenerator.generateEmail;
-import static org.project.util.TestDataGenerator.generateFirstname;
-import static org.project.util.TestDataGenerator.generatePhone;
-import static org.project.util.TestDataGenerator.generateSurname;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
+import static org.project.features.TestDataGenerator.generateBirthdate;
+import static org.project.features.TestDataGenerator.generateEmail;
+import static org.project.features.TestDataGenerator.generateFirstname;
+import static org.project.features.TestDataGenerator.generatePhone;
+import static org.project.features.TestDataGenerator.generateSurname;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.project.application.dto.auth.LoginForm;
 import org.project.application.dto.auth.PasswordChangeForm;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.dto.auth.Token;
 import org.project.application.dto.auth.Tokens;
-import org.project.domain.shared.containers.Result;
-import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.user.entities.OTP;
-import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.OTPRepository;
 import org.project.domain.user.repositories.UserRepository;
-import org.project.domain.user.value_objects.KeyAndCounter;
-import org.project.domain.user.value_objects.PersonalData;
-import org.project.util.PostgresTestResource;
-import org.project.util.TestDataGenerator;
-import org.project.util.util.DBManagementUtils;
+import org.project.features.PostgresTestResource;
+import org.project.features.TestDataGenerator;
+import org.project.features.util.DBManagementUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

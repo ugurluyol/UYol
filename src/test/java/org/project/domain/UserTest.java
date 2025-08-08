@@ -6,7 +6,7 @@ import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.exceptions.BannedUserException;
 import org.project.infrastructure.security.HOTPGenerator;
-import org.project.util.TestDataGenerator;
+import org.project.features.TestDataGenerator;
 
 public class UserTest {
 

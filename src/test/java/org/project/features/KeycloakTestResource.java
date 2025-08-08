@@ -1,4 +1,4 @@
-package org.project.util;
+package org.project.features;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import org.testcontainers.containers.GenericContainer;
