@@ -16,8 +16,8 @@ public record SeatMap(List<SeatStatus> seats) {
     if (seats.isEmpty())
       throw new IllegalDomainArgumentException("Seat list cannot be empty");
 
-    if (seats.size() < 2 || seats.size() > 12)
-      throw new IllegalDomainArgumentException("Invalid seats count: min 2, max 12");
+    if (seats.size() < 2 || seats.size() > 64)
+      throw new IllegalDomainArgumentException("Invalid seats count: min 2, max 64");
 
     if (seats.getFirst() != SeatStatus.DRIVER)
       throw new IllegalDomainArgumentException("First seat must be for the driver");
@@ -35,8 +35,8 @@ public record SeatMap(List<SeatStatus> seats) {
   }
 
   public static SeatMap ofEmpty(int totalSeats) {
-    if (totalSeats < 2 || totalSeats > 12)
-      throw new IllegalDomainArgumentException("Seat count must be between 2 and 12");
+    if (totalSeats < 2 || totalSeats > 64)
+      throw new IllegalDomainArgumentException("Seat count must be between 2 and 64");
 
     List<SeatStatus> seats = new ArrayList<>(totalSeats);
     seats.add(SeatStatus.DRIVER);
