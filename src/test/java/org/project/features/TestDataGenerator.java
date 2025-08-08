@@ -3,6 +3,7 @@ package org.project.features;
 import org.jetbrains.annotations.NotNull;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.domain.fleet.entities.Car;
+import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.value_objects.*;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.user.entities.User;
@@ -43,6 +44,10 @@ public class TestDataGenerator {
         return User.of(personalData(), HOTPGenerator.generateSecretKey());
     }
 
+    public static Driver driver() {
+        return Driver.of(UserID.newID(), driverLicense());
+    }
+
     public static Car car() {
         return Car.of(UserID.newID(),
                 generateLicensePlate(),
@@ -53,15 +58,19 @@ public class TestDataGenerator {
                 generateSeatCount());
     }
 
-    private static @NotNull SeatCount generateSeatCount() {
+    public static DriverLicense driverLicense() {
+        return new DriverLicense(faker.numerify("## ## ######"));
+    }
+
+    public static @NotNull SeatCount generateSeatCount() {
         return new SeatCount(ThreadLocalRandom.current().nextInt(2, 10));
     }
 
-    private static CarYear generateCarYear() {
+    public static CarYear generateCarYear() {
         return new CarYear(ThreadLocalRandom.current().nextInt(2010, 2022));
     }
 
-    private static @NotNull CarColor generateCarColor() {
+    public static @NotNull CarColor generateCarColor() {
         return new CarColor(faker.color().name());
     }
 
@@ -78,11 +87,11 @@ public class TestDataGenerator {
         return new LicensePlate(sb.toString());
     }
 
-    private static @NotNull CarModel generateCarModel() {
+    public static @NotNull CarModel generateCarModel() {
         return new CarModel(faker.vehicle().model());
     }
 
-    private static CarBrand generateCarBrand() {
+    public static CarBrand generateCarBrand() {
         return new CarBrand(faker.vehicle().manufacturer());
     }
 
@@ -93,14 +102,14 @@ public class TestDataGenerator {
                 generatePhone().phoneNumber(),
                 generatePassword().password(),
                 generateEmail().email(),
-                generateBirthdate().birthDate()
-        );
+                generateBirthdate().birthDate());
     }
 
     public static Firstname generateFirstname() {
         while (true) {
             var firstnameResult = Result.ofThrowable(() -> new Firstname(faker.name().firstName()));
-            if (!firstnameResult.success()) continue;
+            if (!firstnameResult.success())
+                continue;
             return firstnameResult.value();
         }
     }
@@ -108,7 +117,8 @@ public class TestDataGenerator {
     public static Surname generateSurname() {
         while (true) {
             var surnameResult = Result.ofThrowable(() -> new Surname(faker.name().lastName()));
-            if (!surnameResult.success()) continue;
+            if (!surnameResult.success())
+                continue;
             return surnameResult.value();
         }
     }
@@ -116,7 +126,8 @@ public class TestDataGenerator {
     public static Phone generatePhone() {
         while (true) {
             var phoneResult = Result.ofThrowable(() -> new Phone(faker.phoneNumber().phoneNumber()));
-            if (!phoneResult.success()) continue;
+            if (!phoneResult.success())
+                continue;
             return phoneResult.value();
         }
     }
@@ -124,7 +135,8 @@ public class TestDataGenerator {
     public static Email generateEmail() {
         while (true) {
             var emailResult = Result.ofThrowable(() -> new Email(faker.internet().emailAddress()));
-            if (!emailResult.success()) continue;
+            if (!emailResult.success())
+                continue;
             return emailResult.value();
         }
     }
@@ -132,7 +144,8 @@ public class TestDataGenerator {
     public static Password generatePassword() {
         while (true) {
             var passwordResult = Result.ofThrowable(() -> new Password(faker.internet().password()));
-            if (!passwordResult.success()) continue;
+            if (!passwordResult.success())
+                continue;
             return passwordResult.value();
         }
     }
@@ -140,16 +153,17 @@ public class TestDataGenerator {
     public static Birthdate generateBirthdate() {
         while (true) {
             var birthdateResult = Result.ofThrowable(() -> new Birthdate(faker.timeAndDate().birthday(18, 120)));
-            if (!birthdateResult.success()) continue;
+            if (!birthdateResult.success())
+                continue;
             return birthdateResult.value();
         }
     }
 
-	public static RegistrationForm generateRegistrationForm() {
-		String password = generatePassword().password();
-		return new RegistrationForm(generateFirstname().firstname(), generateSurname().surname(),
-				generatePhone().phoneNumber(), generateEmail().email(), password, password,
-				generateBirthdate().birthDate());
-	}
+    public static RegistrationForm generateRegistrationForm() {
+        String password = generatePassword().password();
+        return new RegistrationForm(generateFirstname().firstname(), generateSurname().surname(),
+                generatePhone().phoneNumber(), generateEmail().email(), password, password,
+                generateBirthdate().birthDate());
+    }
 
 }
