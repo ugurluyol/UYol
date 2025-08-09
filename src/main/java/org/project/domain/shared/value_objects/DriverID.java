@@ -8,4 +8,8 @@ public record DriverID(UUID value) {
     public DriverID {
         required("driverID", value);
     }
+
+    public static DriverID newID() {
+        return new DriverID(UUID.randomUUID());
+    }
 }

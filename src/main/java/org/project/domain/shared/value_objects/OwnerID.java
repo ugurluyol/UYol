@@ -8,4 +8,8 @@ public record OwnerID(UUID value) {
     public OwnerID {
         required("ownerID", value);
     }
+
+    public static OwnerID newID() {
+        return new OwnerID(UUID.randomUUID());
+    }
 }
