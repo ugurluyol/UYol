@@ -6,7 +6,13 @@ import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.value_objects.*;
+import org.project.domain.ride.entities.Ride;
+import org.project.domain.ride.enumerations.RideRule;
+import org.project.domain.ride.enumerations.SeatStatus;
+import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.containers.Result;
+import org.project.domain.shared.value_objects.DriverID;
+import org.project.domain.shared.value_objects.OwnerID;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.value_objects.Birthdate;
 import org.project.domain.user.value_objects.Email;
@@ -20,6 +26,12 @@ import org.project.infrastructure.security.HOTPGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.datafaker.Faker;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 @ApplicationScoped
@@ -53,6 +65,125 @@ public class TestDataGenerator {
         return Owner.of(UserID.newID(), voen());
     }
 
+    public static Ride rideWithoutDelivery() {
+        return Ride.of(
+                generateRideOwner(),
+                generateRoute(),
+                generateRideTime(),
+                generatePrice(),
+                generateSeatMap(),
+                generateRideDesc(),
+                generateRideRules()
+        );
+    }
+
+    public static Ride rideWithDelivery() {
+        return Ride.of(
+                generateRideOwner(),
+                generateRoute(),
+                generateRideTime(),
+                generateSeatMap(),
+                generatePrice(),
+                generatePrice(),
+                generateRideDesc(),
+                generateRideRules()
+        );
+    }
+
+    public static Route generateRoute() {
+        Location from = new Location(
+                "Start Point",
+                randomInRange(-90.0, 90.0),
+                randomInRange(-180.0, 180.0)
+        );
+
+        Location to;
+        do {
+            to = new Location(
+                    "End Point",
+                    randomInRange(-90.0, 90.0),
+                    randomInRange(-180.0, 180.0)
+            );
+        } while (from.equals(to));
+
+        int stopsCount = (int) (Math.random() * 4);
+        List<Location> stops = new ArrayList<>();
+
+        for (int i = 0; i < stopsCount; i++) {
+            Location stop;
+            do {
+                stop = new Location(
+                        "Stop " + (i + 1),
+                        randomInRange(-90.0, 90.0),
+                        randomInRange(-180.0, 180.0)
+                );
+            } while (stop.equals(from) || stop.equals(to) || stops.contains(stop));
+
+            stops.add(stop);
+        }
+
+        return new Route(from, to, stops);
+    }
+
+    private static double randomInRange(double min, double max) {
+        return min + (Math.random() * (max - min));
+    }
+
+    public static RideTime generateRideTime() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = now.plusHours(ThreadLocalRandom.current().nextInt(1, 25));
+        LocalDateTime end = start.plusHours(ThreadLocalRandom.current().nextInt(1, 5));
+        return new RideTime(start, end);
+    }
+
+    private static RideDesc generateRideDesc() {
+        return new RideDesc(faker.lorem().characters(64));
+    }
+
+    private static Set<RideRule> generateRideRules() {
+        Set<RideRule> rideRules = new HashSet<>();
+        RideRule[] values = RideRule.values();
+        for (int i = 0; i < 10; i++) {
+            rideRules.add(values[ThreadLocalRandom.current().nextInt(values.length)]);
+        }
+        return rideRules;
+    }
+
+    private static Price generatePrice() {
+        return new Price(BigDecimal.valueOf(ThreadLocalRandom.current().nextLong(100_000L, 999999999999999999L)));
+    }
+
+    public static SeatMap generateSeatMap() {
+        int seatCount = ThreadLocalRandom.current().nextInt(2, 65);
+        List<SeatStatus> seats = new ArrayList<>(seatCount);
+        seats.add(SeatStatus.DRIVER);
+
+        SeatStatus[] nonDriverStatuses = getNonDriverStatuses();
+
+        for (int i = 1; i < seatCount; i++) {
+            seats.add(getRandomNonDriverStatus(nonDriverStatuses));
+        }
+
+        return new SeatMap(seats);
+    }
+
+    private static SeatStatus[] getNonDriverStatuses() {
+        SeatStatus[] allStatuses = SeatStatus.values();
+        SeatStatus[] nonDriverStatuses = new SeatStatus[allStatuses.length - 1];
+
+        int index = 0;
+        for (SeatStatus status : allStatuses) {
+            if (status != SeatStatus.DRIVER) {
+                nonDriverStatuses[index++] = status;
+            }
+        }
+        return nonDriverStatuses;
+    }
+
+    private static SeatStatus getRandomNonDriverStatus(SeatStatus[] nonDriverStatuses) {
+        return nonDriverStatuses[ThreadLocalRandom.current().nextInt(nonDriverStatuses.length)];
+    }
+
     public static Car car() {
         return Car.of(UserID.newID(),
                 generateLicensePlate(),
@@ -71,6 +202,10 @@ public class TestDataGenerator {
 
     public static DriverLicense driverLicense() {
         return new DriverLicense(faker.numerify("## ## ######"));
+    }
+
+    public static @NotNull RideOwner generateRideOwner() {
+        return new RideOwner(DriverID.newID(), OwnerID.newID());
     }
 
     public static @NotNull SeatCount generateSeatCount() {
