@@ -37,9 +37,7 @@ public class JetOwnerRepository implements OwnerRepository {
 
 	@Override
 	public Result<Integer, Throwable> save(Owner owner) {
-		// UUID obyektlərini birbaşa ötürürük, toString() yoxdur
-		return mapTransactionResult(jet.write(SAVE_OWNER, owner.id(), // UUID
-				owner.userID(), // UUID
+		return mapTransactionResult(jet.write(SAVE_OWNER, owner.id(), owner.userID(),
 				owner.voen().value(), owner.createdAt()));
 	}
 

@@ -45,8 +45,7 @@ public class JetCarRepository implements CarRepository {
 
 	@Override
 	public Result<Integer, Throwable> save(Car car) {
-		return mapTransactionResult(jet.write(SAVE_CAR, car.id(), // UUID birbaşa
-				car.owner(), // UUID birbaşa
+		return mapTransactionResult(jet.write(SAVE_CAR, car.id(), car.owner(),
 				car.licensePlate().toString(), car.carBrand().toString(), car.carModel().toString(),
 				car.carColor().toString(), car.carYear().value(), car.seatCount().value(), car.createdAt()));
 	}
