@@ -37,19 +37,21 @@ public class JetOwnerRepository implements OwnerRepository {
 
 	@Override
 	public Result<Integer, Throwable> save(Owner owner) {
-		return mapTransactionResult(jet.write(SAVE_OWNER, owner.id().toString(), owner.userID().toString(),
+		// UUID obyektlərini birbaşa ötürürük, toString() yoxdur
+		return mapTransactionResult(jet.write(SAVE_OWNER, owner.id(), // UUID
+				owner.userID(), // UUID
 				owner.voen().value(), owner.createdAt()));
 	}
 
 	@Override
 	public Result<Owner, Throwable> findBy(OwnerID ownerID) {
-		var result = jet.read(OWNER_BY_ID, this::ownerMapper, ownerID.toString());
+		var result = jet.read(OWNER_BY_ID, this::ownerMapper, ownerID);
 		return new Result<>(result.value(), result.throwable(), result.success());
 	}
 
 	@Override
 	public Result<UserID, Throwable> findBy(UserID userID) {
-		var result = jet.read(OWNER_BY_USER_ID, this::userIdMapper, userID.toString());
+		var result = jet.read(OWNER_BY_USER_ID, this::userIdMapper, userID);
 		return new Result<>(result.value(), result.throwable(), result.success());
 	}
 
