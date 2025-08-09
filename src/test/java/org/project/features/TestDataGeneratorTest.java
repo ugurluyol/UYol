@@ -10,6 +10,30 @@ import java.time.Duration;
 class TestDataGeneratorTest {
 
   @Test
+  @DisplayName("rideWithDelivery()")
+  void testRideWithDelivery() {
+    assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
+      assertNotNull(TestDataGenerator.rideWithDelivery());
+    });
+  }
+
+  @Test
+  @DisplayName("rideWithoutDelivery()")
+  void testRideWithoutDelivery() {
+    assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
+      assertNotNull(TestDataGenerator.rideWithoutDelivery());
+    });
+  }
+
+  @Test
+  @DisplayName("generateRoute()")
+  void testRoute() {
+    assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
+      assertNotNull(TestDataGenerator.generateRoute());
+    });
+  }
+
+  @Test
   @DisplayName("otp()")
   void testOtp() {
     assertTimeoutPreemptively(Duration.ofSeconds(3), () -> {
