@@ -45,7 +45,8 @@ public class JetCarRepository implements CarRepository {
 
 	@Override
 	public Result<Integer, Throwable> save(Car car) {
-		return mapTransactionResult(jet.write(SAVE_CAR, car.id().toString(), car.owner().toString(),
+		return mapTransactionResult(jet.write(SAVE_CAR, car.id(), // UUID birbaşa
+				car.owner(), // UUID birbaşa
 				car.licensePlate().toString(), car.carBrand().toString(), car.carModel().toString(),
 				car.carColor().toString(), car.carYear().value(), car.seatCount().value(), car.createdAt()));
 	}
@@ -57,15 +58,14 @@ public class JetCarRepository implements CarRepository {
 
 	@Override
 	public Result<Car, Throwable> findBy(CarID carID) {
-		var result = jet.read(CAR_BY_ID, this::carMapper, carID.toString());
+		var result = jet.read(CAR_BY_ID, this::carMapper, carID);
 		return new Result<>(result.value(), result.throwable(), result.success());
 	}
 
 	@Override
 	public Result<List<Car>, Throwable> pageOf(org.project.domain.shared.value_objects.Pageable pageable,
 			UserID userID) {
-		com.hadzhy.jetquerious.util.Result<List<Car>, Throwable> listOf = jet.readListOf(PAGE_OF_CARS, this::carMapper,
-				userID.toString(), pageable.limit(), pageable.offset());
+		var listOf = jet.readListOf(PAGE_OF_CARS, this::carMapper, userID, pageable.limit(), pageable.offset());
 		return new Result<>(listOf.value(), listOf.throwable(), listOf.success());
 	}
 
@@ -76,7 +76,4 @@ public class JetCarRepository implements CarRepository {
 				new CarColor(rs.getString("color")), new CarYear(rs.getInt("year")),
 				new SeatCount(rs.getInt("seat_count")), rs.getObject("created_at", Timestamp.class).toLocalDateTime());
 	}
-
-
-
 }
