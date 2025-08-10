@@ -101,9 +101,6 @@ public record SeatMap(List<SeatStatus> seats) {
     if (!newOccupantStatus.isOccupied())
       throw new IllegalDomainArgumentException("New occupant must be a valid passenger type");
 
-    if (seats.get(index) == SeatStatus.EMPTY)
-      throw new IllegalDomainArgumentException("Cannot change passenger on empty seat");
-
     return updateStatus(index, newOccupantStatus);
   }
 
