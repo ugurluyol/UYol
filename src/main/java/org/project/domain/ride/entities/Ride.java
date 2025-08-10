@@ -138,7 +138,7 @@ public class Ride {
 
   public Route addStop(Location location) {
     if (status != RideStatus.PENDING)
-      throw new IllegalDomainArgumentException("Cannot add stop when ride is already on the road");
+      throw new IllegalDomainArgumentException("Cannot add stop when ride is already on the road, canceled or finished");
 
     this.route = this.route.addStop(location);
     return route;
@@ -146,7 +146,7 @@ public class Ride {
 
   public Route removeStop(Location location) {
     if (status != RideStatus.PENDING)
-      throw new IllegalDomainArgumentException("Cannot remove stop when ride is already on the road");
+      throw new IllegalDomainArgumentException("Cannot remove stop when ride is already on the road, canceled or finished");
 
     this.route = this.route.removeStop(location);
     return route;
