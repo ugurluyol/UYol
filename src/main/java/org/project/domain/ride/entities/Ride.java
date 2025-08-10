@@ -186,7 +186,7 @@ public class Ride {
 
   public void start() {
     if (this.status != RideStatus.PENDING)
-      throw new IllegalDomainArgumentException("Ride already started");
+      throw new IllegalDomainArgumentException("Ride already started or canceled/finished");
 
     this.status = RideStatus.ON_THE_ROAD;
   }
