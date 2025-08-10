@@ -171,7 +171,7 @@ public class TestDataGenerator {
         return new SeatMap(seats);
     }
 
-    private static SeatStatus[] getNonDriverStatuses() {
+    public static SeatStatus[] getNonDriverStatuses() {
         SeatStatus[] allStatuses = SeatStatus.values();
         SeatStatus[] nonDriverStatuses = new SeatStatus[allStatuses.length - 1];
 
@@ -184,7 +184,7 @@ public class TestDataGenerator {
         return nonDriverStatuses;
     }
 
-    private static SeatStatus getRandomNonDriverStatus(SeatStatus[] nonDriverStatuses) {
+    public static SeatStatus getRandomNonDriverStatus(SeatStatus[] nonDriverStatuses) {
         return nonDriverStatuses[ThreadLocalRandom.current().nextInt(nonDriverStatuses.length)];
     }
 

@@ -3,10 +3,13 @@ package org.project.domain;
 import org.junit.jupiter.api.Test;
 import org.project.domain.ride.entities.Ride;
 import org.project.domain.ride.enumerations.RideStatus;
+import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.ride.value_object.Location;
 import org.project.domain.ride.value_object.Route;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.features.TestDataGenerator;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -154,7 +157,7 @@ class RideTest {
         IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.removeStop(location));
         assertEquals("Cannot remove stop when ride is already on the road, canceled or finished",  e.getMessage());
     }
-1
+
     @Test
     void shouldNotAllowToRemoveUnexistedStop() {
         Ride ride = TestDataGenerator.rideWithoutDelivery();
@@ -162,5 +165,71 @@ class RideTest {
 
         IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.removeStop(location));
         assertEquals("Stop not found in the route.", e.getMessage());
+    }
+
+    @Test
+    void shouldSuccessfullyChangePassenger() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        int index = generateIndex(ride);
+        SeatStatus seatStatus = getRandomNonDriverOccupiedStatus();
+
+        assertDoesNotThrow(() -> ride.changePassenger(index, seatStatus));
+    }
+
+    private static SeatStatus getRandomNonDriverOccupiedStatus() {
+        while (true) {
+            SeatStatus randomNonDriverStatus = TestDataGenerator.getRandomNonDriverStatus(TestDataGenerator.getNonDriverStatuses());
+            if (randomNonDriverStatus.isOccupied()) return randomNonDriverStatus;
+        }
+    }
+
+    private int generateIndex(Ride ride) {
+        return ThreadLocalRandom.current().nextInt(1, ride.seatMap().size());
+    }
+
+    @Test
+    void shouldNotAllowChangingPassengerOnNonPendingRide() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        ride.start();
+        int index = generateIndex(ride);
+        SeatStatus seatStatus = getRandomNonDriverOccupiedStatus();
+
+        IllegalDomainArgumentException e =
+                assertThrows(IllegalDomainArgumentException.class, () -> ride.changePassenger(index, seatStatus));
+        assertEquals("Cannot add passenger when ride is already on the road", e.getMessage());
+    }
+
+    @Test
+    void shouldNotAllowToChangePassengerOnNonOccupiedOne() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        int index = generateIndex(ride);
+        SeatStatus seatStatus = SeatStatus.DRIVER;
+        SeatStatus seatStatus1 = SeatStatus.EMPTY;
+
+        IllegalDomainArgumentException e =
+                assertThrows(IllegalDomainArgumentException.class, () -> ride.changePassenger(index, seatStatus));
+        assertEquals("New occupant must be a valid passenger type", e.getMessage());
+
+        IllegalDomainArgumentException e1 =
+                assertThrows(IllegalDomainArgumentException.class, () -> ride.changePassenger(index, seatStatus1));
+        assertEquals("New occupant must be a valid passenger type", e1.getMessage());
+    }
+
+    @Test
+    void shouldSuccessfullyReleaseSeat() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        int index = generateIndex(ride);
+
+        assertDoesNotThrow(() -> ride.removePassenger(index));
+    }
+
+    @Test
+    void shouldNotAllowToReleaseSeatOnNonPendingRide() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        ride.start();
+        int index = generateIndex(ride);
+
+        IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.removePassenger(index));
+        assertEquals("Cannot remove passenger when ride is already on the road", e.getMessage());
     }
 }
