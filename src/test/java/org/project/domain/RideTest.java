@@ -232,4 +232,12 @@ class RideTest {
         IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.removePassenger(index));
         assertEquals("Cannot remove passenger when ride is already on the road", e.getMessage());
     }
+
+    @Test
+    void shouldSuccessfullyEnableDelivery() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+
+        assertDoesNotThrow(() -> ride.enableDelivery(TestDataGenerator.generatePrice()));
+        assertTrue(ride.isDeliveryAvailable());
+    }
 }

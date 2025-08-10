@@ -129,7 +129,7 @@ public class TestDataGenerator {
         return new Location(faker.address().streetName(), randomInRange(-90.0, 90.0), randomInRange(-180.0, 180.0));
     }
 
-    private static double randomInRange(double min, double max) {
+    public static double randomInRange(double min, double max) {
         return min + (Math.random() * (max - min));
     }
 
@@ -140,11 +140,11 @@ public class TestDataGenerator {
         return new RideTime(start, end);
     }
 
-    private static RideDesc generateRideDesc() {
+    public static RideDesc generateRideDesc() {
         return new RideDesc(faker.lorem().characters(64));
     }
 
-    private static Set<RideRule> generateRideRules() {
+    public static Set<RideRule> generateRideRules() {
         Set<RideRule> rideRules = new HashSet<>();
         RideRule[] values = RideRule.values();
         for (int i = 0; i < 10; i++) {
@@ -153,7 +153,7 @@ public class TestDataGenerator {
         return rideRules;
     }
 
-    private static Price generatePrice() {
+    public static Price generatePrice() {
         return new Price(BigDecimal.valueOf(ThreadLocalRandom.current().nextLong(100_000L, 999999999999999999L)));
     }
 
