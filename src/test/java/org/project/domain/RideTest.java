@@ -3,6 +3,8 @@ package org.project.domain;
 import org.junit.jupiter.api.Test;
 import org.project.domain.ride.entities.Ride;
 import org.project.domain.ride.enumerations.RideStatus;
+import org.project.domain.ride.value_object.Location;
+import org.project.domain.ride.value_object.Route;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.features.TestDataGenerator;
 
@@ -86,5 +88,79 @@ class RideTest {
         Ride ride = TestDataGenerator.rideWithoutDelivery();
         ride.cancel();
         assertThrows(IllegalDomainArgumentException.class, ride::finish, "You can`t finish the ride which was not going");
+    }
+
+    @Test
+    void shouldAddStopToTheRouteSuccessfully() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        Location location = TestDataGenerator.generateLocation();
+
+        assertDoesNotThrow(() -> {
+            Route route = ride.addStop(location);
+            route.stops().contains(location);
+        });
+    }
+
+    @Test
+    void shouldNotAllowToAddStopThatEqualsToStartOrEnd() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        Location from = ride.route().from();
+        Location to = ride.route().to();
+
+        IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.addStop(from));
+        assertEquals("Stop cannot be the same as start or end location.", e.getMessage());
+
+        IllegalDomainArgumentException ex = assertThrows(IllegalDomainArgumentException.class, () -> ride.addStop(to));
+        assertEquals("Stop cannot be the same as start or end location.", ex.getMessage());
+    }
+
+    @Test
+    void shouldNotAllowToChangeRouteOnNonPendingRide() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        ride.start();
+
+        Location location = TestDataGenerator.generateLocation();
+        IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.addStop(location));
+        assertEquals("Cannot add stop when ride is already on the road, canceled or finished", e.getMessage());
+    }
+
+    @Test
+    void shouldNotAllowToAddSameStopTwice() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        Location location = TestDataGenerator.generateLocation();
+
+        ride.addStop(location);
+
+        IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.addStop(location));
+        assertEquals("Stop already exists in the route.", e.getMessage());
+    }
+
+    @Test
+    void shouldSuccessfullyRemoveStop() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        Location location = TestDataGenerator.generateLocation();
+        ride.addStop(location);
+
+        assertDoesNotThrow(() -> ride.removeStop(location));
+    }
+
+    @Test
+    void shouldNotAllowToRemoveStopWhenRideOnTheRoad() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        Location location = TestDataGenerator.generateLocation();
+        ride.addStop(location);
+        ride.start();
+
+        IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.removeStop(location));
+        assertEquals("Cannot remove stop when ride is already on the road, canceled or finished",  e.getMessage());
+    }
+1
+    @Test
+    void shouldNotAllowToRemoveUnexistedStop() {
+        Ride ride = TestDataGenerator.rideWithoutDelivery();
+        Location location = TestDataGenerator.generateLocation();
+
+        IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.removeStop(location));
+        assertEquals("Stop not found in the route.", e.getMessage());
     }
 }
