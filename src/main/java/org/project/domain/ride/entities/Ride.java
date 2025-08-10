@@ -192,8 +192,8 @@ public class Ride {
   }
 
   public void cancel() {
-    if (this.status != RideStatus.PENDING && this.status != RideStatus.ON_THE_ROAD)
-      throw new IllegalDomainArgumentException("Ride cancellation is not possible if it`s already finished");
+    if (this.status != RideStatus.PENDING)
+      throw new IllegalDomainArgumentException("Ride cancellation is not possible if it`s already on the road or finished");
 
     this.status = RideStatus.CANCELED;
   }
