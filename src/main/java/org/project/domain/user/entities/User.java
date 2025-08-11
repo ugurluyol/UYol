@@ -103,6 +103,7 @@ public class User {
                 newPassword.password(),
                 personalData.email().orElse(null),
                 personalData.birthDate());
+        touch();
     }
 
     public boolean isBanned() {
@@ -125,6 +126,7 @@ public class User {
         required("profilePicture", profilePicture);
 
         this.profilePicture = profilePicture;
+        touch();
     }
 
     public Optional<ProfilePicture> profilePicture() {
@@ -141,6 +143,7 @@ public class User {
 
         this.isVerified = true;
         this.keyAndCounter = new KeyAndCounter(keyAndCounter.key(), keyAndCounter.counter());
+        touch();
     }
 
     public boolean canLogin() {
@@ -157,6 +160,7 @@ public class User {
             throw new IllegalDomainStateException("You can`t activate 2FA twice");
 
         this.is2FAEnabled = true;
+        touch();
     }
 
     public void ban() {
@@ -164,6 +168,11 @@ public class User {
             throw new IllegalDomainStateException("You can`t ban already banned user.");
 
         this.isBanned = true;
+        touch();
+    }
+
+    private void touch() {
+        this.dates = this.dates.updated();
     }
 
     private void verifyPotentialBan() {

@@ -13,4 +13,8 @@ public record Dates(LocalDateTime createdAt, LocalDateTime lastUpdated) {
     public static Dates defaultDates() {
         return new Dates(LocalDateTime.now(), LocalDateTime.now());
     }
+
+    public Dates updated() {
+        return new Dates(createdAt, LocalDateTime.now());
+    }
 }
