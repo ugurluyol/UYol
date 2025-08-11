@@ -74,7 +74,7 @@ public class AuthResource {
 
 	@PATCH
 	@Path("/apply/password/change")
-	public Response initializiPasswordChange(PasswordChangeForm passwordChangeForm) {
+	public Response applyPasswordChange(PasswordChangeForm passwordChangeForm) {
 		authService.applyPasswordChange(passwordChangeForm);
 		return Response.accepted().build();
 	}
