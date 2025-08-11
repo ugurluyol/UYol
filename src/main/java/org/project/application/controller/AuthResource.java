@@ -27,6 +27,12 @@ public class AuthResource {
 	}
 
 	@POST
+	@Path("/oidc")
+	public Response oidcAuth(@HeaderParam("X-ID-TOKEN") String idToken) {
+		return Response.ok(authService.oidcAuth(idToken)).build();
+	}
+
+	@POST
 	@Path("/login")
 	public Response login(LoginForm loginForm) {
 		return Response.ok(authService.login(loginForm)).build();

@@ -3,10 +3,13 @@ package org.project.application.service;
 import static org.project.application.util.RestUtil.required;
 import static org.project.application.util.RestUtil.responseException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.application.dto.auth.LoginForm;
 import org.project.application.dto.auth.PasswordChangeForm;
 import org.project.application.dto.auth.RegistrationForm;
@@ -105,6 +108,34 @@ public class AuthService {
 						"Unable to register your account at the moment. Please try again later."));
 
 		generateAndSendOTP(user);
+	}
+
+	public Tokens oidcAuth(String idToken) {
+		try {
+			JsonWebToken claims = jwtUtility.verifyAndParse(idToken)
+					.orElseThrow(() -> responseException(Response.Status.FORBIDDEN, "Invalid id token"));
+
+			String emailAttribute = claims.getClaim("email");
+			Email email = new Email(emailAttribute);
+
+			if (!userRepository.isEmailExists(email)) {
+				User user = registerNonExistedUser(claims, email);
+				Tokens tokens = generateTokens(user);
+				userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()))
+						.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+								"Unable to authenticate your account at the moment. Please try again later."));
+				return tokens;
+			}
+
+			User user = userRepository.findBy(email).orElseThrow();
+			Tokens tokens = generateTokens(user);
+			userRepository.saveRefreshToken(new RefreshToken(user.id(), tokens.refreshToken()))
+					.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+							"Unable to authenticate your account at the moment. Please try again later."));
+			return tokens;
+		} catch (DateTimeParseException e) {
+			throw responseException(Response.Status.BAD_REQUEST, e.getMessage());
+		}
 	}
 
 	public Tokens login(LoginForm form) {
@@ -308,6 +339,28 @@ public class AuthService {
 			throw responseException(Response.Status.FORBIDDEN, "Account not verified");
 
 		return user;
+	}
+
+	private User registerNonExistedUser(JsonWebToken claims, Email email) {
+		String firstname = claims.getClaim("firstname");
+		String surname = claims.getClaim("lastname");
+		LocalDate birthDate = LocalDate.parse(claims.getClaim("birthDate"));
+
+		PersonalData personalData = getPersonalData(email, firstname, surname, birthDate);
+		String secretKey = HOTPGenerator.generateSecretKey();
+
+		User user = User.of(personalData, secretKey);
+
+		userRepository.save(user)
+				.orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+						"Unable to register your account at the moment. Please try again later."));
+
+		emailInteractionService.sendSoftVerificationMessage(email);
+		return user;
+	}
+
+	private PersonalData getPersonalData(Email email, String firstname, String surname, LocalDate birthDate) {
+		return new PersonalData(firstname, surname, null, null, email.email(), birthDate);
 	}
 
 	private void generateAndSendOTP(User user) {
