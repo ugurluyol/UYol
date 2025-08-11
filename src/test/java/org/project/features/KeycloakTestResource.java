@@ -19,7 +19,7 @@ public class KeycloakTestResource implements QuarkusTestResourceLifecycleManager
 
         String host = keycloakContainer.getHost();
         int port = keycloakContainer.getMappedPort(7080);
-        String keycloakURL = "http://%s:%s/auth/realms/karto-realm".formatted(host, port);
+        String keycloakURL = "http://%s:%s/auth/realms/uyol-realm".formatted(host, port);
         return Map.of("keycloak-url", keycloakURL);
     }
 
