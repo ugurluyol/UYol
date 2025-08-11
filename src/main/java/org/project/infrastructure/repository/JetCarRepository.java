@@ -31,12 +31,12 @@ public class JetCarRepository implements CarRepository {
 	private final JetQuerious jet;
 
 	static final String SAVE_CAR = insert().into("car")
-			.columns("id", "owner_id", "license_plate", "brand", "model", "color", "year", "seat_count", "created_at")
+			.columns("id", "owner", "license_plate", "brand", "model", "color", "year", "seat_count", "created_at")
 			.values().build().sql();
 
 	static final String CAR_BY_ID = select().all().from("car").where("id = ?").build().sql();
 
-	static final String PAGE_OF_CARS = select().all().from("car").where("owner_id = ?").orderBy("created_at DESC")
+	static final String PAGE_OF_CARS = select().all().from("car").where("owner = ?").orderBy("created_at DESC")
 			.limitAndOffset().sql();
 
 	JetCarRepository() {
@@ -45,7 +45,7 @@ public class JetCarRepository implements CarRepository {
 
 	@Override
 	public Result<Integer, Throwable> save(Car car) {
-		return mapTransactionResult(jet.write(SAVE_CAR, car.id(), car.owner(),
+		return mapTransactionResult(jet.write(SAVE_CAR, car.id().value(), car.owner().value(),
 				car.licensePlate().toString(), car.carBrand().toString(), car.carModel().toString(),
 				car.carColor().toString(), car.carYear().value(), car.seatCount().value(), car.createdAt()));
 	}
@@ -57,20 +57,20 @@ public class JetCarRepository implements CarRepository {
 
 	@Override
 	public Result<Car, Throwable> findBy(CarID carID) {
-		var result = jet.read(CAR_BY_ID, this::carMapper, carID);
+		var result = jet.read(CAR_BY_ID, this::carMapper, carID.value());
 		return new Result<>(result.value(), result.throwable(), result.success());
 	}
 
 	@Override
 	public Result<List<Car>, Throwable> pageOf(org.project.domain.shared.value_objects.Pageable pageable,
 			UserID userID) {
-		var listOf = jet.readListOf(PAGE_OF_CARS, this::carMapper, userID, pageable.limit(), pageable.offset());
+		var listOf = jet.readListOf(PAGE_OF_CARS, this::carMapper, userID.value(), pageable.limit(), pageable.offset());
 		return new Result<>(listOf.value(), listOf.throwable(), listOf.success());
 	}
 
 	private Car carMapper(ResultSet rs) throws SQLException {
 		return Car.fromRepository(new CarID(UUID.fromString(rs.getString("id"))),
-				new UserID(UUID.fromString(rs.getString("owner_id"))), new LicensePlate(rs.getString("license_plate")),
+				new UserID(UUID.fromString(rs.getString("owner"))), new LicensePlate(rs.getString("license_plate")),
 				new CarBrand(rs.getString("brand")), new CarModel(rs.getString("model")),
 				new CarColor(rs.getString("color")), new CarYear(rs.getInt("year")),
 				new SeatCount(rs.getInt("seat_count")), rs.getObject("created_at", Timestamp.class).toLocalDateTime());

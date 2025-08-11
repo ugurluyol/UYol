@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,14 +29,18 @@ public class CarRepoTest {
 	JetCarRepository repo;
 
 	private static Stream<Car> carProvider() {
-		return Stream.generate(TestDataGenerator::car).limit(5);
+		// Hər dəfə fərqli Car yaradırıq ki, UUID-lər təkrar olmasın
+		return Stream.generate(() -> {
+			Car car = TestDataGenerator.car();
+			return Car.of(car.owner(), car.licensePlate(), car.carBrand(), car.carModel(), car.carColor(),
+					car.carYear(), car.seatCount());
+		}).limit(3);
 	}
 
 	@ParameterizedTest
 	@MethodSource("carProvider")
 	void successfullySaveCar(Car car) {
 		var result = repo.save(car);
-
 		assertTrue(result.success());
 		assertEquals(1, result.value());
 	}
@@ -53,9 +58,8 @@ public class CarRepoTest {
 
 	@ParameterizedTest
 	void failFindByNonExistentCarId() {
-		var nonExistentId = new CarID(java.util.UUID.randomUUID());
+		var nonExistentId = new CarID(UUID.randomUUID());
 		var findResult = repo.findBy(nonExistentId);
-
 		assertFalse(findResult.success());
 	}
 
