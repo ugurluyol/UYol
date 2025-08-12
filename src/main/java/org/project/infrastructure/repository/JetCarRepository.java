@@ -24,6 +24,7 @@ import org.project.domain.shared.containers.Result;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.project.domain.shared.value_objects.Pageable;
 
 @ApplicationScoped
 public class JetCarRepository implements CarRepository {
@@ -44,11 +45,17 @@ public class JetCarRepository implements CarRepository {
 
 	@Override
 	public Result<Integer, Throwable> save(Car car) {
+<<<<<<< HEAD
 		return mapTransactionResult(
 				jet.write(SAVE_CAR, car.id().value(), car.owner().value(), car.licensePlate().value(),
 						car.carBrand().value(), car.carModel().value(), car.carColor().value(), car.carYear().value(),
 						car.seatCount().value(), 
 						car.createdAt()));
+=======
+		return mapTransactionResult(jet.write(SAVE_CAR, car.id().value(), car.owner().value(),
+				car.licensePlate(), car.carBrand(), car.carModel(),
+				car.carColor(), car.carYear().value(), car.seatCount().value(), car.createdAt()));
+>>>>>>> a352087d12d178b18ca7533598c330981330b2f3
 	}
 
 	static Result<Integer, Throwable> mapTransactionResult(
@@ -63,8 +70,7 @@ public class JetCarRepository implements CarRepository {
 	}
 
 	@Override
-	public Result<List<Car>, Throwable> pageOf(org.project.domain.shared.value_objects.Pageable pageable,
-			UserID userID) {
+	public Result<List<Car>, Throwable> pageOf(Pageable pageable, UserID userID) {
 		var listOf = jet.readListOf(PAGE_OF_CARS, this::carMapper, userID.value(), pageable.limit(), pageable.offset());
 		return new Result<>(listOf.value(), listOf.throwable(), listOf.success());
 	}

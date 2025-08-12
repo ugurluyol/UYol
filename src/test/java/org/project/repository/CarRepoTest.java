@@ -45,7 +45,6 @@ public class CarRepoTest {
 		userRepository.save(savedUser);
 		savedUserId = new UserID(savedUser.id());
 
-		// 3 ədəd Car yaradıb listə yığın
 		testCars = Stream.generate(() -> Car.of(savedUserId, TestDataGenerator.generateLicensePlate(),
 				TestDataGenerator.generateCarBrand(), TestDataGenerator.generateCarModel(),
 				TestDataGenerator.generateCarColor(), TestDataGenerator.generateCarYear(),
