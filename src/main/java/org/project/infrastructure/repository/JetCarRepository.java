@@ -31,7 +31,8 @@ public class JetCarRepository implements CarRepository {
 	private final JetQuerious jet;
 
 	static final String SAVE_CAR = insert().into("car")
-			.columns("id", "owner", "license_plate", "brand", "model", "color", "year", "seat_count", "created_at")
+			.columns("id", "owner", "license_plate", "car_brand", "car_model", "car_color", "car_year", "seat_count",
+					"created_at")
 			.values().build().sql();
 
 	static final String CAR_BY_ID = select().all().from("car").where("id = ?").build().sql();
@@ -71,8 +72,8 @@ public class JetCarRepository implements CarRepository {
 	private Car carMapper(ResultSet rs) throws SQLException {
 		return Car.fromRepository(new CarID(UUID.fromString(rs.getString("id"))),
 				new UserID(UUID.fromString(rs.getString("owner"))), new LicensePlate(rs.getString("license_plate")),
-				new CarBrand(rs.getString("brand")), new CarModel(rs.getString("model")),
-				new CarColor(rs.getString("color")), new CarYear(rs.getInt("year")),
+				new CarBrand(rs.getString("car_brand")), new CarModel(rs.getString("car_model")),
+				new CarColor(rs.getString("car_color")), new CarYear(rs.getInt("car_year")),
 				new SeatCount(rs.getInt("seat_count")), rs.getObject("created_at", Timestamp.class).toLocalDateTime());
 	}
 }

@@ -29,12 +29,7 @@ public class CarRepoTest {
 	JetCarRepository repo;
 
 	private static Stream<Car> carProvider() {
-		// Hər dəfə fərqli Car yaradırıq ki, UUID-lər təkrar olmasın
-		return Stream.generate(() -> {
-			Car car = TestDataGenerator.car();
-			return Car.of(car.owner(), car.licensePlate(), car.carBrand(), car.carModel(), car.carColor(),
-					car.carYear(), car.seatCount());
-		}).limit(3);
+		return Stream.generate(TestDataGenerator::car).limit(3);
 	}
 
 	@ParameterizedTest
