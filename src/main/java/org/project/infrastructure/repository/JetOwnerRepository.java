@@ -37,8 +37,8 @@ public class JetOwnerRepository implements OwnerRepository {
 
 	@Override
 	public Result<Integer, Throwable> save(Owner owner) {
-		return mapTransactionResult(jet.write(SAVE_OWNER, owner.id(), owner.userID(),
-				owner.voen().value(), owner.createdAt()));
+		return mapTransactionResult(
+				jet.write(SAVE_OWNER, owner.id(), owner.userID(), owner.voen().value(), owner.createdAt()));
 	}
 
 	@Override

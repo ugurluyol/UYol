@@ -30,10 +30,8 @@ public class JetCarRepository implements CarRepository {
 
 	private final JetQuerious jet;
 
-	static final String SAVE_CAR = insert().into("car")
-			.columns("id", "owner", "license_plate", "car_brand", "car_model", "car_color", "car_year", "seat_count",
-					"created_at")
-			.values().build().sql();
+	static final String SAVE_CAR = insert().into("car").columns("id", "owner", "license_plate", "car_brand",
+			"car_model", "car_color", "car_year", "seat_count", "created_at").values().build().sql();
 
 	static final String CAR_BY_ID = select().all().from("car").where("id = ?").build().sql();
 
@@ -46,9 +44,11 @@ public class JetCarRepository implements CarRepository {
 
 	@Override
 	public Result<Integer, Throwable> save(Car car) {
-		return mapTransactionResult(jet.write(SAVE_CAR, car.id().value(), car.owner().value(),
-				car.licensePlate().toString(), car.carBrand().toString(), car.carModel().toString(),
-				car.carColor().toString(), car.carYear().value(), car.seatCount().value(), car.createdAt()));
+		return mapTransactionResult(
+				jet.write(SAVE_CAR, car.id().value(), car.owner().value(), car.licensePlate().value(),
+						car.carBrand().value(), car.carModel().value(), car.carColor().value(), car.carYear().value(),
+						car.seatCount().value(), 
+						car.createdAt()));
 	}
 
 	static Result<Integer, Throwable> mapTransactionResult(

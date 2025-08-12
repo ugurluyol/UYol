@@ -1,5 +1,4 @@
 package org.project.repository;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,19 +7,24 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.value_objects.CarID;
+import org.project.domain.fleet.value_objects.UserID;
 import org.project.domain.shared.value_objects.Pageable;
+import org.project.domain.user.entities.User;
 import org.project.features.PostgresTestResource;
 import org.project.features.TestDataGenerator;
 import org.project.infrastructure.repository.JetCarRepository;
+import org.project.infrastructure.repository.JetUserRepository;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
 public class CarRepoTest {
@@ -28,41 +32,57 @@ public class CarRepoTest {
 	@Inject
 	JetCarRepository repo;
 
-	private static Stream<Car> carProvider() {
-		return Stream.generate(TestDataGenerator::car).limit(3);
+	@Inject
+	JetUserRepository userRepository;
+
+	private User savedUser;
+	private UserID savedUserId;
+	private List<Car> testCars;
+
+	@BeforeAll
+	void setup() {
+		savedUser = TestDataGenerator.user();
+		userRepository.save(savedUser);
+		savedUserId = new UserID(savedUser.id());
+
+		// 3 ədəd Car yaradıb listə yığın
+		testCars = Stream.generate(() -> Car.of(savedUserId, TestDataGenerator.generateLicensePlate(),
+				TestDataGenerator.generateCarBrand(), TestDataGenerator.generateCarModel(),
+				TestDataGenerator.generateCarColor(), TestDataGenerator.generateCarYear(),
+				TestDataGenerator.generateSeatCount())).limit(3).toList();
 	}
 
-	@ParameterizedTest
-	@MethodSource("carProvider")
-	void successfullySaveCar(Car car) {
-		var result = repo.save(car);
-		assertTrue(result.success());
-		assertEquals(1, result.value());
+	@Test
+	void successfullySaveCars() {
+		for (Car car : testCars) {
+			var result = repo.save(car);
+			assertTrue(result.success());
+			assertEquals(1, result.value());
+		}
 	}
 
-	@ParameterizedTest
-	@MethodSource("carProvider")
-	void successfulFindByCarId(Car car) {
-		var saveResult = repo.save(car);
-		assertTrue(saveResult.success());
-
-		var findResult = repo.findBy(car.id());
-		assertTrue(findResult.success());
-		assertEquals(car.id(), findResult.value().id());
+	@Test
+	void successfulFindByCarId() {
+		for (Car car : testCars) {
+			repo.save(car);
+			var findResult = repo.findBy(car.id());
+			assertTrue(findResult.success());
+			assertEquals(car.id(), findResult.value().id());
+		}
 	}
 
-	@ParameterizedTest
+	@Test
 	void failFindByNonExistentCarId() {
 		var nonExistentId = new CarID(UUID.randomUUID());
 		var findResult = repo.findBy(nonExistentId);
 		assertFalse(findResult.success());
 	}
 
-	@ParameterizedTest
-	@MethodSource("carProvider")
-	void pageOfCarsByUserId(Car car) {
-		var saveResult = repo.save(car);
-		assertTrue(saveResult.success());
+	@Test
+	void pageOfCarsByUserId() {
+		for (Car car : testCars) {
+			repo.save(car);
+		}
 
 		Pageable pageable = new Pageable() {
 			@Override
@@ -76,9 +96,12 @@ public class CarRepoTest {
 			}
 		};
 
-		var pageResult = repo.pageOf(pageable, car.owner());
+		var pageResult = repo.pageOf(pageable, savedUserId);
 		assertTrue(pageResult.success());
+
 		List<Car> cars = pageResult.value();
-		assertTrue(cars.stream().anyMatch(c -> c.id().equals(car.id())));
+		for (Car car : testCars) {
+			assertTrue(cars.stream().anyMatch(c -> c.id().equals(car.id())));
+		}
 	}
 }
