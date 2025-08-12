@@ -4,9 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.project.domain.ride.entities.Ride;
 import org.project.domain.ride.enumerations.RideStatus;
 import org.project.domain.ride.enumerations.SeatStatus;
+import org.project.domain.ride.value_object.BookedSeats;
+import org.project.domain.ride.value_object.PassengerSeat;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.features.TestDataGenerator;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -97,7 +100,7 @@ class RideTest {
         int index = generateIndex(ride);
         SeatStatus seatStatus = getRandomNonDriverOccupiedStatus();
 
-        assertDoesNotThrow(() -> ride.occupy(index, seatStatus));
+        assertDoesNotThrow(() -> ride.occupy(new BookedSeats(List.of(new PassengerSeat(index, seatStatus)))));
     }
 
     private static SeatStatus getRandomNonDriverOccupiedStatus() {
@@ -119,7 +122,8 @@ class RideTest {
         SeatStatus seatStatus = getRandomNonDriverOccupiedStatus();
 
         IllegalDomainArgumentException e =
-                assertThrows(IllegalDomainArgumentException.class, () -> ride.occupy(index, seatStatus));
+                assertThrows(IllegalDomainArgumentException.class, () ->
+                        ride.occupy(new BookedSeats(List.of(new PassengerSeat(index, seatStatus)))));
         assertEquals("Cannot add passenger when ride is already on the road", e.getMessage());
     }
 
@@ -131,11 +135,13 @@ class RideTest {
         SeatStatus seatStatus1 = SeatStatus.EMPTY;
 
         IllegalDomainArgumentException e =
-                assertThrows(IllegalDomainArgumentException.class, () -> ride.occupy(index, seatStatus));
+                assertThrows(IllegalDomainArgumentException.class, () ->
+                        ride.occupy(new BookedSeats(List.of(new PassengerSeat(index, seatStatus)))));
         assertEquals("New occupant must be a valid passenger type", e.getMessage());
 
         IllegalDomainArgumentException e1 =
-                assertThrows(IllegalDomainArgumentException.class, () -> ride.occupy(index, seatStatus1));
+                assertThrows(IllegalDomainArgumentException.class, () ->
+                        ride.occupy(new BookedSeats(List.of(new PassengerSeat(index, seatStatus)))));
         assertEquals("New occupant must be a valid passenger type", e1.getMessage());
     }
 
