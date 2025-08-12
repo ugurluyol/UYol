@@ -27,9 +27,9 @@ public class JetDriverRepository implements DriverRepository {
 	private final JetQuerious jet;
 
 	static final String SAVE_DRIVER = insert().into("driver")
-			.columns("id", "user_id", "license_number", "created_at", "last_updated").values().build().sql();
+			.columns("id", "user_id", "driver_license", "created_at", "last_updated").values().build().sql();
 
-	static final String UPDATE_LICENSE = update("driver").set("license_number = ?, last_updated = ?").where("id = ?")
+	static final String UPDATE_LICENSE = update("driver").set("driver_license = ?, last_updated = ?").where("id = ?")
 			.build().sql();
 
 	static final String FIND_BY_ID = select().all().from("driver").where("id = ?").build().sql();
@@ -66,7 +66,7 @@ public class JetDriverRepository implements DriverRepository {
 
 	private Driver driverMapper(ResultSet rs) throws SQLException {
 		return Driver.fromRepository(new DriverID(UUID.fromString(rs.getString("id"))),
-				new UserID(UUID.fromString(rs.getString("user_id"))), new DriverLicense(rs.getString("license_number")),
+				new UserID(UUID.fromString(rs.getString("user_id"))), new DriverLicense(rs.getString("driver_license")),
 				new Dates(rs.getObject("created_at", LocalDateTime.class),
 						rs.getObject("last_updated", LocalDateTime.class)));
 	}
