@@ -11,4 +11,8 @@ public record BookedSeats(List<PassengerSeat> bookedSeats) {
     public List<PassengerSeat> bookedSeats() {
         return new ArrayList<>(bookedSeats);
     }
+
+    public int size() {
+        return bookedSeats.size();
+    }
 }

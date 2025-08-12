@@ -148,12 +148,16 @@ public class Ride {
     return seatMap;
   }
 
-  public SeatMap occupy(int index, SeatStatus status) {
+  public RideContract occupy(BookedSeats bookedSeats) {
     if (this.status != RideStatus.PENDING)
       throw new IllegalDomainArgumentException("Cannot add passenger when ride is already on the road");
 
-    this.seatMap = seatMap.occupy(index, status);
-    return seatMap;
+    SeatMap newSeatsState = null;
+    for (PassengerSeat bookedSeat : bookedSeats.bookedSeats()) {
+      newSeatsState = seatMap.occupy(bookedSeat.index(), bookedSeat.status());
+    }
+    this.seatMap = newSeatsState;
+    return RideContract.of(id, price, bookedSeats);
   }
 
   public RideStatus status() {
