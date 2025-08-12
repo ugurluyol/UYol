@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.value_objects.CarID;
@@ -39,7 +39,7 @@ public class CarRepoTest {
 	private UserID savedUserId;
 	private List<Car> testCars;
 
-	@BeforeAll
+	@BeforeEach
 	void setup() {
 		savedUser = TestDataGenerator.user();
 		userRepository.save(savedUser);

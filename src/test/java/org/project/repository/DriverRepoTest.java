@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Driver;
@@ -39,7 +39,7 @@ public class DriverRepoTest {
 	private UserID savedUserId;
 	private List<Driver> testDrivers;
 
-	@BeforeAll
+	@BeforeEach
 	void setup() {
 
 		savedUser = TestDataGenerator.user();

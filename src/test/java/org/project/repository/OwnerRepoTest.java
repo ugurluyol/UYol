@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Owner;
@@ -39,14 +39,12 @@ public class OwnerRepoTest {
 	private UserID savedUserId;
 	private List<Owner> testOwners;
 
-	@BeforeAll
+	@BeforeEach
 	void setup() {
-		// User yaradılır və saxlanılır
 		savedUser = TestDataGenerator.user();
 		userRepo.save(savedUser);
 		savedUserId = new UserID(savedUser.id());
 
-		// Bir neçə Owner yaradılır, hər biri üçün yeni user də yaradılır və saxlanılır
 		testOwners = Stream.generate(() -> {
 			User u = TestDataGenerator.user();
 			userRepo.save(u);
