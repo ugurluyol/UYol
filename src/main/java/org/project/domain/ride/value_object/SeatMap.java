@@ -93,27 +93,6 @@ public record SeatMap(List<SeatStatus> seats) {
     return updateStatus(index, occupantStatus);
   }
 
-  public SeatMap changePassenger(int index, SeatStatus newOccupantStatus) {
-    required("newOccupantStatus", newOccupantStatus);
-    if (index <= 0 || index >= seats.size())
-      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
-
-    if (!newOccupantStatus.isOccupied())
-      throw new IllegalDomainArgumentException("New occupant must be a valid passenger type");
-
-    return updateStatus(index, newOccupantStatus);
-  }
-
-  public SeatMap releaseSeat(int index) {
-    if (index <= 0 || index >= seats.size())
-      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
-
-    if (seats.get(index) == SeatStatus.EMPTY)
-      throw new IllegalDomainArgumentException("Seat is already empty");
-
-    return updateStatus(index, SeatStatus.EMPTY);
-  }
-
   public int size() {
     return seats.size();
   }

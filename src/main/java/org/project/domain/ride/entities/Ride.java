@@ -155,7 +155,7 @@ public class Ride {
     this.seatMap = seatMap.changePassenger(index, status);
     return seatMap;
   }
-  
+
   public RideStatus status() {
     return status;
   }

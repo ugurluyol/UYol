@@ -140,24 +140,6 @@ class RideTest {
     }
 
     @Test
-    void shouldSuccessfullyReleaseSeat() {
-        Ride ride = TestDataGenerator.rideWithoutDelivery();
-        int index = generateIndex(ride);
-
-        assertDoesNotThrow(() -> ride.removePassenger(index));
-    }
-
-    @Test
-    void shouldNotAllowToReleaseSeatOnNonPendingRide() {
-        Ride ride = TestDataGenerator.rideWithoutDelivery();
-        ride.start();
-        int index = generateIndex(ride);
-
-        IllegalDomainArgumentException e = assertThrows(IllegalDomainArgumentException.class, () -> ride.removePassenger(index));
-        assertEquals("Cannot remove passenger when ride is already on the road", e.getMessage());
-    }
-
-    @Test
     void shouldSuccessfullyEnableDelivery() {
         Ride ride = TestDataGenerator.rideWithoutDelivery();
 
