@@ -12,6 +12,6 @@ CREATE TABLE car (
   CONSTRAINT fk_car_user FOREIGN KEY (owner) REFERENCES user_account(id) 
 );
 
-CREATE UNIQUE INDEX car_owner_idx ON car (owner);
+CREATE INDEX car_owner_idx ON car (owner);
 
 CREATE UNIQUE INDEX license_plate ON car (license_plate);
