@@ -155,15 +155,7 @@ public class Ride {
     this.seatMap = seatMap.changePassenger(index, status);
     return seatMap;
   }
-
-  public SeatMap removePassenger(int index) {
-    if (this.status != RideStatus.PENDING)
-      throw new IllegalDomainArgumentException("Cannot remove passenger when ride is already on the road");
-
-    this.seatMap = seatMap.releaseSeat(index);
-    return seatMap;
-  }
-
+  
   public RideStatus status() {
     return status;
   }
