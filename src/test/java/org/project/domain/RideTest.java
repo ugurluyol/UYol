@@ -92,12 +92,12 @@ class RideTest {
     }
 
     @Test
-    void shouldSuccessfullyChangePassenger() {
+    void shouldSuccessfullyOccupy() {
         Ride ride = TestDataGenerator.rideWithoutDelivery();
         int index = generateIndex(ride);
         SeatStatus seatStatus = getRandomNonDriverOccupiedStatus();
 
-        assertDoesNotThrow(() -> ride.changePassenger(index, seatStatus));
+        assertDoesNotThrow(() -> ride.occupy(index, seatStatus));
     }
 
     private static SeatStatus getRandomNonDriverOccupiedStatus() {
@@ -119,23 +119,23 @@ class RideTest {
         SeatStatus seatStatus = getRandomNonDriverOccupiedStatus();
 
         IllegalDomainArgumentException e =
-                assertThrows(IllegalDomainArgumentException.class, () -> ride.changePassenger(index, seatStatus));
+                assertThrows(IllegalDomainArgumentException.class, () -> ride.occupy(index, seatStatus));
         assertEquals("Cannot add passenger when ride is already on the road", e.getMessage());
     }
 
     @Test
-    void shouldNotAllowToChangePassengerOnNonOccupiedOne() {
+    void shouldNotAllowToOccupyOnNonOccupiedOne() {
         Ride ride = TestDataGenerator.rideWithoutDelivery();
         int index = generateIndex(ride);
         SeatStatus seatStatus = SeatStatus.DRIVER;
         SeatStatus seatStatus1 = SeatStatus.EMPTY;
 
         IllegalDomainArgumentException e =
-                assertThrows(IllegalDomainArgumentException.class, () -> ride.changePassenger(index, seatStatus));
+                assertThrows(IllegalDomainArgumentException.class, () -> ride.occupy(index, seatStatus));
         assertEquals("New occupant must be a valid passenger type", e.getMessage());
 
         IllegalDomainArgumentException e1 =
-                assertThrows(IllegalDomainArgumentException.class, () -> ride.changePassenger(index, seatStatus1));
+                assertThrows(IllegalDomainArgumentException.class, () -> ride.occupy(index, seatStatus1));
         assertEquals("New occupant must be a valid passenger type", e1.getMessage());
     }
 

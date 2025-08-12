@@ -148,11 +148,11 @@ public class Ride {
     return seatMap;
   }
 
-  public SeatMap changePassenger(int index, SeatStatus status) {
+  public SeatMap occupy(int index, SeatStatus status) {
     if (this.status != RideStatus.PENDING)
       throw new IllegalDomainArgumentException("Cannot add passenger when ride is already on the road");
 
-    this.seatMap = seatMap.changePassenger(index, status);
+    this.seatMap = seatMap.occupy(index, status);
     return seatMap;
   }
 
