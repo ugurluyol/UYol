@@ -1,3 +1,4 @@
+
 package org.project.infrastructure.repository;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.insert;
