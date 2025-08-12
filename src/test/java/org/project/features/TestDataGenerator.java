@@ -145,10 +145,12 @@ public class TestDataGenerator {
         int seatCount = ThreadLocalRandom.current().nextInt(2, 65);
         List<SeatStatus> seats = new ArrayList<>(seatCount);
         seats.add(SeatStatus.DRIVER);
+        seats.add(SeatStatus.EMPTY);
+        seats.add(SeatStatus.EMPTY);
 
         SeatStatus[] nonDriverStatuses = getNonDriverStatuses();
 
-        for (int i = 1; i < seatCount; i++) {
+        for (int i = 3; i < seatCount; i++) {
             seats.add(getRandomNonDriverStatus(nonDriverStatuses));
         }
 
