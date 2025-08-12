@@ -106,23 +106,7 @@ public class TestDataGenerator {
             );
         } while (from.equals(to));
 
-        int stopsCount = (int) (Math.random() * 4);
-        List<Location> stops = new ArrayList<>();
-
-        for (int i = 0; i < stopsCount; i++) {
-            Location stop;
-            do {
-                stop = new Location(
-                        "Stop " + (i + 1),
-                        randomInRange(-90.0, 90.0),
-                        randomInRange(-180.0, 180.0)
-                );
-            } while (stop.equals(from) || stop.equals(to) || stops.contains(stop));
-
-            stops.add(stop);
-        }
-
-        return new Route(from, to, stops);
+        return new Route(from, to);
     }
 
     public static Location generateLocation() {
