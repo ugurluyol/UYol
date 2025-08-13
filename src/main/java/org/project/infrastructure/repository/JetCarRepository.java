@@ -39,6 +39,8 @@ public class JetCarRepository implements CarRepository {
 	static final String PAGE_OF_CARS = select().all().from("car").where("owner = ?").orderBy("created_at DESC")
 			.limitAndOffset().sql();
 
+	static final String IS_LICENSE_PLATE_EXISTS = select().count("count").from("car").where("count = ?").build().sql();
+
 	JetCarRepository() {
 		jet = JetQuerious.instance();
 	}
@@ -69,6 +71,14 @@ public class JetCarRepository implements CarRepository {
 		var listOf = jet.readListOf(PAGE_OF_CARS, this::carMapper, userID.value(), pageable.limit(), pageable.offset());
 		return new Result<>(listOf.value(), listOf.throwable(), listOf.success());
 	}
+
+	@Override
+	public boolean isLicenseTemplateExists(LicensePlate license) {
+		return jet.readObjectOf(IS_LICENSE_PLATE_EXISTS, Integer.class, license)
+				.mapSuccess(count -> count != null && count > 0)
+				.orElse(false);
+	}
+
 
 	private Car carMapper(ResultSet rs) throws SQLException {
 		return Car.fromRepository(new CarID(UUID.fromString(rs.getString("id"))),
