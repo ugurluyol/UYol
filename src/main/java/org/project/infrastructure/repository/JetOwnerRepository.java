@@ -32,6 +32,10 @@ public class JetOwnerRepository implements OwnerRepository {
 
 	static final String OWNER_BY_USER_ID = select().column("id").from("owner").where("user_id = ?").build().sql();
 
+	static final String IS_OWNER_EXISTS = select().count("user_id").from("owner").where("user_id = ?").build().sql();
+
+	static final String IS_VOEN_EXISTS = select().count("voen").from("owner").where("voen = ?").build().sql();
+
 	public JetOwnerRepository() {
 		this.jet = JetQuerious.instance();
 	}
@@ -52,6 +56,20 @@ public class JetOwnerRepository implements OwnerRepository {
 	public Result<UserID, Throwable> findBy(UserID userID) {
 		var result = jet.read(OWNER_BY_USER_ID, this::userIdMapper, userID);
 		return new Result<>(result.value(), result.throwable(), result.success());
+	}
+
+	@Override
+	public boolean isOwnerExists(UserID userID) {
+		return jet.readObjectOf(IS_OWNER_EXISTS, Integer.class, userID)
+				.mapSuccess(count -> count != null && count > 0)
+				.orElse(false);
+	}
+
+	@Override
+	public boolean isVoenExists(Voen voen) {
+		return jet.readObjectOf(IS_VOEN_EXISTS, Integer.class, voen)
+				.mapSuccess(count -> count != null && count > 0)
+				.orElse(false);
 	}
 
 	private Owner ownerMapper(ResultSet rs) throws SQLException {
