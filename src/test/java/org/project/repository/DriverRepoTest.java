@@ -1,28 +1,29 @@
 package org.project.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Driver;
+import org.project.domain.fleet.value_objects.DriverLicense;
 import org.project.domain.fleet.value_objects.UserID;
 import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.user.entities.User;
 import org.project.features.PostgresTestResource;
 import org.project.features.TestDataGenerator;
+import org.project.features.util.DBManagementUtils;
 import org.project.infrastructure.repository.JetDriverRepository;
 import org.project.infrastructure.repository.JetUserRepository;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
@@ -34,6 +35,9 @@ public class DriverRepoTest {
 
 	@Inject
 	JetDriverRepository repo;
+
+	@Inject
+	DBManagementUtils dbManagement;
 
 	private User savedUser;
 	private UserID savedUserId;
@@ -94,5 +98,32 @@ public class DriverRepoTest {
 		var nonExistentUserId = new UserID(UUID.randomUUID());
 		var findResult = repo.findBy(nonExistentUserId);
 		assertFalse(findResult.success());
+	}
+
+	@Test
+	void testIsOwnerExists() throws JsonProcessingException {
+		User user = dbManagement.saveAndRetrieveUser(TestDataGenerator.generateRegistrationForm());
+		UserID userID = new UserID(user.id());
+
+		assertDoesNotThrow(() -> assertFalse(repo.isDriverExists(userID)));
+
+		Driver driver = Driver.of(userID, TestDataGenerator.driverLicense());
+		repo.save(driver);
+
+		assertDoesNotThrow(() -> assertTrue(repo.isDriverExists(userID)));
+	}
+
+	@Test
+	void testIsDriverExists() throws JsonProcessingException {
+		User user = dbManagement.saveAndRetrieveUser(TestDataGenerator.generateRegistrationForm());
+		UserID userID = new UserID(user.id());
+		DriverLicense license = TestDataGenerator.driverLicense();
+
+		assertDoesNotThrow(() -> assertFalse(repo.isLicenseExists(license)));
+
+		Driver driver = Driver.of(userID, license);
+		repo.save(driver);
+
+		assertDoesNotThrow(() -> assertTrue(repo.isLicenseExists(license)));
 	}
 }

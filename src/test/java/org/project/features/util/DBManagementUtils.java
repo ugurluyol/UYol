@@ -56,6 +56,15 @@ public class DBManagementUtils {
 		return otpRepository.findBy(Objects.requireNonNull(user.orElseThrow()).id()).orElseThrow();
 	}
 
+	public User saveAndRetrieveUser(RegistrationForm form) throws JsonProcessingException {
+		given().contentType(ContentType.JSON).body(objectMapper.writeValueAsString(form)).when()
+				.post("/uyol/auth/registration").then().assertThat()
+				.statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+		Result<User, Throwable> user = userRepository.findBy(new Phone(form.phone()));
+		return user.orElseThrow();
+	}
+
 	public OTP getUserOTP(String email) {
 		User user = Objects.requireNonNull(userRepository.findBy(new Email(email)).orElseThrow());
 		return otpRepository.findBy(user.id()).orElseThrow();
