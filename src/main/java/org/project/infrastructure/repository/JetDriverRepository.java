@@ -36,6 +36,9 @@ public class JetDriverRepository implements DriverRepository {
 
 	static final String FIND_BY_USER_ID = select().all().from("driver").where("user_id = ?").build().sql();
 
+	static final String IS_LICENSE_EXISTS = select().count("driver_license")
+			.from("driver").where("driver_license = ?").build().sql();
+
 	public JetDriverRepository() {
 		this.jet = JetQuerious.instance();
 	}
@@ -62,6 +65,13 @@ public class JetDriverRepository implements DriverRepository {
 	public Result<Driver, Throwable> findBy(UserID userID) {
 		var result = jet.read(FIND_BY_USER_ID, this::driverMapper, userID);
 		return new Result<>(result.value(), result.throwable(), result.success());
+	}
+
+	@Override
+	public boolean isLicenseExists(DriverLicense license) {
+		return jet.readObjectOf(IS_LICENSE_EXISTS, Integer.class, license)
+				.mapSuccess(count -> count != null && count > 0)
+				.orElse(false);
 	}
 
 	private Driver driverMapper(ResultSet rs) throws SQLException {
