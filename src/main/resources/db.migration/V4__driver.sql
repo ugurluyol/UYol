@@ -9,3 +9,5 @@ CREATE TABLE driver (
 );
 
 CREATE UNIQUE INDEX unique_user_driver ON driver (user_id); 
+
+CREATE UNIQUE INDEX driver_license_index ON driver (driver_license);
