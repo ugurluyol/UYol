@@ -1,28 +1,29 @@
 package org.project.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.fleet.value_objects.Voen;
 import org.project.domain.shared.value_objects.OwnerID;
 import org.project.domain.user.entities.User;
 import org.project.features.PostgresTestResource;
 import org.project.features.TestDataGenerator;
+import org.project.features.util.DBManagementUtils;
 import org.project.infrastructure.repository.JetOwnerRepository;
 import org.project.infrastructure.repository.JetUserRepository;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
@@ -34,6 +35,9 @@ public class OwnerRepoTest {
 
 	@Inject
 	JetOwnerRepository ownerRepo;
+
+	@Inject
+	DBManagementUtils dbManagement;
 
 	private User savedUser;
 	private UserID savedUserId;
@@ -95,5 +99,30 @@ public class OwnerRepoTest {
 		var nonExistentUserId = new UserID(UUID.randomUUID());
 		var findResult = ownerRepo.findBy(nonExistentUserId);
 		assertFalse(findResult.success());
+	}
+
+	@Test
+	void testIsOwnerExists() throws JsonProcessingException {
+		User user = dbManagement.saveAndRetrieveUser(TestDataGenerator.generateRegistrationForm());
+		UserID userId = new UserID(user.id());
+
+		assertDoesNotThrow(() -> assertFalse(ownerRepo.isOwnerExists(userId)));
+
+		Owner owner = Owner.of(userId, TestDataGenerator.voen());
+		ownerRepo.save(owner);
+		assertDoesNotThrow(() -> assertTrue(ownerRepo.isOwnerExists(userId)));
+	}
+
+	@Test
+	void testIsVoenExists() throws JsonProcessingException {
+		User user = dbManagement.saveAndRetrieveUser(TestDataGenerator.generateRegistrationForm());
+		UserID userId = new UserID(user.id());
+		Voen voen = TestDataGenerator.voen();
+
+		assertDoesNotThrow(() -> assertFalse(ownerRepo.isVoenExists(voen)));
+
+		Owner owner = Owner.of(userId, voen);
+		ownerRepo.save(owner);
+		assertDoesNotThrow(() -> assertTrue(ownerRepo.isVoenExists(voen)));
 	}
 }
