@@ -8,3 +8,5 @@ CREATE TABLE owner (
 );
 
 CREATE UNIQUE INDEX user_owner_idx ON owner (user_id);
+
+CREATE UNIQUE INDEX user_voen ON owner (voen)
