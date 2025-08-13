@@ -39,7 +39,7 @@ public class JetDriverRepository implements DriverRepository {
 	static final String IS_LICENSE_EXISTS = select().count("driver_license")
 			.from("driver").where("driver_license = ?").build().sql();
 
-	static final String IS_OWNER_EXISTS = select().count("user_id")
+	static final String IS_DRIVER_EXISTS = select().count("user_id")
 			.from("driver").where("user_id = ?").build().sql();
 
 	JetDriverRepository() {
@@ -78,8 +78,8 @@ public class JetDriverRepository implements DriverRepository {
 	}
 
 	@Override
-	public boolean isOwnerExists(UserID userID) {
-		return jet.readObjectOf(IS_OWNER_EXISTS, Integer.class, userID)
+	public boolean isDriverExists(UserID userID) {
+		return jet.readObjectOf(IS_DRIVER_EXISTS, Integer.class, userID)
 				.mapSuccess(count -> count != null && count > 0)
 				.orElse(false);
 	}

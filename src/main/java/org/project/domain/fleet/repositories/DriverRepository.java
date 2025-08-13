@@ -18,5 +18,5 @@ public interface DriverRepository {
 
     boolean isLicenseExists(DriverLicense license);
 
-    boolean isOwnerExists(UserID userID);
+    boolean isDriverExists(UserID userID);
 }
