@@ -39,7 +39,10 @@ public class JetDriverRepository implements DriverRepository {
 	static final String IS_LICENSE_EXISTS = select().count("driver_license")
 			.from("driver").where("driver_license = ?").build().sql();
 
-	public JetDriverRepository() {
+	static final String IS_OWNER_EXISTS = select().count("user_id")
+			.from("driver").where("user_id = ?").build().sql();
+
+	JetDriverRepository() {
 		this.jet = JetQuerious.instance();
 	}
 
@@ -70,6 +73,13 @@ public class JetDriverRepository implements DriverRepository {
 	@Override
 	public boolean isLicenseExists(DriverLicense license) {
 		return jet.readObjectOf(IS_LICENSE_EXISTS, Integer.class, license)
+				.mapSuccess(count -> count != null && count > 0)
+				.orElse(false);
+	}
+
+	@Override
+	public boolean isOwnerExists(UserID userID) {
+		return jet.readObjectOf(IS_OWNER_EXISTS, Integer.class, userID)
 				.mapSuccess(count -> count != null && count > 0)
 				.orElse(false);
 	}

@@ -17,4 +17,6 @@ public interface DriverRepository {
     Result<Driver, Throwable> findBy(UserID userID);
 
     boolean isLicenseExists(DriverLicense license);
+
+    boolean isOwnerExists(UserID userID);
 }
