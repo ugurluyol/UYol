@@ -175,8 +175,16 @@ public class TestDataGenerator {
     }
 
     public static Car car() {
-        return Car.of(UserID.newID(),
-                generateLicensePlate(),
+        return car(UserID.newID());
+    }
+
+    public static Car car(UserID userId) {
+        return car(userId, generateLicensePlate());
+    }
+
+    public static Car car(UserID userId, LicensePlate licensePlate) {
+        return Car.of(userId,
+                licensePlate,
                 generateCarBrand(),
                 generateCarModel(),
                 generateCarColor(),
@@ -301,5 +309,4 @@ public class TestDataGenerator {
                 generatePhone().phoneNumber(), generateEmail().email(), password, password,
                 generateBirthdate().birthDate());
     }
-
 }

@@ -1,28 +1,30 @@
 package org.project.repository;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.value_objects.CarID;
+import org.project.domain.fleet.value_objects.LicensePlate;
 import org.project.domain.fleet.value_objects.UserID;
 import org.project.domain.shared.value_objects.Pageable;
 import org.project.domain.user.entities.User;
 import org.project.features.PostgresTestResource;
 import org.project.features.TestDataGenerator;
+import org.project.features.util.DBManagementUtils;
 import org.project.infrastructure.repository.JetCarRepository;
 import org.project.infrastructure.repository.JetUserRepository;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @QuarkusTest
@@ -34,6 +36,9 @@ public class CarRepoTest {
 
 	@Inject
 	JetUserRepository userRepository;
+
+	@Inject
+	DBManagementUtils dbManagement;
 
 	private User savedUser;
 	private UserID savedUserId;
@@ -102,5 +107,19 @@ public class CarRepoTest {
 		for (Car car : testCars) {
 			assertTrue(cars.stream().anyMatch(c -> c.id().equals(car.id())));
 		}
+	}
+
+	@Test
+	void testIsLicenseTemplateExists() throws JsonProcessingException {
+		User user = dbManagement.saveAndRetrieveUser(TestDataGenerator.generateRegistrationForm());
+		UserID userId = new UserID(user.id());
+
+		LicensePlate licensePlate = TestDataGenerator.generateLicensePlate();
+		assertDoesNotThrow(() -> assertFalse(repo.isLicenseTemplateExists(licensePlate)));
+
+		Car car = TestDataGenerator.car(userId, licensePlate);
+		repo.save(car);
+
+		assertDoesNotThrow(() -> assertTrue(repo.isLicenseTemplateExists(licensePlate)));
 	}
 }
