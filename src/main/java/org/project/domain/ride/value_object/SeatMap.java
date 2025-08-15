@@ -20,7 +20,8 @@ public record SeatMap(SeatStatus[][] seats) {
     if (seats[0][0] != SeatStatus.DRIVER)
       throw new IllegalDomainArgumentException("Seat matrix must start with driver");
 
-    int totalSeats = 0;
+    int totalSeats = 1;
+    boolean isFirstSeat = true;
 
     for (SeatStatus[] row : seats) {
       if (row.length > 4)
@@ -29,6 +30,11 @@ public record SeatMap(SeatStatus[][] seats) {
       for (SeatStatus seat : row) {
         required("seat", seat);
         totalSeats++;
+
+        if (isFirstSeat) {
+          isFirstSeat = false;
+          continue;
+        }
 
         if (totalSeats > 64)
           throw new IllegalDomainArgumentException("Invalid seats count: min 2, max 64");
