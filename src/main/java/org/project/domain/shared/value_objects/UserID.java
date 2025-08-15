@@ -12,4 +12,8 @@ public record UserID(UUID value) {
     public static UserID newID() {
         return new UserID(UUID.randomUUID());
     }
+
+    public static UserID fromString(String value) {
+        return new UserID(UUID.fromString(value));
+    }
 }
