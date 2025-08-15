@@ -39,7 +39,11 @@ public class JetCarRepository implements CarRepository {
 	static final String PAGE_OF_CARS = select().all().from("car").where("owner = ?").orderBy("created_at DESC")
 			.limitAndOffset().sql();
 
-	static final String IS_LICENSE_PLATE_EXISTS = select().count("count").from("car").where("count = ?").build().sql();
+	static final String IS_LICENSE_PLATE_EXISTS = select()
+			.count("license_plate")
+			.from("car")
+			.where("license_plate = ?")
+			.build().sql();
 
 	JetCarRepository() {
 		jet = JetQuerious.instance();
