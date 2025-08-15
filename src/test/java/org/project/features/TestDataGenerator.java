@@ -2,6 +2,7 @@ package org.project.features;
 
 import org.jetbrains.annotations.NotNull;
 import org.project.application.dto.auth.RegistrationForm;
+import org.project.application.dto.fleet.CarForm;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.entities.Owner;
@@ -201,6 +202,39 @@ public class TestDataGenerator {
                 generateCarColor(),
                 generateCarYear(),
                 generateSeatCount());
+    }
+
+    public static CarForm carForm() {
+        return new CarForm(
+                generateLicensePlate().value(),
+                generateCarBrand().value(),
+                generateCarModel().value(),
+                generateCarColor().value(),
+                generateCarYear().value(),
+                generateSeatCount().value()
+        );
+    }
+
+    public static CarForm carForm(LicensePlate licensePlate) {
+        return new CarForm(
+                licensePlate.value(),
+                generateCarBrand().value(),
+                generateCarModel().value(),
+                generateCarColor().value(),
+                generateCarYear().value(),
+                generateSeatCount().value()
+        );
+    }
+
+    public static CarForm carForm(LicensePlate licensePlate, SeatCount seatCount) {
+        return new CarForm(
+                licensePlate.value(),
+                generateCarBrand().value(),
+                generateCarModel().value(),
+                generateCarColor().value(),
+                generateCarYear().value(),
+                seatCount.value()
+        );
     }
 
     public static Voen voen() {
