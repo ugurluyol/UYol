@@ -21,6 +21,7 @@ public record SeatMap(SeatStatus[][] seats) {
     boolean hasDriver = false;
 
     for (SeatStatus[] row : seats) {
+      if (row.length > 4) throw new IllegalDomainArgumentException("Seat matrix contains more than 4 rows");
       for (SeatStatus seat : row) {
         required("seat", seat);
         totalSeats++;
