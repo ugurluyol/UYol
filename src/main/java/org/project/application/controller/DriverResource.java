@@ -7,6 +7,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.project.application.dto.fleet.CarForm;
 import org.project.application.service.DriverService;
 
 @Path("/driver")
@@ -26,6 +27,13 @@ public class DriverResource {
     @Path("/registration")
     public Response registerDriver(@QueryParam("driver_license") String driverLicense) {
         service.register(jwt.getName(), driverLicense);
+        return Response.accepted().build();
+    }
+
+    @POST
+    @Path("/car/save")
+    public Response saveCar(CarForm carForm) {
+        service.saveCar(jwt.getName(), carForm);
         return Response.accepted().build();
     }
 }
