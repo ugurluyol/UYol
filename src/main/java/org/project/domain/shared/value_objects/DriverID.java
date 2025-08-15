@@ -12,4 +12,8 @@ public record DriverID(UUID value) {
     public static DriverID newID() {
         return new DriverID(UUID.randomUUID());
     }
+
+    public static DriverID fromString(String driverId) {
+        return new DriverID(UUID.fromString(driverId));
+    }
 }

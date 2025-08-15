@@ -12,4 +12,8 @@ public record OwnerID(UUID value) {
     public static OwnerID newID() {
         return new OwnerID(UUID.randomUUID());
     }
+
+    public static OwnerID fromString(String ownerId) {
+        return new OwnerID(UUID.fromString(ownerId));
+    }
 }
