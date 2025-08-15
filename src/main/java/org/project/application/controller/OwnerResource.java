@@ -7,6 +7,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.project.application.dto.fleet.CarForm;
 import org.project.application.service.OwnerService;
 
 @Path("/owner")
@@ -26,6 +27,13 @@ public class OwnerResource {
     @Path("/register")
     public Response registerOwner(@QueryParam("voen") String voen) {
         service.register(jwt.getName(), voen);
+        return Response.accepted().build();
+    }
+
+    @POST
+    @Path("/car/save")
+    public Response saveCar(CarForm carForm) {
+        service.saveCar(jwt.getName(), carForm);
         return Response.accepted().build();
     }
 }
