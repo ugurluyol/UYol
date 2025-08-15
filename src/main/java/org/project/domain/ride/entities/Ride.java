@@ -5,6 +5,7 @@ import org.project.domain.ride.enumerations.RideStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.Dates;
+import org.project.domain.shared.value_objects.UserID;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -112,7 +113,7 @@ public class Ride {
     return seatMap;
   }
 
-  public RideContract occupy(BookedSeats bookedSeats) {
+  public RideContract occupy(UserID userID, BookedSeats bookedSeats) {
     if (this.status != RideStatus.PENDING)
       throw new IllegalDomainArgumentException("Cannot add passenger when ride is already on the road");
 
@@ -121,7 +122,7 @@ public class Ride {
       newSeatsState = seatMap.occupy(bookedSeat.index(), bookedSeat.status());
     }
     this.seatMap = newSeatsState;
-    return RideContract.of(id, price, bookedSeats);
+    return RideContract.of(userID, id, price, bookedSeats);
   }
 
   public RideStatus status() {

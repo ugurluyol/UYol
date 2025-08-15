@@ -9,6 +9,7 @@ import org.project.domain.ride.repositories.RideContractRepository;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.shared.value_objects.Pageable;
+import org.project.domain.shared.value_objects.UserID;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,6 +28,7 @@ public class JetRideContractRepository implements RideContractRepository {
     static final String RIDE_CONTRACT = insert()
             .into("ride_contract")
             .column("id")
+            .column("user_id")
             .column("ride_id")
             .column("price_per_seat")
             .column("booked_seats")
@@ -63,6 +65,7 @@ public class JetRideContractRepository implements RideContractRepository {
 
         return mapTransactionResult(jet.write(RIDE_CONTRACT,
                 rideContract.id(),
+                rideContract.userID(),
                 rideContract.rideID(),
                 rideContract.pricePerSeat(),
                 bookedSeats
@@ -88,6 +91,7 @@ public class JetRideContractRepository implements RideContractRepository {
 
             return RideContract.fromRepository(
                     RideContractID.fromString(rs.getString("id")),
+                    UserID.fromString(rs.getString("user_id")),
                     RideID.fromString(rs.getString("ride_id")),
                     new Price(rs.getBigDecimal("price_per_seat")),
                     new BookedSeats(bookedSeats)
