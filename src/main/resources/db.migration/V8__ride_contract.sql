@@ -9,6 +9,6 @@ CREATE TABLE ride_contract (
     CONSTRAINT fk_ride_contract FOREIGN KEY (ride_id) REFERENCES ride(id)
 );
 
-CREATE INDEX user_contract_idx ON ride_contract(user_id);
-
 CREATE INDEX ride_contract_idx ON ride_contract(ride_id);
+
+CREATE INDEX idx_user_ride_contract ON ride_contract(user_id, ride_id);
