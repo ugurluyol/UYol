@@ -8,6 +8,7 @@ import org.project.domain.shared.containers.Result;
 import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.shared.value_objects.OwnerID;
 import org.project.domain.shared.value_objects.Pageable;
+import org.project.domain.shared.value_objects.UserID;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,6 +24,8 @@ public interface RideRepository {
     Result<Integer, Throwable> updateRules(Ride ride);
 
     Result<Ride, Throwable> findBy(RideID rideID);
+
+    Result<List<RideDTO>, Throwable> pageOf(UserID userID, Pageable page);
 
     Result<List<RideDTO>, Throwable> pageOf(OwnerID ownerID, Pageable page);
 

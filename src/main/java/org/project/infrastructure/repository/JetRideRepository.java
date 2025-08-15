@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
+import com.hadzhy.jetquerious.sql.Order;
 import org.project.application.dto.ride.RideDTO;
 import org.project.domain.ride.entities.Ride;
 import org.project.domain.ride.enumerations.RideRule;
@@ -12,10 +13,7 @@ import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.ride.repositories.RideRepository;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.containers.Result;
-import org.project.domain.shared.value_objects.Dates;
-import org.project.domain.shared.value_objects.DriverID;
-import org.project.domain.shared.value_objects.OwnerID;
-import org.project.domain.shared.value_objects.Pageable;
+import org.project.domain.shared.value_objects.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,6 +80,27 @@ public class JetRideRepository implements RideRepository {
             .from("ride")
             .where("id = ?")
             .build()
+            .sql();
+
+    static final String FIND_BY_USER_ID = select()
+            .column("r.id").as("id")
+            .column("r.driver_id").as("driver_id")
+            .column("r.owner_id").as("owner_id")
+            .column("r.from_location_desc").as("from_location_desc")
+            .column("r.from_latitude").as("from_latitude")
+            .column("r.from_longitude").as("from_longitude")
+            .column("r.to_location_desc").as("to_location_desc")
+            .column("r.to_latitude").as("to_latitude")
+            .column("r.to_longitude").as("to_longitude")
+            .column("r.start_time").as("start_time")
+            .column("r.end_time").as("end_time")
+            .column("r.price").as("price")
+            .column("r.status").as("status")
+            .from("ride r")
+            .join("ride_contract rc", "r.id = rc.ride_id")
+            .where("rc.user_id = ?")
+            .orderBy("r.start_time", Order.DESC)
+            .limitAndOffset()
             .sql();
 
     static final String FIND_BY_OWNER_ID = select()
@@ -237,6 +256,13 @@ public class JetRideRepository implements RideRepository {
     @Override
     public Result<Ride, Throwable> findBy(RideID rideID) {
         return mapRideResult(jet.read(FIND_BY_ID, this::mapRide, rideID));
+    }
+
+    @Override
+    public Result<List<RideDTO>, Throwable> pageOf(UserID userID, Pageable page) {
+        return mapPageRideResult(
+                jet.readListOf(FIND_BY_USER_ID, this::mapRideDTO, userID, page.limit(), page.offset())
+        );
     }
 
     @Override
