@@ -10,8 +10,6 @@ import org.project.features.PostgresTestResource;
 import org.project.features.TestDataGenerator;
 import org.project.infrastructure.security.JWTUtility;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -27,7 +25,7 @@ class DriverRegistrationTest {
 	JWTUtility jwtUtility;
 
 	@Test
-    void successfullyRegisterDriver() throws JsonProcessingException {
+    void successfullyRegisterDriver() {
 		User user = TestDataGenerator.user();
 		userRepository.save(user);
 		String jwtToken = jwtUtility.generateToken(user);
@@ -39,7 +37,7 @@ class DriverRegistrationTest {
 	}
 
 	@Test
-	void invalidDriverLicense() throws JsonProcessingException {
+	void invalidDriverLicense() {
 		User user = TestDataGenerator.user();
 		userRepository.save(user);
 		String jwtToken = jwtUtility.generateToken(user);
@@ -47,17 +45,6 @@ class DriverRegistrationTest {
 		given().header("Authorization", "Bearer " + jwtToken).queryParam("driver_license", "").when()
 				.post("uyol/driver/registration").then().statusCode(400);
 	}
-
-	@Test
-	void invalidIdentifier() {
-		User fakeUser = TestDataGenerator.user();
-		String jwtToken = jwtUtility.generateToken(fakeUser);
-
-		DriverLicense license = TestDataGenerator.driverLicense();
-
-		given().header("Authorization", "Bearer " + jwtToken).queryParam("driver_license", license.licenseNumber())
-				.when().post("uyol/driver/registration").then().statusCode(404);
-    }
 
 	@Test
 	void userAccountDontExists() {
@@ -71,7 +58,7 @@ class DriverRegistrationTest {
 	}
 
     @Test
-	void driverAlreadyExists() throws JsonProcessingException {
+	void driverAlreadyExists() {
 		User user = TestDataGenerator.user();
 		userRepository.save(user);
 		String jwtToken = jwtUtility.generateToken(user);
@@ -88,7 +75,7 @@ class DriverRegistrationTest {
     }
 
     @Test
-	void driverLicenseAlreadyExists() throws JsonProcessingException {
+	void driverLicenseAlreadyExists() {
 
 		User user1 = TestDataGenerator.user();
 		userRepository.save(user1);
