@@ -28,9 +28,7 @@ import net.datafaker.Faker;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -78,19 +76,11 @@ public class TestDataGenerator {
     }
 
     public static Route generateRoute() {
-        Location from = new Location(
-                "Start Point",
-                randomInRange(-90.0, 90.0),
-                randomInRange(-180.0, 180.0)
-        );
+        Location from = generateLocation();
 
         Location to;
         do {
-            to = new Location(
-                    "End Point",
-                    randomInRange(-90.0, 90.0),
-                    randomInRange(-180.0, 180.0)
-            );
+            to = generateLocation();
         } while (from.equals(to));
 
         return new Route(from, to);
@@ -129,19 +119,53 @@ public class TestDataGenerator {
     }
 
     public static SeatMap generateSeatMap() {
-        int seatCount = ThreadLocalRandom.current().nextInt(2, 65);
-        List<SeatStatus> seats = new ArrayList<>(seatCount);
-        seats.add(SeatStatus.DRIVER);
-        seats.add(SeatStatus.EMPTY);
-        seats.add(SeatStatus.EMPTY);
+        int rows = ThreadLocalRandom.current().nextInt(1, 5);
+        int cols = ThreadLocalRandom.current().nextInt(1, 5);
 
-        SeatStatus[] nonDriverStatuses = getNonDriverStatuses();
-
-        for (int i = 3; i < seatCount; i++) {
-            seats.add(getRandomNonDriverStatus(nonDriverStatuses));
+        int totalSeats = rows * cols;
+        if (totalSeats < 2) {
+            rows = 1;
+            cols = 2;
+        } else if (totalSeats > 64) {
+            rows = 8;
+            cols = 8;
         }
 
-        return new SeatMap(seats);
+        SeatStatus[][] seatMatrix = new SeatStatus[rows][cols];
+        SeatStatus[] nonDriverStatuses = getNonDriverStatuses();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (i == 0 && j == 0) {
+                    seatMatrix[i][j] = SeatStatus.DRIVER;
+                } else {
+                    seatMatrix[i][j] = getRandomNonDriverStatus(nonDriverStatuses);
+                }
+            }
+        }
+
+        boolean hasEmpty = false;
+        outer:
+        for (SeatStatus[] row : seatMatrix) {
+            for (SeatStatus seat : row) {
+                if (seat == SeatStatus.EMPTY) {
+                    hasEmpty = true;
+                    break outer;
+                }
+            }
+        }
+
+        if (!hasEmpty) {
+            int row = ThreadLocalRandom.current().nextInt(rows);
+            int col = ThreadLocalRandom.current().nextInt(cols);
+            while (row == 0 && col == 0) {
+                row = ThreadLocalRandom.current().nextInt(rows);
+                col = ThreadLocalRandom.current().nextInt(cols);
+            }
+            seatMatrix[row][col] = SeatStatus.EMPTY;
+        }
+
+        return new SeatMap(seatMatrix);
     }
 
     public static SeatStatus[] getNonDriverStatuses() {
