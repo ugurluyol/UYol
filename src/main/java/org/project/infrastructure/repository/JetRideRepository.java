@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
+import org.project.application.dto.ride.RideDTO;
 import org.project.domain.ride.entities.Ride;
 import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.enumerations.RideStatus;
@@ -18,6 +19,7 @@ import org.project.domain.shared.value_objects.Pageable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -83,23 +85,84 @@ public class JetRideRepository implements RideRepository {
             .sql();
 
     static final String FIND_BY_OWNER_ID = select()
-            .all()
+            .column("id")
+            .column("driver_id")
+            .column("owner_id")
+            .column("from_location_desc")
+            .column("from_latitude")
+            .column("from_longitude")
+            .column("to_location_desc")
+            .column("to_latitude")
+            .column("to_longitude")
+            .column("start_time")
+            .column("end_time")
+            .column("price")
+            .column("status")
             .from("ride")
             .where("owner_id = ?")
             .limitAndOffset()
             .sql();
 
     static final String FIND_BY_DRIVER_ID = select()
-            .all()
+            .column("id")
+            .column("driver_id")
+            .column("owner_id")
+            .column("from_location_desc")
+            .column("from_latitude")
+            .column("from_longitude")
+            .column("to_location_desc")
+            .column("to_latitude")
+            .column("to_longitude")
+            .column("start_time")
+            .column("end_time")
+            .column("price")
+            .column("status")
             .from("ride")
             .where("driver_id = ?")
             .limitAndOffset()
             .sql();
 
     static final String FIND_BY_DATE = select()
-            .all()
+            .column("id")
+            .column("driver_id")
+            .column("owner_id")
+            .column("from_location_desc")
+            .column("from_latitude")
+            .column("from_longitude")
+            .column("to_location_desc")
+            .column("to_latitude")
+            .column("to_longitude")
+            .column("start_time")
+            .column("end_time")
+            .column("price")
+            .column("status")
             .from("ride")
             .where("CAST(start_time AS DATE) = CAST(? AS DATE)")
+            .limitAndOffset()
+            .sql();
+
+    static final String ACTUAL_FOR = select()
+            .column("id")
+            .column("driver_id")
+            .column("owner_id")
+            .column("from_location_desc")
+            .column("from_latitude")
+            .column("from_longitude")
+            .column("to_location_desc")
+            .column("to_latitude")
+            .column("to_longitude")
+            .column("start_time")
+            .column("end_time")
+            .column("price")
+            .column("status")
+            .column("POWER(from_latitude - ?, 2) + POWER(from_longitude - ?, 2)").as("start_distance_sq")
+            .column("POWER(to_latitude - ?, 2) + POWER(to_longitude - ?, 2)").as("end_distance_sq")
+            .from("ride")
+            .where("start_time >= ?")
+            .and("POWER(from_latitude - ?, 2) + POWER(from_longitude - ?, 2) <= ?")
+            .and("POWER(to_latitude - ?, 2) + POWER(to_longitude - ?, 2) <= ?")
+            .and("status = 'PENDING'")
+            .orderBy("start_time ASC")
             .limitAndOffset()
             .sql();
 
@@ -177,18 +240,37 @@ public class JetRideRepository implements RideRepository {
     }
 
     @Override
-    public Result<List<Ride>, Throwable> pageOf(OwnerID ownerID, Pageable page) {
-        return mapPageRideResult(jet.readListOf(FIND_BY_OWNER_ID, this::mapRide, ownerID, page.limit(), page.offset()));
+    public Result<List<RideDTO>, Throwable> pageOf(OwnerID ownerID, Pageable page) {
+        return mapPageRideResult(
+                jet.readListOf(FIND_BY_OWNER_ID, this::mapRideDTO, ownerID, page.limit(), page.offset())
+        );
     }
 
     @Override
-    public Result<List<Ride>, Throwable> pageOf(DriverID driverID, Pageable page) {
-        return mapPageRideResult(jet.readListOf(FIND_BY_DRIVER_ID, this::mapRide, driverID, page.limit(), page.offset()));
+    public Result<List<RideDTO>, Throwable> pageOf(DriverID driverID, Pageable page) {
+        return mapPageRideResult(
+                jet.readListOf(FIND_BY_DRIVER_ID, this::mapRideDTO, driverID, page.limit(), page.offset())
+        );
     }
 
     @Override
-    public Result<List<Ride>, Throwable> pageOf(LocalDate localDate, Pageable page) {
-        return mapPageRideResult(jet.readListOf(FIND_BY_DATE, this::mapRide, localDate, page.limit(), page.offset()));
+    public Result<List<RideDTO>, Throwable> pageOf(LocalDate localDate, Pageable page) {
+        return mapPageRideResult(
+                jet.readListOf(FIND_BY_DATE, this::mapRideDTO, localDate, page.limit(), page.offset())
+        );
+    }
+
+    @Override
+    public Result<List<RideDTO>, Throwable> actualFor(Location startPoint, Location destination, Pageable page) {
+        return mapPageRideResult(
+                jet.readListOf(ACTUAL_FOR, this::mapRideDTO,
+                        startPoint.latitude(), startPoint.longitude(),
+                        destination.latitude(), destination.longitude(),
+                        LocalDate.now().plus(Duration.ofMinutes(1)),
+                        startPoint.latitude(), startPoint.longitude(),
+                        destination.latitude(), destination.longitude(),
+                        page.limit(), page.offset())
+        );
     }
 
     private Ride mapRide(ResultSet rs) throws SQLException {
@@ -240,11 +322,29 @@ public class JetRideRepository implements RideRepository {
         }
     }
 
+    private RideDTO mapRideDTO(ResultSet rs) throws SQLException {
+        return new RideDTO(
+                rs.getString("id"),
+                rs.getString("driver_id"),
+                rs.getString("owner_id"),
+                rs.getString("from_location_desc"),
+                rs.getDouble("from_latitude"),
+                rs.getDouble("from_longitude"),
+                rs.getString("to_location_desc"),
+                rs.getDouble("to_latitude"),
+                rs.getDouble("to_longitude"),
+                rs.getTimestamp("start_time").toLocalDateTime(),
+                rs.getTimestamp("end_time").toLocalDateTime(),
+                rs.getBigDecimal("price"),
+                RideStatus.valueOf(rs.getString("status"))
+        );
+    }
+
     private Result<Ride, Throwable> mapRideResult(com.hadzhy.jetquerious.util.Result<Ride, Throwable> read) {
         return new Result<>(read.value(), read.throwable(), read.success());
     }
 
-    private Result<List<Ride>, Throwable> mapPageRideResult(com.hadzhy.jetquerious.util.Result<List<Ride>, Throwable> read) {
+    private Result<List<RideDTO>, Throwable> mapPageRideResult(com.hadzhy.jetquerious.util.Result<List<RideDTO>, Throwable> read) {
         return new Result<>(read.value(), read.throwable(), read.success());
     }
 }

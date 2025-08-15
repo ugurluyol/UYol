@@ -1,6 +1,8 @@
 package org.project.domain.ride.repositories;
 
+import org.project.application.dto.ride.RideDTO;
 import org.project.domain.ride.entities.Ride;
+import org.project.domain.ride.value_object.Location;
 import org.project.domain.ride.value_object.RideID;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.shared.value_objects.DriverID;
@@ -22,9 +24,11 @@ public interface RideRepository {
 
     Result<Ride, Throwable> findBy(RideID rideID);
 
-    Result<List<Ride>, Throwable> pageOf(OwnerID ownerID, Pageable pageable);
+    Result<List<RideDTO>, Throwable> pageOf(OwnerID ownerID, Pageable page);
 
-    Result<List<Ride>, Throwable> pageOf(DriverID driverID, Pageable pageable);
+    Result<List<RideDTO>, Throwable> pageOf(DriverID driverID, Pageable page);
 
-    Result<List<Ride>, Throwable> pageOf(LocalDate localDate, Pageable pageable);
+    Result<List<RideDTO>, Throwable> pageOf(LocalDate localDate, Pageable page);
+
+    Result<List<RideDTO>, Throwable> actualFor(Location startPoint, Location destination, Pageable page);
 }
