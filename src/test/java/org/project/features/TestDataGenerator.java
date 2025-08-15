@@ -77,19 +77,6 @@ public class TestDataGenerator {
         );
     }
 
-    public static Ride rideWithDelivery() {
-        return Ride.of(
-                generateRideOwner(),
-                generateRoute(),
-                generateRideTime(),
-                generateSeatMap(),
-                generatePrice(),
-                generatePrice(),
-                generateRideDesc(),
-                generateRideRules()
-        );
-    }
-
     public static Route generateRoute() {
         Location from = new Location(
                 "Start Point",

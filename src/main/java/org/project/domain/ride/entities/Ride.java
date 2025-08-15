@@ -2,15 +2,12 @@ package org.project.domain.ride.entities;
 
 import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.enumerations.RideStatus;
-import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.ride.value_object.*;
-import org.project.domain.shared.annotations.Nullable;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.Dates;
 
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.project.domain.shared.util.Utils.required;
@@ -25,8 +22,6 @@ public class Ride {
   private final Price price;
   private SeatMap seatMap;
   private RideStatus status;
-  private boolean isDeliveryAvailable;
-  private @Nullable Price deliveryPrice;
   private final RideDesc rideDesc;
   private final Set<RideRule> rideRules;
   private final Dates dates;
@@ -39,8 +34,6 @@ public class Ride {
           Price price,
           SeatMap seatMap,
           RideStatus status,
-          boolean isDeliveryAvailable,
-          Price deliveryPrice,
           RideDesc rideDesc,
           Set<RideRule> rideRules,
           Dates dates) {
@@ -52,8 +45,6 @@ public class Ride {
     this.price = price;
     this.seatMap = seatMap;
     this.status = status;
-    this.isDeliveryAvailable = isDeliveryAvailable;
-    this.deliveryPrice = deliveryPrice;
     this.rideRules = rideRules;
     this.rideDesc = rideDesc;
     this.dates = dates;
@@ -79,32 +70,7 @@ public class Ride {
       throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
     return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap,
-            RideStatus.PENDING, false, null, rideDesc,rideRules, Dates.defaultDates());
-  }
-
-  public static Ride of(
-          RideOwner rideOwner,
-          Route route,
-          RideTime rideTime,
-          SeatMap seatMap,
-          Price price,
-          Price deliveryPrice,
-          RideDesc rideDesc,
-          Set<RideRule> rideRules) {
-
-    required("rideOwner", rideOwner);
-    required("route", route);
-    required("rideTime", rideTime);
-    required("price", price);
-    required("deliveryPrice", deliveryPrice);
-    required("seatMap", seatMap);
-    required("rideDesc", rideDesc);
-    required("rideRules", rideRules);
-    if (rideRules.size() > MAX_RIDE_RULES)
-      throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
-
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap,
-            RideStatus.PENDING, true, deliveryPrice, rideDesc, rideRules, Dates.defaultDates());
+            RideStatus.PENDING, rideDesc,rideRules, Dates.defaultDates());
   }
 
   public static Ride fromRepository(
@@ -115,13 +81,11 @@ public class Ride {
           Price price,
           SeatMap seatMap,
           RideStatus status,
-          boolean isDeliveryAvailable,
-          Price deliveryPrice,
           RideDesc rideDesc,
           Set<RideRule> rideRules,
           Dates dates) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, isDeliveryAvailable, deliveryPrice, rideDesc, rideRules, dates);
+    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, rideDesc, rideRules, dates);
   }
 
   public RideID id() {
@@ -183,27 +147,6 @@ public class Ride {
       throw new IllegalDomainArgumentException("You can`t finish the ride which was not going");
 
     this.status = RideStatus.ENDED_SUCCESSFULLY;
-  }
-
-  public boolean isDeliveryAvailable() {
-    return isDeliveryAvailable;
-  }
-
-  public Optional<Price> deliveryPrice() {
-    return Optional.ofNullable(deliveryPrice);
-  }
-
-  public void enableDelivery(Price deliveryPrice) {
-    required("deliveryPrice", deliveryPrice);
-
-    if (isDeliveryAvailable)
-      throw new IllegalDomainArgumentException("Delivery is already available");
-
-    if (status != RideStatus.PENDING)
-      throw new IllegalDomainArgumentException("You cannot modify ride if it`s already started.");
-
-    this.isDeliveryAvailable = true;
-    this.deliveryPrice = deliveryPrice;
   }
 
   public RideDesc rideDesc() {

@@ -23,11 +23,6 @@ class RideTest {
     }
 
     @Test
-    void validCreationOfRideWithDelivery() {
-        assertDoesNotThrow(() -> assertNotNull(TestDataGenerator.rideWithDelivery()));
-    }
-
-    @Test
     void shouldStartTheRoadSuccessfully() {
         Ride ride = TestDataGenerator.rideWithoutDelivery();
         assertDoesNotThrow(ride::start);
@@ -151,13 +146,5 @@ class RideTest {
             int i = ThreadLocalRandom.current().nextInt(1, ride.seatMap().size());
             if (ride.seatMap().status(i) == SeatStatus.EMPTY) return i;
         }
-    }
-
-    @Test
-    void shouldSuccessfullyEnableDelivery() {
-        Ride ride = TestDataGenerator.rideWithoutDelivery();
-
-        assertDoesNotThrow(() -> ride.enableDelivery(TestDataGenerator.generatePrice()));
-        assertTrue(ride.isDeliveryAvailable());
     }
 }
