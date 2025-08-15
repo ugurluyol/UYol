@@ -25,3 +25,5 @@ CREATE TABLE ride (
 CREATE INDEX idx_ride_status ON ride(status);
 
 CREATE INDEX idx_ride_start_time ON ride(start_time);
+
+CREATE INDEX idx_ride_to_location ON ride(to_location_desc);
