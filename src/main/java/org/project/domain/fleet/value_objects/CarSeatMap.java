@@ -14,8 +14,10 @@ public record CarSeatMap(SeatStatus[][] seats) {
         if (seats.length == 0 || seats[0].length == 0)
             throw new IllegalDomainArgumentException("Seat matrix cannot be empty");
 
+        if (seats[0][0] != SeatStatus.DRIVER)
+            throw new IllegalDomainArgumentException("Seat matrix must start with driver");
+
         int totalSeats = 0;
-        boolean hasDriver = false;
 
         for (SeatStatus[] row : seats) {
             if (row.length > 4)
@@ -25,34 +27,28 @@ public record CarSeatMap(SeatStatus[][] seats) {
                 required("seat", seat);
                 totalSeats++;
 
-                if (seat == SeatStatus.DRIVER) {
-                    if (hasDriver)
-                        throw new IllegalDomainArgumentException("There can be only one driver");
-                    hasDriver = true;
-                }
+                if (totalSeats > 64)
+                    throw new IllegalDomainArgumentException("Invalid seats count: min 2, max 64");
+
+                if (seat == SeatStatus.DRIVER)
+                    throw new IllegalDomainArgumentException("There can be only one driver");
             }
         }
 
-        if (totalSeats < 2 || totalSeats > 64) {
+        if (totalSeats < 2)
             throw new IllegalDomainArgumentException("Invalid seats count: min 2, max 64");
-        }
-
-        if (!hasDriver) {
-            throw new IllegalDomainArgumentException("First seat must be for the driver");
-        }
     }
 
     public static CarSeatMap ofEmpty(int rows, int cols) {
-        if (rows < 1 || cols < 1 || rows * cols < 2 || rows * cols > 64) {
-            throw new IllegalDomainArgumentException("Total seats must be between 2 and 64");
-        }
+        validateRowsAndColumns(rows, cols);
 
         SeatStatus[][] matrix = new SeatStatus[rows][cols];
         matrix[0][0] = SeatStatus.DRIVER;
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                if (i == 0 && j == 0) continue;
+                if (i == 0 && j == 0)
+                    continue;
                 matrix[i][j] = SeatStatus.EMPTY;
             }
         }
@@ -71,8 +67,7 @@ public record CarSeatMap(SeatStatus[][] seats) {
     public SeatStatus status(int row, int col) {
         if (row < 0 || row >= seats.length || col < 0 || col >= seats[row].length) {
             throw new IllegalDomainArgumentException(
-                "Invalid seat coordinates: [" + row + "][" + col + "]"
-            );
+                    "Invalid seat coordinates: [" + row + "][" + col + "]");
         }
         return seats[row][col];
     }
@@ -85,10 +80,25 @@ public record CarSeatMap(SeatStatus[][] seats) {
         return seats.length > 0 ? seats[0].length : 0;
     }
 
+    private int totalSeats() {
+        int count = 0;
+        for (SeatStatus[] row : seats) {
+            count += row.length;
+        }
+        return count;
+    }
+
+    private static void validateRowsAndColumns(int rows, int cols) {
+        if (rows < 1 || cols < 1 || rows * cols < 2 || rows * cols > 64)
+            throw new IllegalDomainArgumentException("Total seats must be between 2 and 64");
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         CarSeatMap that = (CarSeatMap) o;
         return Arrays.deepEquals(seats, that.seats);
     }
