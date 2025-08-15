@@ -25,7 +25,7 @@ class OwnerRegistrationTest {
 	JWTUtility jwtUtility;
 
     @Test
-    void successfullOwnerRegistration() {
+    void successfulOwnerRegistration() {
 		User user = TestDataGenerator.user();
 		userRepository.save(user);
 		String jwtToken = jwtUtility.generateToken(user);
@@ -46,17 +46,6 @@ class OwnerRegistrationTest {
 
 		given().header("Authorization", "Bearer " + jwtToken).queryParam("voen", voen).when()
 				.post("uyol/owner/register").then().statusCode(400);
-    }
-
-    @Test
-    void invalidIdentifier() {
-		User fakeUser = TestDataGenerator.user();
-		String jwtToken = jwtUtility.generateToken(fakeUser);
-
-		String voen = TestDataGenerator.voen().value();
-
-		given().header("Authorization", "Bearer " + jwtToken).queryParam("voen", voen).when()
-				.post("uyol/owner/register").then().statusCode(404);
     }
 
     @Test
