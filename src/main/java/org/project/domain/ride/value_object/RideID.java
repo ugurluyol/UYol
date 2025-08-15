@@ -12,4 +12,8 @@ public record RideID(UUID value) {
   public static RideID newID() {
     return new RideID(UUID.randomUUID());
   }
+
+  public static RideID fromString(String value) {
+    return new RideID(UUID.fromString(value));
+  }
 }

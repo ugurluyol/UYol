@@ -17,34 +17,33 @@ public record SeatMap(SeatStatus[][] seats) {
     if (seats.length == 0 || seats[0].length == 0)
       throw new IllegalDomainArgumentException("Seat matrix cannot be empty");
 
+    if (seats[0][0] != SeatStatus.DRIVER)
+      throw new IllegalDomainArgumentException("Seat matrix must start with driver");
+
     int totalSeats = 0;
-    boolean hasDriver = false;
 
     for (SeatStatus[] row : seats) {
-      if (row.length > 4) throw new IllegalDomainArgumentException("Seat matrix contains more than 4 rows");
+      if (row.length > 4)
+        throw new IllegalDomainArgumentException("Seat matrix contains more than 4 rows");
+
       for (SeatStatus seat : row) {
         required("seat", seat);
         totalSeats++;
 
-        if (seat == SeatStatus.DRIVER) {
-          if (hasDriver) {
+        if (totalSeats > 64)
+          throw new IllegalDomainArgumentException("Invalid seats count: min 2, max 64");
+
+        if (seat == SeatStatus.DRIVER)
             throw new IllegalDomainArgumentException("There can be only one driver");
-          }
-          hasDriver = true;
-        }
       }
     }
 
-    if (totalSeats < 2 || totalSeats > 64)
+    if (totalSeats < 2)
       throw new IllegalDomainArgumentException("Invalid seats count: min 2, max 64");
-
-    if (!hasDriver)
-      throw new IllegalDomainArgumentException("First seat must be for the driver");
   }
 
   public static SeatMap ofEmpty(int rows, int cols) {
-    if (rows < 1 || cols < 1 || rows * cols < 2 || rows * cols > 64)
-      throw new IllegalDomainArgumentException("Total seats must be between 2 and 64");
+    validateRowsAndColumns(rows, cols);
 
     SeatStatus[][] matrix = new SeatStatus[rows][cols];
     matrix[0][0] = SeatStatus.DRIVER;
@@ -82,29 +81,6 @@ public record SeatMap(SeatStatus[][] seats) {
     int row = index / seats[0].length;
     int col = index % seats[0].length;
     return seats[row][col];
-  }
-
-  private SeatMap updateStatus(int index, SeatStatus newStatus) {
-    required("newStatus", newStatus);
-    if (index < 0 || index >= totalSeats())
-      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
-
-    if (index == 0 && newStatus != SeatStatus.DRIVER)
-      throw new IllegalDomainArgumentException("First seat must always be for the driver");
-
-    if (index != 0 && newStatus == SeatStatus.DRIVER)
-      throw new IllegalDomainArgumentException("There can be only one driver");
-
-    SeatStatus[][] newMatrix = new SeatStatus[seats.length][];
-    for (int i = 0; i < seats.length; i++) {
-      newMatrix[i] = Arrays.copyOf(seats[i], seats[i].length);
-    }
-
-    int row = index / seats[0].length;
-    int col = index % seats[0].length;
-    newMatrix[row][col] = newStatus;
-
-    return new SeatMap(newMatrix);
   }
 
   public boolean isAvailable(int index) {
@@ -180,6 +156,34 @@ public record SeatMap(SeatStatus[][] seats) {
     if (row < 0 || row >= seats.length || col < 0 || col >= seats[row].length)
       throw new IllegalDomainArgumentException("Invalid seat coordinates: [" + row + "][" + col + "]");
     return seats[row][col];
+  }
+
+  private static void validateRowsAndColumns(int rows, int cols) {
+    if (rows < 1 || cols < 1 || rows * cols < 2 || rows * cols > 64)
+      throw new IllegalDomainArgumentException("Total seats must be between 2 and 64");
+  }
+
+  private SeatMap updateStatus(int index, SeatStatus newStatus) {
+    required("newStatus", newStatus);
+    if (index < 0 || index >= totalSeats())
+      throw new IllegalDomainArgumentException("Invalid seat index: " + index);
+
+    if (index == 0 && newStatus != SeatStatus.DRIVER)
+      throw new IllegalDomainArgumentException("First seat must always be for the driver");
+
+    if (index != 0 && newStatus == SeatStatus.DRIVER)
+      throw new IllegalDomainArgumentException("There can be only one driver");
+
+    SeatStatus[][] newMatrix = new SeatStatus[seats.length][];
+    for (int i = 0; i < seats.length; i++) {
+      newMatrix[i] = Arrays.copyOf(seats[i], seats[i].length);
+    }
+
+    int row = index / seats[0].length;
+    int col = index % seats[0].length;
+    newMatrix[row][col] = newStatus;
+
+    return new SeatMap(newMatrix);
   }
 
   @Override
