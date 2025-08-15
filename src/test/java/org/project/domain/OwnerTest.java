@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.project.domain.fleet.entities.Owner;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.OwnerID;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

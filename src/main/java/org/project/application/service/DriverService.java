@@ -8,6 +8,7 @@ import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.repositories.CarRepository;
 import org.project.domain.fleet.repositories.DriverRepository;
 import org.project.domain.fleet.value_objects.*;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.factories.IdentifierFactory;
 import org.project.domain.user.repositories.UserRepository;

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Owner;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.fleet.value_objects.Voen;
 import org.project.domain.shared.value_objects.OwnerID;
 import org.project.domain.user.entities.User;

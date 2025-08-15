@@ -5,7 +5,7 @@ import java.util.List;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.value_objects.CarID;
 import org.project.domain.fleet.value_objects.LicensePlate;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.shared.value_objects.Pageable;
 

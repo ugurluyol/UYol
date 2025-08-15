@@ -2,7 +2,7 @@ package org.project.domain;
 
 import org.junit.jupiter.api.Test;
 import org.project.domain.fleet.entities.Driver;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.shared.value_objects.DriverID;

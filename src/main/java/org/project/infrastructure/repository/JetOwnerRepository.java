@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.repositories.OwnerRepository;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.fleet.value_objects.Voen;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.shared.value_objects.OwnerID;

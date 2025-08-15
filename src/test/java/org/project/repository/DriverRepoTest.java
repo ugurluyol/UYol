@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.value_objects.DriverLicense;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.user.entities.User;
 import org.project.features.PostgresTestResource;

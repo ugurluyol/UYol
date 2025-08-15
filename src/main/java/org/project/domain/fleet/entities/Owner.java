@@ -1,7 +1,7 @@
 package org.project.domain.fleet.entities;
 
 import org.project.domain.shared.value_objects.OwnerID;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.fleet.value_objects.Voen;
 
 import java.time.LocalDateTime;

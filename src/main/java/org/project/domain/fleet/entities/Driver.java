@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.fleet.value_objects.DriverLicense;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.shared.value_objects.Dates;
 
 import static org.project.domain.shared.util.Utils.required;

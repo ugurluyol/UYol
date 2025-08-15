@@ -14,6 +14,7 @@ import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.containers.Result;
 import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.shared.value_objects.OwnerID;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.value_objects.Birthdate;
 import org.project.domain.user.value_objects.Email;

@@ -7,7 +7,7 @@ import org.project.domain.fleet.value_objects.CarModel;
 import org.project.domain.fleet.value_objects.CarYear;
 import org.project.domain.fleet.value_objects.LicensePlate;
 import org.project.domain.fleet.value_objects.SeatCount;
-import org.project.domain.fleet.value_objects.UserID;
+import org.project.domain.shared.value_objects.UserID;
 
 import static org.project.domain.shared.util.Utils.required;
 
