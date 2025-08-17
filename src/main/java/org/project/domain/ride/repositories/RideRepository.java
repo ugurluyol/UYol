@@ -33,5 +33,5 @@ public interface RideRepository {
 
     Result<List<RideDTO>, Throwable> pageOf(LocalDate localDate, Pageable page);
 
-    Result<List<RideDTO>, Throwable> actualFor(Location startPoint, Location destination, Pageable page);
+    Result<List<RideDTO>, Throwable> actualFor(Location startPoint, Location destination, LocalDate date, Pageable page);
 }

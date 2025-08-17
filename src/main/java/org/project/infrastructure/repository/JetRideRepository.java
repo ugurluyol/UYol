@@ -18,7 +18,6 @@ import org.project.domain.shared.value_objects.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -262,43 +261,36 @@ public class JetRideRepository implements RideRepository {
 
     @Override
     public Result<List<RideDTO>, Throwable> pageOf(UserID userID, Pageable page) {
-        return mapPageRideResult(
-                jet.readListOf(FIND_BY_USER_ID, this::mapRideDTO, userID, page.limit(), page.offset())
-        );
+        return mapPageRideResult(jet.readListOf(FIND_BY_USER_ID, this::mapRideDTO, userID, page.limit(), page.offset()));
     }
 
     @Override
     public Result<List<RideDTO>, Throwable> pageOf(OwnerID ownerID, Pageable page) {
-        return mapPageRideResult(
-                jet.readListOf(FIND_BY_OWNER_ID, this::mapRideDTO, ownerID, page.limit(), page.offset())
-        );
+        return mapPageRideResult(jet.readListOf(FIND_BY_OWNER_ID, this::mapRideDTO, ownerID, page.limit(), page.offset()));
     }
 
     @Override
     public Result<List<RideDTO>, Throwable> pageOf(DriverID driverID, Pageable page) {
-        return mapPageRideResult(
-                jet.readListOf(FIND_BY_DRIVER_ID, this::mapRideDTO, driverID, page.limit(), page.offset())
-        );
+        return mapPageRideResult(jet.readListOf(FIND_BY_DRIVER_ID, this::mapRideDTO, driverID, page.limit(), page.offset()));
     }
 
     @Override
     public Result<List<RideDTO>, Throwable> pageOf(LocalDate localDate, Pageable page) {
-        return mapPageRideResult(
-                jet.readListOf(FIND_BY_DATE, this::mapRideDTO, localDate, page.limit(), page.offset())
-        );
+        return mapPageRideResult(jet.readListOf(FIND_BY_DATE, this::mapRideDTO, localDate, page.limit(), page.offset()));
     }
 
     @Override
-    public Result<List<RideDTO>, Throwable> actualFor(Location startPoint, Location destination, Pageable page) {
-        return mapPageRideResult(
-                jet.readListOf(ACTUAL_FOR, this::mapRideDTO,
-                        startPoint.latitude(), startPoint.longitude(),
-                        destination.latitude(), destination.longitude(),
-                        LocalDate.now().plus(Duration.ofMinutes(1)),
-                        startPoint.latitude(), startPoint.longitude(),
-                        destination.latitude(), destination.longitude(),
-                        page.limit(), page.offset())
-        );
+    public Result<List<RideDTO>, Throwable> actualFor(Location startPoint, Location destination, LocalDate date, Pageable page) {
+        double startLatitude = startPoint.latitude();
+        double startLongitude = startPoint.longitude();
+        double endLatitude = destination.latitude();
+        double endLongitude = destination.longitude();
+
+        return mapPageRideResult(jet.readListOf(ACTUAL_FOR, this::mapRideDTO,
+                startLatitude, startLongitude, endLatitude, endLongitude, date,
+                startLatitude, startLongitude, endLatitude, endLongitude,
+                page.limit(), page.offset()
+        ));
     }
 
     private Ride mapRide(ResultSet rs) throws SQLException {
