@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
 import com.hadzhy.jetquerious.sql.Order;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.project.application.dto.ride.RideDTO;
 import org.project.domain.ride.entities.Ride;
 import org.project.domain.ride.enumerations.RideRule;
@@ -25,6 +26,7 @@ import java.util.Set;
 import static com.hadzhy.jetquerious.sql.QueryForge.*;
 import static org.project.infrastructure.repository.JetOTPRepository.mapTransactionResult;
 
+@ApplicationScoped
 public class JetRideRepository implements RideRepository {
 
     private final JetQuerious jet;
