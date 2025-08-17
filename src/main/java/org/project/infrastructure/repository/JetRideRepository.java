@@ -313,9 +313,10 @@ public class JetRideRepository implements RideRepository {
                     new TypeReference<>() {}
             );
 
+            String ownerID = rs.getString("owner_id");
             RideOwner rideOwner = new RideOwner(
                     DriverID.fromString(rs.getString("driver_id")),
-                    OwnerID.fromString(rs.getString("owner_id"))
+                    ownerID == null ? null : OwnerID.fromString(ownerID)
             );
 
             Route route = new Route(
