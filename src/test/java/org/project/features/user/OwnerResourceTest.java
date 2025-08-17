@@ -17,7 +17,7 @@ import jakarta.ws.rs.core.Response;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
-class OwnerRegistrationTest {
+class OwnerResourceTest {
 
     @Inject
 	UserRepository userRepository;

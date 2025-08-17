@@ -22,7 +22,7 @@ import jakarta.ws.rs.core.Response;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
-class DriverRegistrationTest {
+class DriverResourceTest {
 
     @Inject
 	UserRepository userRepository;
@@ -103,23 +103,6 @@ class DriverRegistrationTest {
 		given().header("Authorization", "Bearer " + jwtToken2).queryParam("driver_license", license.licenseNumber())
 				.when().post("uyol/driver/registration").then().statusCode(409);
     }
-
-//	@Test
-//	void successfullySaveCar() {
-//		User user = TestDataGenerator.user();
-//		userRepository.save(user);
-//
-//		Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
-//		driverRepository.save(driver);
-//
-//		String jwtToken = jwtUtility.generateToken(user);
-//
-//		CarForm carForm = TestDataGenerator.carForm();
-//
-//		given().header("Authorization", "Bearer " + jwtToken).contentType("application/json").body(carForm).when()
-//				.post("/uyol/driver/car/save")
-//				.then().statusCode(Response.Status.ACCEPTED.getStatusCode());
-//	}
 
 	@Test
 	void successfullySaveCar() {
