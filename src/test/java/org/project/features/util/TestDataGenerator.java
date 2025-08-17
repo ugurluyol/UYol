@@ -2,7 +2,7 @@ package org.project.features.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.project.application.dto.auth.RegistrationForm;
-import org.project.application.dto.fleet.CarForm;
+import org.project.application.dto.fleet.CarDTO;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.entities.Owner;
@@ -205,8 +205,8 @@ public class TestDataGenerator {
                 generateSeatCount());
     }
 
-    public static CarForm carForm() {
-        return new CarForm(
+    public static CarDTO carForm() {
+        return new CarDTO(
                 generateLicensePlate().value(),
                 generateCarBrand().value(),
                 generateCarModel().value(),
@@ -216,8 +216,8 @@ public class TestDataGenerator {
         );
     }
 
-    public static CarForm carForm(LicensePlate licensePlate) {
-        return new CarForm(
+    public static CarDTO carForm(LicensePlate licensePlate) {
+        return new CarDTO(
                 licensePlate.value(),
                 generateCarBrand().value(),
                 generateCarModel().value(),
@@ -227,8 +227,8 @@ public class TestDataGenerator {
         );
     }
 
-    public static CarForm carForm(LicensePlate licensePlate, SeatCount seatCount) {
-        return new CarForm(
+    public static CarDTO carForm(LicensePlate licensePlate, SeatCount seatCount) {
+        return new CarDTO(
                 licensePlate.value(),
                 generateCarBrand().value(),
                 generateCarModel().value(),

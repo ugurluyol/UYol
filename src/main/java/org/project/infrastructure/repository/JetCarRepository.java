@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
+import org.project.application.dto.fleet.CarDTO;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.repositories.CarRepository;
 import org.project.domain.fleet.value_objects.CarBrand;
@@ -36,7 +37,16 @@ public class JetCarRepository implements CarRepository {
 
 	static final String CAR_BY_ID = select().all().from("car").where("id = ?").build().sql();
 
-	static final String PAGE_OF_CARS = select().all().from("car").where("owner = ?").orderBy("created_at DESC")
+	static final String PAGE_OF_CARS = select()
+			.column("license_plate")
+			.column("car_brand")
+			.column("car_model")
+			.column("car_color")
+			.column("car_year")
+			.column("seat_count")
+			.from("car")
+			.where("owner = ?")
+			.orderBy("created_at DESC")
 			.limitAndOffset().sql();
 
 	static final String IS_LICENSE_PLATE_EXISTS = select()
@@ -71,8 +81,8 @@ public class JetCarRepository implements CarRepository {
 	}
 
 	@Override
-	public Result<List<Car>, Throwable> pageOf(Pageable pageable, UserID userID) {
-		var listOf = jet.readListOf(PAGE_OF_CARS, this::carMapper, userID.value(), pageable.limit(), pageable.offset());
+	public Result<List<CarDTO>, Throwable> pageOf(Pageable pageable, UserID userID) {
+		var listOf = jet.readListOf(PAGE_OF_CARS, this::carDTOMapper, userID.value(), pageable.limit(), pageable.offset());
 		return new Result<>(listOf.value(), listOf.throwable(), listOf.success());
 	}
 
@@ -90,5 +100,14 @@ public class JetCarRepository implements CarRepository {
 				new CarBrand(rs.getString("car_brand")), new CarModel(rs.getString("car_model")),
 				new CarColor(rs.getString("car_color")), new CarYear(rs.getInt("car_year")),
 				new SeatCount(rs.getInt("seat_count")), rs.getObject("created_at", Timestamp.class).toLocalDateTime());
+	}
+
+	private CarDTO carDTOMapper(ResultSet rs) throws SQLException {
+		return new CarDTO(rs.getString("license_plate"),
+				rs.getString("car_brand"),
+				rs.getString("car_model"),
+				rs.getString("car_color"),
+				rs.getInt("car_year"),
+				rs.getInt("seat_count"));
 	}
 }

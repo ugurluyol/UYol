@@ -2,7 +2,7 @@ package org.project.application.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
-import org.project.application.dto.fleet.CarForm;
+import org.project.application.dto.fleet.CarDTO;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.repositories.CarRepository;
@@ -48,8 +48,8 @@ public class OwnerService {
                         "Unable to process your request at the moment. Please try again."));
     }
 
-    public void saveCar(String identifier, CarForm carForm) {
-        required("carForm", carForm);
+    public void saveCar(String identifier, CarDTO carDTO) {
+        required("carForm", carDTO);
 
         User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
         UserID userID = new UserID(user.id());
@@ -59,12 +59,12 @@ public class OwnerService {
 
         Car car = Car.of(
                 userID,
-                new LicensePlate(carForm.licensePlate()),
-                new CarBrand(carForm.carBrand()),
-                new CarModel(carForm.carModel()),
-                new CarColor(carForm.carColor()),
-                new CarYear(carForm.carYear()),
-                new SeatCount(carForm.seatCount())
+                new LicensePlate(carDTO.licensePlate()),
+                new CarBrand(carDTO.carBrand()),
+                new CarModel(carDTO.carModel()),
+                new CarColor(carDTO.carColor()),
+                new CarYear(carDTO.carYear()),
+                new SeatCount(carDTO.seatCount())
         );
 
         carRepository.save(car)

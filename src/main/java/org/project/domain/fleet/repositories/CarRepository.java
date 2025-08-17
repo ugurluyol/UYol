@@ -2,6 +2,7 @@ package org.project.domain.fleet.repositories;
 
 import java.util.List;
 
+import org.project.application.dto.fleet.CarDTO;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.value_objects.CarID;
 import org.project.domain.fleet.value_objects.LicensePlate;
@@ -15,7 +16,7 @@ public interface CarRepository {
 
   Result<Car, Throwable> findBy(CarID carID);
 
-  Result<List<Car>, Throwable> pageOf(Pageable pageable, UserID userID);
+  Result<List<CarDTO>, Throwable> pageOf(Pageable pageable, UserID userID);
 
   boolean isLicenseTemplateExists(LicensePlate license);
 }

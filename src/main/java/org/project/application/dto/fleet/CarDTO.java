@@ -1,6 +1,6 @@
 package org.project.application.dto.fleet;
 
-public record CarForm(
+public record CarDTO(
         String licensePlate,
         String carBrand,
         String carModel,

@@ -3,7 +3,7 @@ package org.project.features.user;
 import static io.restassured.RestAssured.given;
 
 import org.junit.jupiter.api.Test;
-import org.project.application.dto.fleet.CarForm;
+import org.project.application.dto.fleet.CarDTO;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.repositories.DriverRepository;
 import org.project.domain.fleet.value_objects.DriverLicense;
@@ -115,9 +115,9 @@ class DriverResourceTest {
 
 		String jwtToken = jwtUtility.generateToken(user);
 
-		CarForm carForm = TestDataGenerator.carForm();
+		CarDTO carDTO = TestDataGenerator.carForm();
 
-		given().header("Authorization", "Bearer " + jwtToken).contentType(ContentType.JSON).body(carForm).when()
+		given().header("Authorization", "Bearer " + jwtToken).contentType(ContentType.JSON).body(carDTO).when()
 				.post("/uyol/driver/car/save").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
 

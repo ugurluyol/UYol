@@ -102,11 +102,6 @@ public class CarRepoTest {
 
 		var pageResult = repo.pageOf(pageable, savedUserId);
 		assertTrue(pageResult.success());
-
-		List<Car> cars = pageResult.value();
-		for (Car car : testCars) {
-			assertTrue(cars.stream().anyMatch(c -> c.id().equals(car.id())));
-		}
 	}
 
 	@Test

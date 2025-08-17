@@ -3,7 +3,7 @@ package org.project.features.user;
 import static io.restassured.RestAssured.given;
 
 import org.junit.jupiter.api.Test;
-import org.project.application.dto.fleet.CarForm;
+import org.project.application.dto.fleet.CarDTO;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
 import org.project.features.util.PostgresTestResource;
@@ -104,9 +104,9 @@ class OwnerResourceTest {
 		userRepository.save(user);
 		String jwtToken = jwtUtility.generateToken(user);
 
-		CarForm carForm = TestDataGenerator.carForm();
+		CarDTO carDTO = TestDataGenerator.carForm();
 
-		given().header("Authorization", "Bearer " + jwtToken).contentType("application/json").body(carForm).when()
+		given().header("Authorization", "Bearer " + jwtToken).contentType("application/json").body(carDTO).when()
 				.post("uyol/owner/car/save").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
 
@@ -125,9 +125,9 @@ class OwnerResourceTest {
 		User fakeUser = TestDataGenerator.user();
 		String jwtToken = jwtUtility.generateToken(fakeUser);
 
-		CarForm carForm = TestDataGenerator.carForm();
+		CarDTO carDTO = TestDataGenerator.carForm();
 
-		given().header("Authorization", "Bearer " + jwtToken).contentType("application/json").body(carForm).when()
+		given().header("Authorization", "Bearer " + jwtToken).contentType("application/json").body(carDTO).when()
 				.post("uyol/owner/car/save").then().statusCode(404);
 	}
 
@@ -137,11 +137,11 @@ class OwnerResourceTest {
 		userRepository.save(user);
 		String jwtToken = jwtUtility.generateToken(user);
 
-		CarForm carForm = TestDataGenerator.carForm();
-		carForm = new CarForm("INVALID!", carForm.carBrand(), carForm.carModel(), carForm.carColor(), carForm.carYear(),
-				carForm.seatCount());
+		CarDTO carDTO = TestDataGenerator.carForm();
+		carDTO = new CarDTO("INVALID!", carDTO.carBrand(), carDTO.carModel(), carDTO.carColor(), carDTO.carYear(),
+				carDTO.seatCount());
 
-		given().header("Authorization", "Bearer " + jwtToken).contentType("application/json").body(carForm).when()
+		given().header("Authorization", "Bearer " + jwtToken).contentType("application/json").body(carDTO).when()
 				.post("uyol/owner/car/save").then().statusCode(400);
 	}
 }
