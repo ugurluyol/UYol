@@ -30,7 +30,7 @@ public class JetOwnerRepository implements OwnerRepository {
 
 	static final String OWNER_BY_ID = select().all().from("owner").where("id = ?").build().sql();
 
-	static final String OWNER_BY_USER_ID = select().column("id").from("owner").where("user_id = ?").build().sql();
+	static final String OWNER_BY_USER_ID = select().all().from("owner").where("user_id = ?").build().sql();
 
 	static final String IS_OWNER_EXISTS = select().count("user_id").from("owner").where("user_id = ?").build().sql();
 
@@ -53,8 +53,8 @@ public class JetOwnerRepository implements OwnerRepository {
 	}
 
 	@Override
-	public Result<UserID, Throwable> findBy(UserID userID) {
-		var result = jet.read(OWNER_BY_USER_ID, this::userIdMapper, userID);
+	public Result<Owner, Throwable> findBy(UserID userID) {
+		var result = jet.read(OWNER_BY_USER_ID, this::ownerMapper, userID);
 		return new Result<>(result.value(), result.throwable(), result.success());
 	}
 
@@ -76,10 +76,6 @@ public class JetOwnerRepository implements OwnerRepository {
 		return Owner.fromRepository(new OwnerID(UUID.fromString(rs.getString("id"))),
 				new UserID(UUID.fromString(rs.getString("user_id"))), new Voen(rs.getString("voen")),
 				rs.getObject("created_at", LocalDateTime.class));
-	}
-
-	private UserID userIdMapper(ResultSet rs) throws SQLException {
-		return new UserID(UUID.fromString(rs.getString("id")));
 	}
 
 	private static Result<Integer, Throwable> mapTransactionResult(

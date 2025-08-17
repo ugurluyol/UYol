@@ -12,7 +12,7 @@ public interface OwnerRepository {
 
     Result<Owner, Throwable> findBy(OwnerID ownerID);
 
-    Result<UserID, Throwable> findBy(UserID userID);
+    Result<Owner, Throwable> findBy(UserID userID);
 
     boolean isOwnerExists(UserID userID);
 
