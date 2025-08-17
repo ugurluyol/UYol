@@ -1,4 +1,4 @@
-package org.project.domain;
+package org.project.domain.user;
 
 import org.junit.jupiter.api.Test;
 
@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.user.entities.OTP;
-import org.project.features.TestDataGenerator;
+import org.project.features.util.TestDataGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

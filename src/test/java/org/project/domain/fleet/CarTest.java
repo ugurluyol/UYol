@@ -1,4 +1,4 @@
-package org.project.domain;
+package org.project.domain.fleet;
 
 import org.junit.jupiter.api.Test;
 import org.project.domain.fleet.entities.Car;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.project.features.TestDataGenerator.*;
+import static org.project.features.util.TestDataGenerator.*;
 
 class CarTest {
 

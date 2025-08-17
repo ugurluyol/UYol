@@ -1,4 +1,4 @@
-package org.project.repository;
+package org.project.infrastructure.repository;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -15,8 +15,8 @@ import org.project.domain.ride.value_object.BookedSeats;
 import org.project.domain.ride.value_object.PassengerSeat;
 import org.project.domain.ride.value_object.RideOwner;
 import org.project.domain.shared.value_objects.UserID;
-import org.project.features.PostgresTestResource;
-import org.project.features.TestDataGenerator;
+import org.project.features.util.PostgresTestResource;
+import org.project.features.util.TestDataGenerator;
 import org.project.infrastructure.repository.JetDriverRepository;
 import org.project.infrastructure.repository.JetOwnerRepository;
 import org.project.infrastructure.repository.JetRideRepository;

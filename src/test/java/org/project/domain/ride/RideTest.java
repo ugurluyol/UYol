@@ -1,4 +1,4 @@
-package org.project.domain;
+package org.project.domain.ride;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,7 @@ import org.project.domain.ride.value_object.BookedSeats;
 import org.project.domain.ride.value_object.PassengerSeat;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.UserID;
-import org.project.features.TestDataGenerator;
+import org.project.features.util.TestDataGenerator;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;

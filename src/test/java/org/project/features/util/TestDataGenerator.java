@@ -1,4 +1,4 @@
-package org.project.features;
+package org.project.features.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.project.application.dto.auth.RegistrationForm;

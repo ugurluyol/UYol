@@ -4,11 +4,11 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.project.features.TestDataGenerator.generateBirthdate;
-import static org.project.features.TestDataGenerator.generateEmail;
-import static org.project.features.TestDataGenerator.generateFirstname;
-import static org.project.features.TestDataGenerator.generatePhone;
-import static org.project.features.TestDataGenerator.generateSurname;
+import static org.project.features.util.TestDataGenerator.generateBirthdate;
+import static org.project.features.util.TestDataGenerator.generateEmail;
+import static org.project.features.util.TestDataGenerator.generateFirstname;
+import static org.project.features.util.TestDataGenerator.generatePhone;
+import static org.project.features.util.TestDataGenerator.generateSurname;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,8 +20,8 @@ import org.project.application.dto.auth.Tokens;
 import org.project.domain.user.entities.OTP;
 import org.project.domain.user.repositories.OTPRepository;
 import org.project.domain.user.repositories.UserRepository;
-import org.project.features.PostgresTestResource;
-import org.project.features.TestDataGenerator;
+import org.project.features.util.PostgresTestResource;
+import org.project.features.util.TestDataGenerator;
 import org.project.features.util.DBManagementUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,4 +1,4 @@
-package org.project.repository;
+package org.project.infrastructure.repository;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -12,8 +12,8 @@ import org.project.domain.user.value_objects.Phone;
 import org.project.domain.user.value_objects.RefreshToken;
 import org.project.infrastructure.repository.JetUserRepository;
 import org.project.infrastructure.security.JWTUtility;
-import org.project.features.PostgresTestResource;
-import org.project.features.TestDataGenerator;
+import org.project.features.util.PostgresTestResource;
+import org.project.features.util.TestDataGenerator;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;

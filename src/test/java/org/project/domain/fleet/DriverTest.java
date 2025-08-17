@@ -1,4 +1,4 @@
-package org.project.domain;
+package org.project.domain.fleet;
 
 import org.junit.jupiter.api.Test;
 import org.project.domain.fleet.entities.Driver;
@@ -10,8 +10,8 @@ import org.project.domain.shared.value_objects.DriverID;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.project.features.TestDataGenerator.driver;
-import static org.project.features.TestDataGenerator.driverLicense;
+import static org.project.features.util.TestDataGenerator.driver;
+import static org.project.features.util.TestDataGenerator.driverLicense;
 
 class DriverTest {
 

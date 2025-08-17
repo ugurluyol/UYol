@@ -1,4 +1,4 @@
-package org.project.domain;
+package org.project.domain.user;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -6,7 +6,7 @@ import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.exceptions.BannedUserException;
 import org.project.infrastructure.security.HOTPGenerator;
-import org.project.features.TestDataGenerator;
+import org.project.features.util.TestDataGenerator;
 
 public class UserTest {
 

@@ -1,4 +1,4 @@
-package org.project.repository;
+package org.project.infrastructure.repository;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,8 +14,8 @@ import org.project.domain.fleet.value_objects.LicensePlate;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.shared.value_objects.Pageable;
 import org.project.domain.user.entities.User;
-import org.project.features.PostgresTestResource;
-import org.project.features.TestDataGenerator;
+import org.project.features.util.PostgresTestResource;
+import org.project.features.util.TestDataGenerator;
 import org.project.features.util.DBManagementUtils;
 import org.project.infrastructure.repository.JetCarRepository;
 import org.project.infrastructure.repository.JetUserRepository;

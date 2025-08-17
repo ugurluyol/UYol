@@ -7,7 +7,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.project.features.KeycloakTestResource;
+import org.project.features.util.KeycloakTestResource;
 import org.project.features.util.DBManagementUtils;
 
 import static io.restassured.RestAssured.given;

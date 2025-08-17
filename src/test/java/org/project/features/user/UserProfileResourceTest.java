@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
 import org.project.infrastructure.security.JWTUtility;
-import org.project.features.PostgresTestResource;
-import org.project.features.TestDataGenerator;
+import org.project.features.util.PostgresTestResource;
+import org.project.features.util.TestDataGenerator;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
