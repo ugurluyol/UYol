@@ -1,7 +1,7 @@
 CREATE TABLE ride (
     id CHAR(36) NOT NULL,
     driver_id CHAR(36) NOT NULL,
-    owner_id CHAR(36) NOT NULL,
+    owner_id CHAR(36),
     from_location_desc VARCHAR(64) NOT NULL,
     from_latitude DECIMAL(9,6) NOT NULL,
     from_longitude DECIMAL(9,6) NOT NULL,
