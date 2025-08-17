@@ -53,7 +53,7 @@ public class DriverService {
         User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
         UserID userID = new UserID(user.id());
 
-        if (driverRepository.isDriverExists(userID))
+        if (!driverRepository.isDriverExists(userID))
             throw responseException(Response.Status.NOT_FOUND, "Driver account is not found.");
 
         Car car = Car.of(
