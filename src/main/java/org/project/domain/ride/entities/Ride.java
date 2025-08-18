@@ -26,6 +26,7 @@ public class Ride {
   private final RideDesc rideDesc;
   private final Set<RideRule> rideRules;
   private final Dates dates;
+  private final boolean hasActiveContract;
 
   private Ride(
           RideID id,
@@ -37,7 +38,8 @@ public class Ride {
           RideStatus status,
           RideDesc rideDesc,
           Set<RideRule> rideRules,
-          Dates dates) {
+          Dates dates,
+          boolean hasActiveContract) {
 
     this.id = id;
     this.rideOwner = rideOwner;
@@ -49,6 +51,7 @@ public class Ride {
     this.rideRules = rideRules;
     this.rideDesc = rideDesc;
     this.dates = dates;
+    this.hasActiveContract = hasActiveContract;
   }
 
   public static Ride of(
@@ -71,7 +74,7 @@ public class Ride {
       throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
     return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap,
-            RideStatus.PENDING, rideDesc,rideRules, Dates.defaultDates());
+            RideStatus.PENDING, rideDesc,rideRules, Dates.defaultDates(), false);
   }
 
   public static Ride fromRepository(
@@ -84,9 +87,10 @@ public class Ride {
           RideStatus status,
           RideDesc rideDesc,
           Set<RideRule> rideRules,
-          Dates dates) {
+          Dates dates,
+          boolean hasActiveContract) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, rideDesc, rideRules, dates);
+    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, rideDesc, rideRules, dates, hasActiveContract);
   }
 
   public RideID id() {
@@ -139,6 +143,8 @@ public class Ride {
   public void cancel() {
     if (this.status != RideStatus.PENDING)
       throw new IllegalDomainArgumentException("Ride cancellation is not possible if it`s already on the road or finished");
+    if (hasActiveContract)
+      throw new IllegalDomainArgumentException("You already have contracts with passengers, so ride cannot be cancelled");
 
     this.status = RideStatus.CANCELED;
   }
@@ -181,6 +187,10 @@ public class Ride {
 
   public Dates dates() {
     return dates;
+  }
+
+  public boolean hasActiveContract() {
+    return hasActiveContract;
   }
 
   public boolean isModifiable() {

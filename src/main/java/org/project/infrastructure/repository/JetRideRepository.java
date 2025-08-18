@@ -52,14 +52,15 @@ public class JetRideRepository implements RideRepository {
                     "description",
                     "rules",
                     "creation_date",
-                    "last_updated"
+                    "last_updated",
+                    "has_active_contract"
             )
             .values()
             .build()
             .sql();
 
     static final String UPDATE_SEATS = update("ride")
-            .set("seats = ?, last_updated = ?")
+            .set("seats = ?, has_active_contract = ?, last_updated = ?")
             .where("id = ?")
             .build()
             .sql();
@@ -222,7 +223,8 @@ public class JetRideRepository implements RideRepository {
                 ride.rideDesc(),
                 rules,
                 ride.dates().createdAt(),
-                ride.dates().lastUpdated()));
+                ride.dates().lastUpdated(),
+                ride.hasActiveContract()));
     }
 
     @Override
@@ -234,7 +236,7 @@ public class JetRideRepository implements RideRepository {
             return Result.failure(e);
         }
 
-        return mapTransactionResult(jet.write(UPDATE_SEATS, seats, ride.dates().lastUpdated(), ride.id()));
+        return mapTransactionResult(jet.write(UPDATE_SEATS, seats, ride.hasActiveContract(), ride.dates().lastUpdated(), ride.id()));
     }
 
     @Override
@@ -336,7 +338,8 @@ public class JetRideRepository implements RideRepository {
                     RideStatus.valueOf(rs.getString("status")),
                     new RideDesc(rs.getString("description")),
                     rules,
-                    dates
+                    dates,
+                    rs.getBoolean("has_active_contract")
             );
         } catch (JsonProcessingException e) {
             throw new SQLException(e);
