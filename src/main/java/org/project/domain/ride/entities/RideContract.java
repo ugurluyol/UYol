@@ -25,7 +25,7 @@ public class RideContract {
         this.bookedSeats = bookedSeats;
     }
 
-    public static RideContract of(UserID userID, RideID rideID, Price pricePerSeat, BookedSeats bookedSeats) {
+    static RideContract of(UserID userID, RideID rideID, Price pricePerSeat, BookedSeats bookedSeats) {
         required("userID", userID);
         required("rideID", rideID);
         required("pricePerSeat", pricePerSeat);
