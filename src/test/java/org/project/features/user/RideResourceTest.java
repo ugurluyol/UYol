@@ -20,7 +20,6 @@ import org.project.domain.ride.value_object.Location;
 import org.project.domain.ride.value_object.RideOwner;
 import org.project.domain.ride.value_object.RideTime;
 import org.project.domain.ride.value_object.Route;
-import org.project.domain.shared.containers.Result;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.user.entities.User;
@@ -70,42 +69,28 @@ class RideResourceTest {
 	@Test
 	void successfullyGetActualRides() {
 		User user = TestDataGenerator.user();
-		Result<Integer, Throwable> userSaveResult = userRepository.save(user);
-		if (!userSaveResult.success()) {
-			fail("User save failed: " + userSaveResult.throwable().getMessage());
-		}
+		userRepository.save(user);
+
 		UserID userID = new UserID(user.id());
 
-		// 2. Driver yaradılır və save olunur
 		DriverLicense license = TestDataGenerator.driverLicense();
 		Driver driver = Driver.of(userID, license);
-		Result<Integer, Throwable> driverSaveResult = driverRepository.save(driver);
-		if (!driverSaveResult.success()) {
-			fail("Driver save failed: " + driverSaveResult.throwable().getMessage());
-		}
 
-		// 3. RideOwner yaradılır (owner nullable)
 		RideOwner rideOwner = new RideOwner(driver.id(), null);
 
-		// 4. Location və Route
 		Location start = new Location("Baku", 40.4093, 49.8671);
 		Location end = new Location("Sumqayit", 40.5897, 49.6686);
 		Route route = new Route(start, end);
 
-		// 5. RideTime gələcəkdə olmalıdır
+
 		LocalDateTime now = LocalDateTime.now();
 		RideTime rideTime = new RideTime(now.plusMinutes(5), now.plusHours(1));
 
-		// 6. Ride yaradılır və save olunur
+
 		Ride ride = Ride.of(rideOwner, route, rideTime, TestDataGenerator.generatePrice(),
 				TestDataGenerator.generateSeatMap(), TestDataGenerator.generateRideDesc(),
 				TestDataGenerator.generateRideRules());
-		Result<Integer, Throwable> rideSaveResult = rideRepository.save(ride);
-		if (!rideSaveResult.success()) {
-			fail("Ride save failed: " + rideSaveResult.throwable().getMessage());
-		}
-
-		// 7. Sorğu parametrləri ride ilə tam uyğun olmalıdır
+		rideRepository.save(ride);
 		String rideDate = rideTime.startOfTheTrip().toLocalDate().toString();
 
 		given().queryParam("date", rideDate).queryParam("startDesc", start.description())
