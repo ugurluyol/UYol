@@ -75,6 +75,7 @@ class RideResourceTest {
 
 		DriverLicense license = TestDataGenerator.driverLicense();
 		Driver driver = Driver.of(userID, license);
+		driverRepository.save(driver);
 
 		RideOwner rideOwner = new RideOwner(driver.id(), null);
 
