@@ -290,7 +290,7 @@ public class JetRideRepository implements RideRepository {
 
         return mapPageRideResult(jet.readListOf(ACTUAL_FOR, this::mapRideDTO,
                 startLatitude, startLongitude, endLatitude, endLongitude, date,
-                startLatitude, startLongitude, endLatitude, endLongitude,
+                startLatitude, startLongitude, 5 * 5, endLatitude, endLongitude, 5 * 5,
                 page.limit(), page.offset()
         ));
     }
