@@ -7,6 +7,7 @@ import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.shared.value_objects.UserID;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -27,6 +28,7 @@ public class Ride {
   private final Set<RideRule> rideRules;
   private final Dates dates;
   private final boolean hasActiveContract;
+  private Fee fee;
 
   private Ride(
           RideID id,
@@ -39,7 +41,8 @@ public class Ride {
           RideDesc rideDesc,
           Set<RideRule> rideRules,
           Dates dates,
-          boolean hasActiveContract) {
+          boolean hasActiveContract,
+          Fee fee) {
 
     this.id = id;
     this.rideOwner = rideOwner;
@@ -52,6 +55,7 @@ public class Ride {
     this.rideDesc = rideDesc;
     this.dates = dates;
     this.hasActiveContract = hasActiveContract;
+    this.fee = fee;
   }
 
   public static Ride of(
@@ -74,7 +78,7 @@ public class Ride {
       throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
     return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap,
-            RideStatus.PENDING, rideDesc,rideRules, Dates.defaultDates(), false);
+            RideStatus.PENDING, rideDesc,rideRules, Dates.defaultDates(), false, Fee.zero());
   }
 
   public static Ride fromRepository(
@@ -88,9 +92,10 @@ public class Ride {
           RideDesc rideDesc,
           Set<RideRule> rideRules,
           Dates dates,
-          boolean hasActiveContract) {
+          boolean hasActiveContract,
+          Fee fee) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, rideDesc, rideRules, dates, hasActiveContract);
+    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, rideDesc, rideRules, dates, hasActiveContract, fee);
   }
 
   public RideID id() {
@@ -117,15 +122,19 @@ public class Ride {
     return seatMap;
   }
 
-  public RideContract occupy(UserID userID, BookedSeats bookedSeats) {
+  public RideContract book(UserID userID, BookedSeats bookedSeats) {
     if (this.status != RideStatus.PENDING)
       throw new IllegalDomainArgumentException("Cannot add passenger when ride is already on the road");
 
     SeatMap newSeatsState = null;
+    BigDecimal total = BigDecimal.ZERO;
     for (PassengerSeat bookedSeat : bookedSeats.bookedSeats()) {
       newSeatsState = seatMap.occupy(bookedSeat.index(), bookedSeat.status());
+      total = total.add(price.amount());
     }
+
     this.seatMap = newSeatsState;
+    this.fee = fee.calculateFeeForBooking(new Price(total));
     return RideContract.of(userID, id, price, bookedSeats);
   }
 
@@ -191,6 +200,10 @@ public class Ride {
 
   public boolean hasActiveContract() {
     return hasActiveContract;
+  }
+
+  public Fee fee() {
+    return fee;
   }
 
   public boolean isModifiable() {

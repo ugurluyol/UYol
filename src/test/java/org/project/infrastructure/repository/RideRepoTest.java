@@ -17,10 +17,6 @@ import org.project.domain.ride.value_object.RideOwner;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.features.util.PostgresTestResource;
 import org.project.features.util.TestDataGenerator;
-import org.project.infrastructure.repository.JetDriverRepository;
-import org.project.infrastructure.repository.JetOwnerRepository;
-import org.project.infrastructure.repository.JetRideRepository;
-import org.project.infrastructure.repository.JetUserRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -108,7 +104,7 @@ public class RideRepoTest {
         }
 
         var bookedSeats = new BookedSeats(availableSeats.stream().map(seat -> new PassengerSeat(seat, SeatStatus.MALE_OCCUPIED)).toList());
-        ride.occupy(UserID.newID(), bookedSeats);
+        ride.book(UserID.newID(), bookedSeats);
 
         var updateSeatsResult = rideRepo.updateSeats(ride);
         assertThat(updateSeatsResult.success()).isTrue();

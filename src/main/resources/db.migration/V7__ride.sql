@@ -18,6 +18,7 @@ CREATE TABLE ride (
     creation_date TIMESTAMP NOT NULL,
     last_updated TIMESTAMP NOT NULL,
     has_active_contract BOOLEAN NOT NULL,
+    fee NUMERIC NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT fk_driver_ride FOREIGN KEY (driver_id) REFERENCES driver(id),
     CONSTRAINT fk_owner_ride FOREIGN KEY (owner_id) REFERENCES owner(id)

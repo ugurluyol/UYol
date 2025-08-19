@@ -97,7 +97,7 @@ class RideTest {
         int index = generateIndex(ride);
         SeatStatus seatStatus = getRandomNonDriverOccupiedStatus();
 
-        assertDoesNotThrow(() -> ride.occupy(UserID.newID(), getBookedSeats(index, seatStatus)));
+        assertDoesNotThrow(() -> ride.book(UserID.newID(), getBookedSeats(index, seatStatus)));
     }
 
     @Test
@@ -109,7 +109,7 @@ class RideTest {
 
         IllegalDomainArgumentException e =
                 assertThrows(IllegalDomainArgumentException.class, () ->
-                        ride.occupy(UserID.newID(), getBookedSeats(index, seatStatus)));
+                        ride.book(UserID.newID(), getBookedSeats(index, seatStatus)));
         assertEquals("Cannot add passenger when ride is already on the road", e.getMessage());
     }
 
@@ -122,12 +122,12 @@ class RideTest {
 
         IllegalDomainArgumentException e =
                 assertThrows(IllegalDomainArgumentException.class, () ->
-                        ride.occupy(UserID.newID(), getBookedSeats(index, seatStatus)));
+                        ride.book(UserID.newID(), getBookedSeats(index, seatStatus)));
         assertEquals("Seat must be occupied with valid occupant", e.getMessage());
 
         IllegalDomainArgumentException e1 =
                 assertThrows(IllegalDomainArgumentException.class, () ->
-                        ride.occupy(UserID.newID(), getBookedSeats(index, seatStatus1)));
+                        ride.book(UserID.newID(), getBookedSeats(index, seatStatus1)));
         assertEquals("Seat must be occupied with valid occupant", e1.getMessage());
     }
 

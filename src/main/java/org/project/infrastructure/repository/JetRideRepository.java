@@ -53,14 +53,15 @@ public class JetRideRepository implements RideRepository {
                     "rules",
                     "creation_date",
                     "last_updated",
-                    "has_active_contract"
+                    "has_active_contract",
+                    "fee"
             )
             .values()
             .build()
             .sql();
 
-    static final String UPDATE_SEATS = update("ride")
-            .set("seats = ?, has_active_contract = ?, last_updated = ?")
+    static final String UPDATE_BOOKING = update("ride")
+            .set("seats = ?, has_active_contract = ?, fee = ?, last_updated = ?")
             .where("id = ?")
             .build()
             .sql();
@@ -224,7 +225,8 @@ public class JetRideRepository implements RideRepository {
                 rules,
                 ride.dates().createdAt(),
                 ride.dates().lastUpdated(),
-                ride.hasActiveContract()));
+                ride.hasActiveContract(),
+                ride.fee()));
     }
 
     @Override
@@ -236,7 +238,8 @@ public class JetRideRepository implements RideRepository {
             return Result.failure(e);
         }
 
-        return mapTransactionResult(jet.write(UPDATE_SEATS, seats, ride.hasActiveContract(), ride.dates().lastUpdated(), ride.id()));
+        return mapTransactionResult(jet.write(UPDATE_BOOKING, seats, ride.hasActiveContract(),
+                ride.fee(), ride.dates().lastUpdated(), ride.id()));
     }
 
     @Override
@@ -339,7 +342,8 @@ public class JetRideRepository implements RideRepository {
                     new RideDesc(rs.getString("description")),
                     rules,
                     dates,
-                    rs.getBoolean("has_active_contract")
+                    rs.getBoolean("has_active_contract"),
+                    new Fee(rs.getBigDecimal("fee"))
             );
         } catch (JsonProcessingException e) {
             throw new SQLException(e);
