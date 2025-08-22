@@ -16,7 +16,9 @@ public interface CarRepository {
 
   Result<Car, Throwable> findBy(CarID carID);
 
+  Result<Car, Throwable> findBy(LicensePlate licensePlate);
+
   Result<List<CarDTO>, Throwable> pageOf(Pageable pageable, UserID userID);
 
-  boolean isLicenseTemplateExists(LicensePlate license);
+  boolean isLicenseTemplateExists(LicensePlate license);;
 }

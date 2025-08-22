@@ -37,6 +37,8 @@ public class JetCarRepository implements CarRepository {
 
 	static final String CAR_BY_ID = select().all().from("car").where("id = ?").build().sql();
 
+	static final String CAR_BY_LICENSE_PLATE = select().all().from("car").where("license_plate = ?").build().sql();
+
 	static final String PAGE_OF_CARS = select()
 			.column("license_plate")
 			.column("car_brand")
@@ -80,7 +82,13 @@ public class JetCarRepository implements CarRepository {
 		return new Result<>(result.value(), result.throwable(), result.success());
 	}
 
-	@Override
+    @Override
+    public Result<Car, Throwable> findBy(LicensePlate licensePlate) {
+		var result = jet.read(CAR_BY_LICENSE_PLATE, this::carMapper, licensePlate.value());
+		return new Result<>(result.value(), result.throwable(), result.success());
+    }
+
+    @Override
 	public Result<List<CarDTO>, Throwable> pageOf(Pageable pageable, UserID userID) {
 		var listOf = jet.readListOf(PAGE_OF_CARS, this::carDTOMapper, userID.value(), pageable.limit(), pageable.offset());
 		return new Result<>(listOf.value(), listOf.throwable(), listOf.success());
