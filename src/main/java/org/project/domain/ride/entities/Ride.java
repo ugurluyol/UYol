@@ -4,6 +4,7 @@ import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.enumerations.RideStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
+import org.project.domain.shared.value_objects.CarID;
 import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.shared.value_objects.UserID;
 
@@ -18,6 +19,7 @@ public class Ride {
   public static final int MAX_RIDE_RULES = 12;
 
   private final RideID id;
+  private final CarID carID;
   private final RideOwner rideOwner;
   private final Route route;
   private final RideTime rideTime;
@@ -32,6 +34,7 @@ public class Ride {
 
   private Ride(
           RideID id,
+          CarID carID,
           RideOwner rideOwner,
           Route route,
           RideTime rideTime,
@@ -45,6 +48,7 @@ public class Ride {
           Fee fee) {
 
     this.id = id;
+    this.carID = carID;
     this.rideOwner = rideOwner;
     this.route = route;
     this.rideTime = rideTime;
@@ -59,6 +63,7 @@ public class Ride {
   }
 
   public static Ride of(
+          CarID carID,
           RideOwner rideOwner,
           Route route,
           RideTime rideTime,
@@ -67,6 +72,7 @@ public class Ride {
           RideDesc rideDesc,
           Set<RideRule> rideRules) {
 
+    required("carID", carID);
     required("rideOwner", rideOwner);
     required("route", route);
     required("rideTime", rideTime);
@@ -77,12 +83,13 @@ public class Ride {
     if (rideRules.size() > MAX_RIDE_RULES)
       throw new IllegalDomainArgumentException("Too many rules for ride, don't be so boring");
 
-    return new Ride(RideID.newID(),  rideOwner, route, rideTime, price, seatMap,
-            RideStatus.PENDING, rideDesc,rideRules, Dates.defaultDates(), false, Fee.zero());
+    return new Ride(RideID.newID(), carID, rideOwner, route, rideTime, price,
+            seatMap, RideStatus.PENDING, rideDesc, rideRules, Dates.defaultDates(), false, Fee.zero());
   }
 
   public static Ride fromRepository(
           RideID id,
+          CarID carID,
           RideOwner rideOwner,
           Route route,
           RideTime rideTime,
@@ -95,11 +102,15 @@ public class Ride {
           boolean hasActiveContract,
           Fee fee) {
 
-    return new Ride(id, rideOwner, route, rideTime, price, seatMap, status, rideDesc, rideRules, dates, hasActiveContract, fee);
+    return new Ride(id, carID, rideOwner, route, rideTime, price, seatMap, status, rideDesc, rideRules, dates, hasActiveContract, fee);
   }
 
   public RideID id() {
     return id;
+  }
+
+  public CarID carID() {
+    return carID;
   }
 
   public RideOwner rideOwner() {

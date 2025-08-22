@@ -36,6 +36,7 @@ public class JetRideRepository implements RideRepository {
             .into("ride")
             .columns(
                     "id",
+                    "car_id",
                     "driver_id",
                     "owner_id",
                     "from_location_desc",
@@ -208,6 +209,7 @@ public class JetRideRepository implements RideRepository {
 
         return mapTransactionResult(jet.write(RIDE,
                 ride.id(),
+                ride.carID(),
                 ride.rideOwner().driverID(),
                 ride.rideOwner().ownerID(),
                 from.description(),
@@ -333,6 +335,7 @@ public class JetRideRepository implements RideRepository {
 
             return Ride.fromRepository(
                     RideID.fromString(rs.getString("id")),
+                    CarID.fromString(rs.getString("car_id")),
                     rideOwner,
                     route,
                     rideTime,

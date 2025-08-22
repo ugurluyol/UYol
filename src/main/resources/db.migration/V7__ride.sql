@@ -1,5 +1,6 @@
 CREATE TABLE ride (
     id CHAR(36) NOT NULL,
+    car_id CHAR(36) NOT NULL,
     driver_id CHAR(36) NOT NULL,
     owner_id CHAR(36),
     from_location_desc VARCHAR(64) NOT NULL,
@@ -21,7 +22,8 @@ CREATE TABLE ride (
     fee NUMERIC NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT fk_driver_ride FOREIGN KEY (driver_id) REFERENCES driver(id),
-    CONSTRAINT fk_owner_ride FOREIGN KEY (owner_id) REFERENCES owner(id)
+    CONSTRAINT fk_owner_ride FOREIGN KEY (owner_id) REFERENCES owner(id),
+    CONSTRAINT fk_car_ride FOREIGN KEY (car_id) REFERENCES car(id)
 );
 
 CREATE INDEX idx_ride_status ON ride(status);

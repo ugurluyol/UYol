@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.repositories.DriverRepository;
@@ -28,6 +29,7 @@ import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
 import org.project.features.util.PostgresTestResource;
 import org.project.features.util.TestDataGenerator;
+import org.project.infrastructure.repository.JetCarRepository;
 import org.project.infrastructure.security.JWTUtility;
 
 import io.quarkus.test.common.QuarkusTestResource;
@@ -53,6 +55,9 @@ class RideHistoryResourceTest {
 	@Inject
 	JWTUtility jwtUtility;
 
+    @Inject
+    JetCarRepository jetCarRepository;
+
 	@Test
 	void successfullyGetUserRides() {
 		User user = TestDataGenerator.user();
@@ -63,6 +68,9 @@ class RideHistoryResourceTest {
 		DriverLicense driverLicense = TestDataGenerator.driverLicense();
 		Driver driver = Driver.of(userID, driverLicense);
 		driverRepository.save(driver);
+
+		Car car = TestDataGenerator.car(userID);
+		jetCarRepository.save(car);
 
 		Location startLocation = new Location("Baku", 40.4093, 49.8671);
 		Location endLocation = new Location("Sumqayit", 40.5897, 49.6686);
@@ -75,7 +83,7 @@ class RideHistoryResourceTest {
 		RideDesc rideDesc = TestDataGenerator.generateRideDesc();
 		Set<RideRule> rideRules = TestDataGenerator.generateRideRules();
 
-		Ride ride = Ride.of(rideOwner, route, rideTime, price, seatMap, rideDesc, rideRules);
+		Ride ride = Ride.of(car.id(), rideOwner, route, rideTime, price, seatMap, rideDesc, rideRules);
 		rideRepository.save(ride);
 
 		String jwtToken = jwtUtility.generateToken(user);
@@ -96,6 +104,9 @@ class RideHistoryResourceTest {
 		Driver driver = Driver.of(userID, driverLicense);
 		driverRepository.save(driver);
 
+		Car car = TestDataGenerator.car(userID);
+		jetCarRepository.save(car);
+
 		Location startLocation = new Location("Baku", 40.4093, 49.8671);
 		Location endLocation = new Location("Sumqayit", 40.5897, 49.6686);
 		RideOwner rideOwner = new RideOwner(driver.id(), null); // ownerID null ola bilər
@@ -106,7 +117,7 @@ class RideHistoryResourceTest {
 		RideDesc rideDesc = TestDataGenerator.generateRideDesc();
 		Set<RideRule> rideRules = TestDataGenerator.generateRideRules();
 
-		Ride ride = Ride.of(rideOwner, route, rideTime, price, seatMap, rideDesc, rideRules);
+		Ride ride = Ride.of(car.id(), rideOwner, route, rideTime, price, seatMap, rideDesc, rideRules);
 		rideRepository.save(ride);
 
 		String jwtToken = jwtUtility.generateToken(user);
@@ -130,6 +141,9 @@ class RideHistoryResourceTest {
 		Driver driver = Driver.of(userID, driverLicense);
 		driverRepository.save(driver);
 
+		Car car = TestDataGenerator.car(userID);
+		jetCarRepository.save(car);
+
 		Location startLocation = new Location("Baku", 40.4093, 49.8671);
 		Location endLocation = new Location("Sumqayit", 40.5897, 49.6686);
 		RideOwner rideOwner = new RideOwner(driver.id(), owner.id());
@@ -140,7 +154,7 @@ class RideHistoryResourceTest {
 		RideDesc rideDesc = TestDataGenerator.generateRideDesc();
 		Set<RideRule> rideRules = TestDataGenerator.generateRideRules();
 
-		Ride ride = Ride.of(rideOwner, route, rideTime, price, seatMap, rideDesc, rideRules);
+		Ride ride = Ride.of(car.id(), rideOwner, route, rideTime, price, seatMap, rideDesc, rideRules);
 		rideRepository.save(ride);
 
 		String jwtToken = jwtUtility.generateToken(user);

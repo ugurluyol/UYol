@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.*;
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class RideRepoTest {
+class RideRepoTest {
 
     @Inject
     JetRideRepository rideRepo;
@@ -42,11 +42,16 @@ public class RideRepoTest {
     @Inject
     JetDriverRepository driverRepo;
 
+    @Inject
+    JetCarRepository carRepo;
+
     @Test
     void save_user() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -60,6 +65,9 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
     }
@@ -68,7 +76,9 @@ public class RideRepoTest {
     void fail_saving_ride_without_driver() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -79,6 +89,9 @@ public class RideRepoTest {
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isFalse();
     }
@@ -87,7 +100,9 @@ public class RideRepoTest {
     void fail_saving_without_driver_user() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -98,6 +113,9 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isFalse();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isFalse();
+
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isFalse();
     }
@@ -106,7 +124,9 @@ public class RideRepoTest {
     void update_seats() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -116,7 +136,7 @@ public class RideRepoTest {
 
 
         while (!ride.canAcceptPassenger()) {
-            ride = Ride.of(new RideOwner(driver.id(), null),
+            ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -130,6 +150,9 @@ public class RideRepoTest {
 
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
+
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
 
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
@@ -153,7 +176,9 @@ public class RideRepoTest {
     void update_ride_status_from_pending_to_on_the_road() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -166,6 +191,9 @@ public class RideRepoTest {
 
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
+
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
 
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
@@ -180,7 +208,9 @@ public class RideRepoTest {
     void update_ride_status_from_pending_to_cancelled() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -193,6 +223,9 @@ public class RideRepoTest {
 
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
+
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
 
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
@@ -207,7 +240,9 @@ public class RideRepoTest {
     void update_ride_status_from_on_the_road_to_finished() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -220,6 +255,9 @@ public class RideRepoTest {
 
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
+
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
 
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
@@ -239,7 +277,9 @@ public class RideRepoTest {
     void update_ride_rules() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -252,6 +292,9 @@ public class RideRepoTest {
 
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
+
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
 
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
@@ -266,7 +309,9 @@ public class RideRepoTest {
     void find_by_ride_id() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -279,6 +324,9 @@ public class RideRepoTest {
 
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
+
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
 
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
@@ -291,7 +339,9 @@ public class RideRepoTest {
     void find_by_invalid_ride_id() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
+
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 TestDataGenerator.generateRoute(),
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -305,6 +355,9 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
 
@@ -316,6 +369,7 @@ public class RideRepoTest {
     void find_by_user_id() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -323,8 +377,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         for (int i = 0; i < 10; i++) {
-            var ride = Ride.of(new RideOwner(driver.id(), null),
+            var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -343,6 +400,7 @@ public class RideRepoTest {
     void find_by_invalid_user_id() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -350,8 +408,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         for (int i = 0; i < 10; i++) {
-            var ride = Ride.of(new RideOwner(driver.id(), null),
+            var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -372,6 +433,7 @@ public class RideRepoTest {
     void find_by_driver_id() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -379,8 +441,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         for (int i = 0; i < 10; i++) {
-            var ride = Ride.of(new RideOwner(driver.id(), null),
+            var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -399,6 +464,7 @@ public class RideRepoTest {
     void find_by_invalid_driver_id() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -406,8 +472,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         for (int i = 0; i < 10; i++) {
-            var ride = Ride.of(new RideOwner(driver.id(), null),
+            var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -431,6 +500,7 @@ public class RideRepoTest {
         var owner = Owner.of(UserID.fromString(ownerUser.id().toString()), TestDataGenerator.voen());
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -444,8 +514,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         for (int i = 0; i < 10; i++) {
-            var ride = Ride.of(new RideOwner(driver.id(), owner.id()),
+            var ride = Ride.of(car.id(), new RideOwner(driver.id(), owner.id()),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -466,6 +539,7 @@ public class RideRepoTest {
         var owner = Owner.of(UserID.fromString(ownerUser.id().toString()), TestDataGenerator.voen());
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -479,8 +553,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         for (int i = 0; i < 10; i++) {
-            var ride = Ride.of(new RideOwner(driver.id(), owner.id()),
+            var ride = Ride.of(car.id(), new RideOwner(driver.id(), owner.id()),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -501,6 +578,7 @@ public class RideRepoTest {
     void find_by_date() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -508,8 +586,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         for (int i = 0; i < 10; i++) {
-            var ride = Ride.of(new RideOwner(driver.id(), null),
+            var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -528,6 +609,7 @@ public class RideRepoTest {
     void find_by_invalid_date() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -535,8 +617,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         for (int i = 0; i < 10; i++) {
-            var ride = Ride.of(new RideOwner(driver.id(), null),
+            var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                     TestDataGenerator.generateRoute(),
                     TestDataGenerator.generateRideTime(),
                     TestDataGenerator.generatePrice(),
@@ -557,6 +642,7 @@ public class RideRepoTest {
     void find_by_location() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -564,8 +650,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         var rideRoute = new Route(TestDataGenerator.generateLocation(), TestDataGenerator.generateLocation());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 rideRoute,
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),
@@ -584,6 +673,7 @@ public class RideRepoTest {
     void fail_find_by_non_existent_location() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var car = TestDataGenerator.car(new UserID(driverUser.id()));
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
@@ -591,8 +681,11 @@ public class RideRepoTest {
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
 
+        var carSaveResult = carRepo.save(car);
+        assertThat(carSaveResult.success()).isTrue();
+
         var rideRoute = new Route(TestDataGenerator.generateLocation(), TestDataGenerator.generateLocation());
-        var ride = Ride.of(new RideOwner(driver.id(), null),
+        var ride = Ride.of(car.id(), new RideOwner(driver.id(), null),
                 rideRoute,
                 TestDataGenerator.generateRideTime(),
                 TestDataGenerator.generatePrice(),

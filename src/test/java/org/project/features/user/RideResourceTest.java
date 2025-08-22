@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.project.application.service.ActiveRidesService;
+import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.repositories.DriverRepository;
@@ -30,6 +31,7 @@ import org.project.features.util.TestDataGenerator;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import org.project.infrastructure.repository.JetCarRepository;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
@@ -45,10 +47,10 @@ class RideResourceTest {
 	DriverRepository driverRepository;
 
 	@Inject
-	ActiveRidesService ridesService;
-
-	@Inject
 	OwnerRepository ownerRepository;
+
+    @Inject
+    JetCarRepository jetCarRepository;
 
 
 	@Test
@@ -77,6 +79,9 @@ class RideResourceTest {
 		Driver driver = Driver.of(userID, license);
 		driverRepository.save(driver);
 
+		Car car = TestDataGenerator.car(userID);
+		jetCarRepository.save(car);
+
 		RideOwner rideOwner = new RideOwner(driver.id(), null);
 
 		Location start = new Location("Baku", 40.4093, 49.8671);
@@ -88,7 +93,7 @@ class RideResourceTest {
 		RideTime rideTime = new RideTime(now.plusMinutes(5), now.plusHours(1));
 
 
-		Ride ride = Ride.of(rideOwner, route, rideTime, TestDataGenerator.generatePrice(),
+		Ride ride = Ride.of(car.id(), rideOwner, route, rideTime, TestDataGenerator.generatePrice(),
 				TestDataGenerator.generateSeatMap(), TestDataGenerator.generateRideDesc(),
 				TestDataGenerator.generateRideRules());
 		rideRepository.save(ride);

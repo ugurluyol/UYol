@@ -12,6 +12,7 @@ import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.containers.Result;
+import org.project.domain.shared.value_objects.CarID;
 import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.shared.value_objects.OwnerID;
 import org.project.domain.shared.value_objects.UserID;
@@ -32,6 +33,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @ApplicationScoped
@@ -67,6 +69,7 @@ public class TestDataGenerator {
 
     public static Ride rideWithoutDelivery() {
         return Ride.of(
+                new CarID(UUID.randomUUID()),
                 generateRideOwner(),
                 generateRoute(),
                 generateRideTime(),

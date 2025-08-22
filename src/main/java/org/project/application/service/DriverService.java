@@ -101,6 +101,7 @@ public class DriverService {
         Location to = new Location(rideForm.toLocationDesc(), rideForm.toLatitude(), rideForm.toLongitude());
 
         Ride ride = Ride.of(
+                car.id(),
                 new RideOwner(driver.id(), null),
                 new Route(from, to),
                 new RideTime(rideForm.startTime(), rideForm.endTime()),
