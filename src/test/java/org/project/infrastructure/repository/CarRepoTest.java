@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.project.domain.fleet.entities.Car;
-import org.project.domain.fleet.value_objects.CarID;
+import org.project.domain.shared.value_objects.CarID;
 import org.project.domain.fleet.value_objects.LicensePlate;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.shared.value_objects.Pageable;
@@ -17,8 +17,6 @@ import org.project.domain.user.entities.User;
 import org.project.features.util.PostgresTestResource;
 import org.project.features.util.TestDataGenerator;
 import org.project.features.util.DBManagementUtils;
-import org.project.infrastructure.repository.JetCarRepository;
-import org.project.infrastructure.repository.JetUserRepository;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;

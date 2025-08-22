@@ -1,4 +1,4 @@
-package org.project.domain.fleet.value_objects;
+package org.project.domain.shared.value_objects;
 
 import java.util.UUID;
 

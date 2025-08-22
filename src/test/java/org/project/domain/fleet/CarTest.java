@@ -2,8 +2,8 @@ package org.project.domain.fleet;
 
 import org.junit.jupiter.api.Test;
 import org.project.domain.fleet.entities.Car;
-import org.project.domain.fleet.value_objects.*;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
+import org.project.domain.shared.value_objects.CarID;
 import org.project.domain.shared.value_objects.UserID;
 
 import java.time.LocalDateTime;

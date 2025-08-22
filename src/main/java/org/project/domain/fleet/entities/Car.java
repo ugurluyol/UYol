@@ -2,7 +2,7 @@ package org.project.domain.fleet.entities;
 
 import org.project.domain.fleet.value_objects.CarBrand;
 import org.project.domain.fleet.value_objects.CarColor;
-import org.project.domain.fleet.value_objects.CarID;
+import org.project.domain.shared.value_objects.CarID;
 import org.project.domain.fleet.value_objects.CarModel;
 import org.project.domain.fleet.value_objects.CarYear;
 import org.project.domain.fleet.value_objects.LicensePlate;
