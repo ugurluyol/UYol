@@ -11,9 +11,9 @@ import org.project.domain.fleet.entities.Owner;
 import org.project.domain.ride.entities.Ride;
 import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.enumerations.SeatStatus;
-import org.project.domain.ride.value_object.BookedSeats;
-import org.project.domain.ride.value_object.PassengerSeat;
-import org.project.domain.ride.value_object.RideOwner;
+import org.project.domain.ride.value_object.*;
+import org.project.domain.shared.value_objects.DriverID;
+import org.project.domain.shared.value_objects.OwnerID;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.features.util.PostgresTestResource;
 import org.project.features.util.TestDataGenerator;
@@ -43,7 +43,7 @@ public class RideRepoTest {
     JetDriverRepository driverRepo;
 
     @Test
-    void save_ride() {
+    void save_user() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
         var ride = Ride.of(new RideOwner(driver.id(), null),
@@ -62,6 +62,44 @@ public class RideRepoTest {
 
         var rideSaveResult = rideRepo.save(ride);
         assertThat(rideSaveResult.success()).isTrue();
+    }
+
+    @Test
+    void fail_saving_ride_without_driver() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var ride = Ride.of(new RideOwner(driver.id(), null),
+                TestDataGenerator.generateRoute(),
+                TestDataGenerator.generateRideTime(),
+                TestDataGenerator.generatePrice(),
+                TestDataGenerator.generateSeatMap(),
+                TestDataGenerator.generateRideDesc(),
+                TestDataGenerator.generateRideRules());
+
+        var driverUserSaveResult = userRepo.save(driverUser);
+        assertThat(driverUserSaveResult.success()).isTrue();
+
+        var rideSaveResult = rideRepo.save(ride);
+        assertThat(rideSaveResult.success()).isFalse();
+    }
+
+    @Test
+    void fail_saving_without_driver_user() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var ride = Ride.of(new RideOwner(driver.id(), null),
+                TestDataGenerator.generateRoute(),
+                TestDataGenerator.generateRideTime(),
+                TestDataGenerator.generatePrice(),
+                TestDataGenerator.generateSeatMap(),
+                TestDataGenerator.generateRideDesc(),
+                TestDataGenerator.generateRideRules());
+
+        var driverSaveResult = driverRepo.save(driver);
+        assertThat(driverSaveResult.success()).isFalse();
+
+        var rideSaveResult = rideRepo.save(ride);
+        assertThat(rideSaveResult.success()).isFalse();
     }
 
     @Test
@@ -250,6 +288,31 @@ public class RideRepoTest {
     }
 
     @Test
+    void find_by_invalid_ride_id() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+        var ride = Ride.of(new RideOwner(driver.id(), null),
+                TestDataGenerator.generateRoute(),
+                TestDataGenerator.generateRideTime(),
+                TestDataGenerator.generatePrice(),
+                TestDataGenerator.generateSeatMap(),
+                TestDataGenerator.generateRideDesc(),
+                TestDataGenerator.generateRideRules());
+
+        var driverUserSaveResult = userRepo.save(driverUser);
+        assertThat(driverUserSaveResult.success()).isTrue();
+
+        var driverSaveResult = driverRepo.save(driver);
+        assertThat(driverSaveResult.success()).isTrue();
+
+        var rideSaveResult = rideRepo.save(ride);
+        assertThat(rideSaveResult.success()).isTrue();
+
+        var findResult = rideRepo.findBy(RideID.newID());
+        assertThat(findResult.success()).isFalse();
+    }
+
+    @Test
     void find_by_user_id() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
@@ -277,6 +340,35 @@ public class RideRepoTest {
     }
 
     @Test
+    void find_by_invalid_user_id() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+
+        var driverUserSaveResult = userRepo.save(driverUser);
+        assertThat(driverUserSaveResult.success()).isTrue();
+
+        var driverSaveResult = driverRepo.save(driver);
+        assertThat(driverSaveResult.success()).isTrue();
+
+        for (int i = 0; i < 10; i++) {
+            var ride = Ride.of(new RideOwner(driver.id(), null),
+                    TestDataGenerator.generateRoute(),
+                    TestDataGenerator.generateRideTime(),
+                    TestDataGenerator.generatePrice(),
+                    TestDataGenerator.generateSeatMap(),
+                    TestDataGenerator.generateRideDesc(),
+                    TestDataGenerator.generateRideRules());
+            var rideSaveResult = rideRepo.save(ride);
+            assertThat(rideSaveResult.success()).isTrue();
+        }
+
+        var findByUserIdResult = rideRepo.pageOf(UserID.newID(), new PageRequest(5, 0));
+        if (findByUserIdResult.success()) {
+            assertThat(findByUserIdResult.value().isEmpty()).isTrue();
+        }
+    }
+
+    @Test
     void find_by_driver_id() {
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
@@ -301,6 +393,36 @@ public class RideRepoTest {
 
         var findByOwnerIdResult = rideRepo.pageOf(driver.id(), new PageRequest(5, 0));
         assertThat(findByOwnerIdResult.success()).isTrue();
+    }
+
+    @Test
+    void find_by_invalid_driver_id() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+
+        var driverUserSaveResult = userRepo.save(driverUser);
+        assertThat(driverUserSaveResult.success()).isTrue();
+
+        var driverSaveResult = driverRepo.save(driver);
+        assertThat(driverSaveResult.success()).isTrue();
+
+        for (int i = 0; i < 10; i++) {
+            var ride = Ride.of(new RideOwner(driver.id(), null),
+                    TestDataGenerator.generateRoute(),
+                    TestDataGenerator.generateRideTime(),
+                    TestDataGenerator.generatePrice(),
+                    TestDataGenerator.generateSeatMap(),
+                    TestDataGenerator.generateRideDesc(),
+                    TestDataGenerator.generateRideRules());
+            var rideSaveResult = rideRepo.save(ride);
+            assertThat(rideSaveResult.success()).isTrue();
+        }
+
+        var findByDriverIdResult = rideRepo.pageOf(DriverID.newID(), new PageRequest(5, 0));
+
+        if (findByDriverIdResult.success()) {
+            assertThat(findByDriverIdResult.value().isEmpty()).isTrue();
+        }
     }
 
     @Test
@@ -339,13 +461,49 @@ public class RideRepoTest {
     }
 
     @Test
-    void find_by_date() {
+    void find_by_invalid_owner_id() {
+        var ownerUser = TestDataGenerator.user();
+        var owner = Owner.of(UserID.fromString(ownerUser.id().toString()), TestDataGenerator.voen());
         var driverUser = TestDataGenerator.user();
         var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
 
         var driverUserSaveResult = userRepo.save(driverUser);
         assertThat(driverUserSaveResult.success()).isTrue();
 
+        var ownerUserSaveResult = userRepo.save(ownerUser);
+        assertThat(ownerUserSaveResult.success()).isTrue();
+
+        var ownerSaveResult = ownerRepo.save(owner);
+        assertThat(ownerSaveResult.success()).isTrue();
+
+        var driverSaveResult = driverRepo.save(driver);
+        assertThat(driverSaveResult.success()).isTrue();
+
+        for (int i = 0; i < 10; i++) {
+            var ride = Ride.of(new RideOwner(driver.id(), owner.id()),
+                    TestDataGenerator.generateRoute(),
+                    TestDataGenerator.generateRideTime(),
+                    TestDataGenerator.generatePrice(),
+                    TestDataGenerator.generateSeatMap(),
+                    TestDataGenerator.generateRideDesc(),
+                    TestDataGenerator.generateRideRules());
+            var rideSaveResult = rideRepo.save(ride);
+            assertThat(rideSaveResult.success()).isTrue();
+        }
+
+        var findByOwnerIdResult = rideRepo.pageOf(OwnerID.newID(), new PageRequest(5, 0));
+        if (findByOwnerIdResult.success()) {
+            assertThat(findByOwnerIdResult.value().isEmpty()).isTrue();
+        }
+    }
+
+    @Test
+    void find_by_date() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+
+        var driverUserSaveResult = userRepo.save(driverUser);
+        assertThat(driverUserSaveResult.success()).isTrue();
 
         var driverSaveResult = driverRepo.save(driver);
         assertThat(driverSaveResult.success()).isTrue();
@@ -364,5 +522,90 @@ public class RideRepoTest {
 
         var findByOwnerIdResult = rideRepo.pageOf(LocalDate.now(), new PageRequest(5, 0));
         assertThat(findByOwnerIdResult.success()).isTrue();
+    }
+
+    @Test
+    void find_by_invalid_date() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+
+        var driverUserSaveResult = userRepo.save(driverUser);
+        assertThat(driverUserSaveResult.success()).isTrue();
+
+        var driverSaveResult = driverRepo.save(driver);
+        assertThat(driverSaveResult.success()).isTrue();
+
+        for (int i = 0; i < 10; i++) {
+            var ride = Ride.of(new RideOwner(driver.id(), null),
+                    TestDataGenerator.generateRoute(),
+                    TestDataGenerator.generateRideTime(),
+                    TestDataGenerator.generatePrice(),
+                    TestDataGenerator.generateSeatMap(),
+                    TestDataGenerator.generateRideDesc(),
+                    TestDataGenerator.generateRideRules());
+            var rideSaveResult = rideRepo.save(ride);
+            assertThat(rideSaveResult.success()).isTrue();
+        }
+
+        var findByDateResult = rideRepo.pageOf(LocalDate.now().minusDays(5000), new PageRequest(5, 0));
+        if (findByDateResult.success()) {
+            assertThat(findByDateResult.value().isEmpty()).isTrue();
+        }
+    }
+
+    @Test
+    void find_by_location() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+
+        var driverUserSaveResult = userRepo.save(driverUser);
+        assertThat(driverUserSaveResult.success()).isTrue();
+
+        var driverSaveResult = driverRepo.save(driver);
+        assertThat(driverSaveResult.success()).isTrue();
+
+        var rideRoute = new Route(TestDataGenerator.generateLocation(), TestDataGenerator.generateLocation());
+        var ride = Ride.of(new RideOwner(driver.id(), null),
+                rideRoute,
+                TestDataGenerator.generateRideTime(),
+                TestDataGenerator.generatePrice(),
+                TestDataGenerator.generateSeatMap(),
+                TestDataGenerator.generateRideDesc(),
+                TestDataGenerator.generateRideRules());
+
+        var rideSaveResult = rideRepo.save(ride);
+        assertThat(rideSaveResult.success()).isTrue();
+
+        var findByLocation = rideRepo.actualFor(ride.route().from(), ride.route().to(), ride.dates().createdAt().toLocalDate(), new PageRequest(5, 0));
+        assertThat(findByLocation.success()).isTrue();
+    }
+
+    @Test
+    void fail_find_by_non_existent_location() {
+        var driverUser = TestDataGenerator.user();
+        var driver = Driver.of(UserID.fromString(driverUser.id().toString()), TestDataGenerator.driverLicense());
+
+        var driverUserSaveResult = userRepo.save(driverUser);
+        assertThat(driverUserSaveResult.success()).isTrue();
+
+        var driverSaveResult = driverRepo.save(driver);
+        assertThat(driverSaveResult.success()).isTrue();
+
+        var rideRoute = new Route(TestDataGenerator.generateLocation(), TestDataGenerator.generateLocation());
+        var ride = Ride.of(new RideOwner(driver.id(), null),
+                rideRoute,
+                TestDataGenerator.generateRideTime(),
+                TestDataGenerator.generatePrice(),
+                TestDataGenerator.generateSeatMap(),
+                TestDataGenerator.generateRideDesc(),
+                TestDataGenerator.generateRideRules());
+
+        var rideSaveResult = rideRepo.save(ride);
+        assertThat(rideSaveResult.success()).isTrue();
+
+        var findByLocationResult = rideRepo.actualFor(TestDataGenerator.generateLocation(), TestDataGenerator.generateLocation(), ride.dates().createdAt().toLocalDate(), new PageRequest(5, 0));
+        if (findByLocationResult.success()) {
+            assertThat(findByLocationResult.value().isEmpty()).isTrue();
+        }
     }
 }
