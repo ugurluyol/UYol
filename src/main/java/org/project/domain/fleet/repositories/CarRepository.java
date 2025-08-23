@@ -14,11 +14,13 @@ public interface CarRepository {
 
   Result<Integer, Throwable> save(Car car);
 
+  Result<Integer, Throwable> update(Car car);
+
   Result<Car, Throwable> findBy(CarID carID);
 
   Result<Car, Throwable> findBy(LicensePlate licensePlate);
 
   Result<List<CarDTO>, Throwable> pageOf(Pageable pageable, UserID userID);
 
-  boolean isLicenseTemplateExists(LicensePlate license);;
+  boolean isLicenseTemplateExists(LicensePlate license);
 }

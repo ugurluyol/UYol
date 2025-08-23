@@ -86,6 +86,7 @@ public class DriverService {
 
     public RideDTO createRide(String identified, DriverRideForm rideForm) {
         required("rideForm", rideForm);
+
         User user = userRepository.findBy(IdentifierFactory.from(identified)).orElseThrow();
         UserID userID = new UserID(user.id());
         Driver driver = driverRepository.findBy(userID)
@@ -96,6 +97,9 @@ public class DriverService {
 
         if (!car.owner().equals(userID))
             throw responseException(Response.Status.FORBIDDEN, "You are not the owner of the car or license plate is wrong.");
+
+        if (!car.isAvailableForTheTrip())
+            throw responseException(Response.Status.CONFLICT, "Selected car is already on the road.");
 
         Location from = new Location(rideForm.fromLocationDesc(), rideForm.fromLatitude(), rideForm.fromLongitude());
         Location to = new Location(rideForm.toLocationDesc(), rideForm.toLatitude(), rideForm.toLongitude());
@@ -110,7 +114,13 @@ public class DriverService {
                 new RideDesc(rideForm.rideDesc()),
                 new HashSet<>(Arrays.asList(rideForm.rideRules()))
         );
+        car.startedRide();
+
         rideRepository.save(ride)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to process your request at the moment. Please try again."));
+
+        carRepository.update(car)
                 .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
                         "Unable to process your request at the moment. Please try again."));
 

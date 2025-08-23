@@ -2,6 +2,7 @@ package org.project.infrastructure.repository;
 
 import static com.hadzhy.jetquerious.sql.QueryForge.insert;
 import static com.hadzhy.jetquerious.sql.QueryForge.select;
+import static org.project.infrastructure.repository.JetOTPRepository.mapTransactionResult;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,8 +10,10 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
+import com.hadzhy.jetquerious.sql.QueryForge;
 import org.project.application.dto.fleet.CarDTO;
 import org.project.domain.fleet.entities.Car;
+import org.project.domain.fleet.enumerations.CarStatus;
 import org.project.domain.fleet.repositories.CarRepository;
 import org.project.domain.fleet.value_objects.CarBrand;
 import org.project.domain.fleet.value_objects.CarColor;
@@ -33,7 +36,9 @@ public class JetCarRepository implements CarRepository {
 	private final JetQuerious jet;
 
 	static final String SAVE_CAR = insert().into("car").columns("id", "owner", "license_plate", "car_brand",
-			"car_model", "car_color", "car_year", "seat_count", "created_at").values().build().sql();
+			"car_model", "car_color", "car_year", "seat_count", "created_at", "status").values().build().sql();
+
+	static final String UPDATE_STATUS = QueryForge.update("car").set("status = ?").where("id = ?").build().sql();
 
 	static final String CAR_BY_ID = select().all().from("car").where("id = ?").build().sql();
 
@@ -67,13 +72,14 @@ public class JetCarRepository implements CarRepository {
 		return mapTransactionResult(
 				jet.write(SAVE_CAR, car.id().value(), car.owner().value(), car.licensePlate().value(),
 						car.carBrand().value(), car.carModel().value(), car.carColor().value(), car.carYear().value(),
-						car.seatCount().value(), 
-						car.createdAt()));
+						car.seatCount().value(), car.createdAt(), car.status()));
 	}
 
-	static Result<Integer, Throwable> mapTransactionResult(
-			com.hadzhy.jetquerious.util.Result<Integer, Throwable> result) {
-		return new Result<>(result.value(), result.throwable(), result.success());
+	@Override
+	public Result<Integer, Throwable> update(Car car) {
+		return mapTransactionResult(
+				jet.write(UPDATE_STATUS, car.status(), car.id())
+		);
 	}
 
 	@Override
@@ -101,13 +107,13 @@ public class JetCarRepository implements CarRepository {
 				.orElse(false);
 	}
 
-
 	private Car carMapper(ResultSet rs) throws SQLException {
 		return Car.fromRepository(new CarID(UUID.fromString(rs.getString("id"))),
 				new UserID(UUID.fromString(rs.getString("owner"))), new LicensePlate(rs.getString("license_plate")),
 				new CarBrand(rs.getString("car_brand")), new CarModel(rs.getString("car_model")),
 				new CarColor(rs.getString("car_color")), new CarYear(rs.getInt("car_year")),
-				new SeatCount(rs.getInt("seat_count")), rs.getObject("created_at", Timestamp.class).toLocalDateTime());
+				new SeatCount(rs.getInt("seat_count")), rs.getObject("created_at", Timestamp.class).toLocalDateTime(),
+				CarStatus.valueOf(rs.getString("status")));
 	}
 
 	private CarDTO carDTOMapper(ResultSet rs) throws SQLException {

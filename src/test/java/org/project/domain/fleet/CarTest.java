@@ -2,12 +2,14 @@ package org.project.domain.fleet;
 
 import org.junit.jupiter.api.Test;
 import org.project.domain.fleet.entities.Car;
+import org.project.domain.fleet.enumerations.CarStatus;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.CarID;
 import org.project.domain.shared.value_objects.UserID;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.project.features.util.TestDataGenerator.*;
@@ -48,8 +50,9 @@ class CarTest {
         var carYear = generateCarYear();
         var seatCount = generateSeatCount();
         var createdAt = LocalDateTime.now();
+        var status = ThreadLocalRandom.current().nextBoolean() ? CarStatus.IDLE : CarStatus.ON_THE_ROAD;
 
-        var car = Car.fromRepository(id, owner, licensePlate, carBrand, carModel, carColor, carYear, seatCount, createdAt);
+        var car = Car.fromRepository(id, owner, licensePlate, carBrand, carModel, carColor, carYear, seatCount, createdAt, status);
 
         assertEquals(id, car.id());
         assertEquals(owner, car.owner());
@@ -115,9 +118,10 @@ class CarTest {
     void shouldBeEqualWhenIdIsSame() {
         var id = new CarID(UUID.randomUUID());
         var c1 = Car.fromRepository(id, UserID.newID(), generateLicensePlate(), generateCarBrand(),
-                generateCarModel(), generateCarColor(), generateCarYear(), generateSeatCount(), LocalDateTime.now());
+                generateCarModel(), generateCarColor(), generateCarYear(), generateSeatCount(), LocalDateTime.now(), CarStatus.IDLE);
         var c2 = Car.fromRepository(id, UserID.newID(), generateLicensePlate(), generateCarBrand(),
-                generateCarModel(), generateCarColor(), generateCarYear(), generateSeatCount(), LocalDateTime.now().minusDays(1));
+                generateCarModel(), generateCarColor(), generateCarYear(), generateSeatCount(),
+                LocalDateTime.now().minusDays(1), CarStatus.IDLE);
 
         assertEquals(c1, c2);
         assertEquals(c1.hashCode(), c2.hashCode());
