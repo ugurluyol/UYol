@@ -3,6 +3,7 @@ package org.project.features.util;
 import org.jetbrains.annotations.NotNull;
 import org.project.application.dto.auth.RegistrationForm;
 import org.project.application.dto.fleet.CarDTO;
+import org.project.application.dto.ride.DriverRideForm;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.entities.Owner;
@@ -65,6 +66,28 @@ public class TestDataGenerator {
 
     public static Owner owner() {
         return Owner.of(UserID.newID(), voen());
+    }
+
+    public static DriverRideForm driverRideForm(LicensePlate licensePlate) {
+        Location from = generateLocation();
+        Location to = generateLocation();
+        RideTime rideTime = generateRideTime();
+
+        return new DriverRideForm(
+                licensePlate.value(),
+                from.description(),
+                from.latitude(),
+                from.longitude(),
+                to.description(),
+                to.latitude(),
+                to.longitude(),
+                generateSeatMap().seats(),
+                rideTime.startOfTheTrip(),
+                rideTime.endOfTheTrip(),
+                generatePrice().amount(),
+                generateRideDesc().value(),
+                generateRideRules().toArray(new RideRule[]{})
+        );
     }
 
     public static Ride rideWithoutDelivery() {
