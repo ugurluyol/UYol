@@ -30,10 +30,9 @@ public class UserProfileResource {
 
   @GET
   @Path("/picture")
-  public Response picture() {
+  public ProfilePictureDTO picture() {
     ProfilePicture profilePicture = profile.profilePictureOf(jwt.getName());
-    return Response.ok(
-        new ProfilePictureDTO(profilePicture.profilePicture(), profilePicture.imageType())).build();
+    return new ProfilePictureDTO(profilePicture.profilePicture(), profilePicture.imageType());
   }
 
   @PUT

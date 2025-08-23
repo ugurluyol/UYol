@@ -2,9 +2,8 @@ package org.project.application.controller;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import org.project.application.dto.auth.LoginForm;
-import org.project.application.dto.auth.PasswordChangeForm;
-import org.project.application.dto.auth.RegistrationForm;
+import org.project.application.dto.auth.*;
+import org.project.application.dto.common.Info;
 import org.project.application.service.AuthService;
 
 import jakarta.ws.rs.core.Response;
@@ -28,14 +27,14 @@ public class AuthResource {
 
 	@POST
 	@Path("/oidc")
-	public Response oidcAuth(@HeaderParam("X-ID-TOKEN") String idToken) {
-		return Response.ok(authService.oidcAuth(idToken)).build();
+	public Tokens oidcAuth(@HeaderParam("X-ID-TOKEN") String idToken) {
+		return authService.oidcAuth(idToken);
 	}
 
 	@POST
 	@Path("/login")
-	public Response login(LoginForm loginForm) {
-		return Response.ok(authService.login(loginForm)).build();
+	public Tokens login(LoginForm loginForm) {
+		return authService.login(loginForm);
 	}
 
 	@GET
@@ -54,28 +53,28 @@ public class AuthResource {
 
 	@PATCH
 	@Path("/refresh-token")
-	public Response refresh(@HeaderParam("Refresh-Token") String refreshToken) {
-		return Response.ok(authService.refreshToken(refreshToken)).build();
+	public Token refresh(@HeaderParam("Refresh-Token") String refreshToken) {
+		return authService.refreshToken(refreshToken);
 	}
 
 	@POST
 	@Path("/2FA")
-	public Response initiate2FA(LoginForm loginForm) {
+	public Info initiate2FA(LoginForm loginForm) {
 		authService.enable2FA(loginForm);
-		return Response.accepted("OTP sent. Please verify.").build();
+		return new Info("OTP sent. Please verify.");
 	}
 
 	@PATCH
 	@Path("/2FA/verification")
-	public Response verify2FA(@QueryParam("otp") String otp) {
-		return Response.ok(authService.twoFactorAuth(otp)).build();
+	public Tokens verify2FA(@QueryParam("otp") String otp) {
+		return authService.twoFactorAuth(otp);
 	}
 
 	@POST
 	@Path("/start/password/change")
-	public Response startPasswordChange(@QueryParam("identifier") String identifier) {
+	public Info startPasswordChange(@QueryParam("identifier") String identifier) {
 		authService.startPasswordChange(identifier);
-		return Response.ok("Confirm OTP.").build();
+		return new Info("Confirm OTP.");
 	}
 
 	@PATCH

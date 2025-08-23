@@ -5,10 +5,12 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.project.application.dto.ride.RideDTO;
 import org.project.application.pagination.PageRequest;
 import org.project.application.service.RideHistoryService;
+
+import java.util.List;
 
 @Path("/ride/history")
 @RolesAllowed("USER")
@@ -25,19 +27,19 @@ public class RideHistoryResource {
 
     @GET
     @Path("/user-rides")
-    public Response userRides(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        return Response.ok(historyService.userRides(jwt.getName(), new PageRequest(pageSize, pageNumber))).build();
+    public List<RideDTO> userRides(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        return historyService.userRides(jwt.getName(), new PageRequest(pageSize, pageNumber));
     }
 
     @GET
     @Path("/driver-rides")
-    public Response driverRides(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        return Response.ok(historyService.driverRides(jwt.getName(), new PageRequest(pageSize, pageNumber))).build();
+    public List<RideDTO> driverRides(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        return historyService.driverRides(jwt.getName(), new PageRequest(pageSize, pageNumber));
     }
 
     @GET
     @Path("/owner-rides")
-    public Response ownerRides(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        return Response.ok(historyService.ownerRides(jwt.getName(), new PageRequest(pageSize, pageNumber))).build();
+    public List<RideDTO> ownerRides(@QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
+        return historyService.ownerRides(jwt.getName(), new PageRequest(pageSize, pageNumber));
     }
 }

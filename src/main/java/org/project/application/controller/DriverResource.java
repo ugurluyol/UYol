@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.DriverRideForm;
+import org.project.application.dto.ride.RideDTO;
 import org.project.application.service.DriverService;
 
 @Path("/driver")
@@ -40,7 +41,7 @@ public class DriverResource {
 
     @POST
     @Path("/create/ride")
-    public Response createRide(DriverRideForm rideForm) {
-        return Response.ok(service.createRide(jwt.getName(), rideForm)).build();
+    public RideDTO createRide(DriverRideForm rideForm) {
+        return service.createRide(jwt.getName(), rideForm);
     }
 }
