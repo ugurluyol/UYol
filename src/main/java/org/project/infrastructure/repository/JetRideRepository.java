@@ -211,7 +211,7 @@ public class JetRideRepository implements RideRepository {
                 ride.id(),
                 ride.carID(),
                 ride.rideOwner().driverID(),
-                ride.rideOwner().ownerID(),
+                ride.rideOwner().ownerID().map(ownerID -> ownerID.value().toString()).orElse(null),
                 from.description(),
                 from.latitude(),
                 from.longitude(),

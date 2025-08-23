@@ -24,8 +24,8 @@ public record RideDTO(
     public static RideDTO from(Ride ride) {
         return new RideDTO(
                 ride.id().value().toString(),
-                ride.rideOwner().driverID().toString(),
-                ride.rideOwner().ownerID().toString(),
+                ride.rideOwner().driverID().value().toString(),
+                ride.rideOwner().ownerID().map(ownerID -> ownerID.value().toString()).orElse(null),
                 ride.route().from().description(),
                 ride.route().from().latitude(),
                 ride.route().from().longitude(),
