@@ -2,6 +2,7 @@ package org.project.domain.fleet;
 
 import org.junit.jupiter.api.Test;
 import org.project.domain.fleet.entities.Driver;
+import org.project.domain.fleet.enumerations.DriverStatus;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.Dates;
@@ -35,7 +36,7 @@ class DriverTest {
         var license = driverLicense();
         var dates = Dates.defaultDates();
 
-        var driver = Driver.fromRepository(id, userID, license, dates);
+        var driver = Driver.fromRepository(id, userID, license, dates, DriverStatus.AVAILABLE);
 
         assertEquals(id, driver.id());
         assertEquals(userID, driver.userID());
@@ -75,8 +76,8 @@ class DriverTest {
     @Test
     void shouldBeEqualWhenIdIsSame() {
         var id = new DriverID(UUID.randomUUID());
-        var d1 = Driver.fromRepository(id, UserID.newID(), driverLicense(), Dates.defaultDates());
-        var d2 = Driver.fromRepository(id, UserID.newID(), driverLicense(), Dates.defaultDates());
+        var d1 = Driver.fromRepository(id, UserID.newID(), driverLicense(), Dates.defaultDates(), DriverStatus.AVAILABLE);
+        var d2 = Driver.fromRepository(id, UserID.newID(), driverLicense(), Dates.defaultDates(), DriverStatus.AVAILABLE);
 
         assertEquals(d1, d2);
         assertEquals(d1.hashCode(), d2.hashCode());

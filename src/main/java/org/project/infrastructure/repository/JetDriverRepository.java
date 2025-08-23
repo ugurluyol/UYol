@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.project.domain.fleet.entities.Driver;
+import org.project.domain.fleet.enumerations.DriverStatus;
 import org.project.domain.fleet.repositories.DriverRepository;
 import org.project.domain.fleet.value_objects.DriverLicense;
 import org.project.domain.shared.value_objects.UserID;
@@ -27,9 +28,12 @@ public class JetDriverRepository implements DriverRepository {
 	private final JetQuerious jet;
 
 	static final String SAVE_DRIVER = insert().into("driver")
-			.columns("id", "user_id", "driver_license", "created_at", "last_updated").values().build().sql();
+			.columns("id", "user_id", "driver_license", "status", "created_at", "last_updated").values().build().sql();
 
 	static final String UPDATE_LICENSE = update("driver").set("driver_license = ?, last_updated = ?").where("id = ?")
+			.build().sql();
+
+	static final String UPDATE_STATUS = update("driver").set("status = ?, last_updated = ?").where("id = ?")
 			.build().sql();
 
 	static final String FIND_BY_ID = select().all().from("driver").where("id = ?").build().sql();
@@ -49,13 +53,20 @@ public class JetDriverRepository implements DriverRepository {
 	@Override
 	public Result<Integer, Throwable> save(Driver driver) {
 		return mapTransactionResult(jet.write(SAVE_DRIVER, driver.id(), driver.userID(),
-				driver.license().licenseNumber(), driver.dates().createdAt(), driver.dates().lastUpdated()));
+				driver.license().licenseNumber(), driver.status(), driver.dates().createdAt(), driver.dates().lastUpdated()));
 	}
 
 	@Override
 	public Result<Integer, Throwable> updateLicense(Driver driver) {
 		return mapTransactionResult(
 				jet.write(UPDATE_LICENSE, driver.license().licenseNumber(), driver.dates().lastUpdated(), driver.id()));
+	}
+
+	@Override
+	public Result<Integer, Throwable> updateStatus(Driver driver) {
+		return mapTransactionResult(
+				jet.write(UPDATE_STATUS, driver.status(), driver.dates().lastUpdated(), driver.id())
+		);
 	}
 
 	@Override
@@ -88,7 +99,8 @@ public class JetDriverRepository implements DriverRepository {
 		return Driver.fromRepository(new DriverID(UUID.fromString(rs.getString("id"))),
 				new UserID(UUID.fromString(rs.getString("user_id"))), new DriverLicense(rs.getString("driver_license")),
 				new Dates(rs.getObject("created_at", LocalDateTime.class),
-						rs.getObject("last_updated", LocalDateTime.class)));
+						rs.getObject("last_updated", LocalDateTime.class)),
+				DriverStatus.valueOf(rs.getString("status")));
 	}
 
 	private static Result<Integer, Throwable> mapTransactionResult(

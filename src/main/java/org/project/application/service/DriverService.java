@@ -115,12 +115,17 @@ public class DriverService {
                 new HashSet<>(Arrays.asList(rideForm.rideRules()))
         );
         car.startedRide();
+        driver.startedRide();
 
         rideRepository.save(ride)
                 .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
                         "Unable to process your request at the moment. Please try again."));
 
         carRepository.update(car)
+                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
+                        "Unable to process your request at the moment. Please try again."));
+
+        driverRepository.updateStatus(driver)
                 .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
                         "Unable to process your request at the moment. Please try again."));
 

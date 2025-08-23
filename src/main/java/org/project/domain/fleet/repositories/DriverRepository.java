@@ -12,6 +12,8 @@ public interface DriverRepository {
 
     Result<Integer, Throwable> updateLicense(Driver driver);
 
+    Result<Integer, Throwable> updateStatus(Driver driver);
+
     Result<Driver, Throwable> findBy(DriverID driverID);
 
     Result<Driver, Throwable> findBy(UserID userID);

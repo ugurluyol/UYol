@@ -3,6 +3,8 @@ package org.project.domain.fleet.entities;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.project.domain.fleet.enumerations.DriverStatus;
+import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.fleet.value_objects.DriverLicense;
 import org.project.domain.shared.value_objects.UserID;
@@ -14,29 +16,32 @@ public class Driver {
   private final DriverID id;
   private final UserID userID;
   private DriverLicense license;
-  private final Dates dates;
+  private Dates dates;
+  private DriverStatus status;
 
-  private Driver(DriverID id, UserID userID, DriverLicense license, Dates dates) {
+  private Driver(DriverID id, UserID userID, DriverLicense license, Dates dates, DriverStatus status) {
     this.id = id;
     this.userID = userID;
     this.license = license;
     this.dates = dates;
+    this.status = status;
   }
 
   public static Driver of(UserID userID, DriverLicense license) {
     required("userID", userID);
     required("licenseNumber", license);
 
-    return new Driver(new DriverID(UUID.randomUUID()), userID, license, Dates.defaultDates());
+    return new Driver(new DriverID(UUID.randomUUID()), userID, license, Dates.defaultDates(), DriverStatus.AVAILABLE);
   }
 
   public static Driver fromRepository(
       DriverID id,
       UserID userID,
       DriverLicense license,
-      Dates dates) {
+      Dates dates,
+      DriverStatus status) {
 
-    return new Driver(id, userID, license, dates);
+    return new Driver(id, userID, license, dates, status);
   }
 
   public DriverID id() {
@@ -56,8 +61,30 @@ public class Driver {
     this.license = license;
   }
 
+  public DriverStatus status() {
+    return status;
+  }
+
+  public void startedRide() {
+    if (status == DriverStatus.ON_THE_ROAD)
+      throw new IllegalDomainStateException("Driver is already on the road");
+    this.status = DriverStatus.ON_THE_ROAD;
+    touch();
+  }
+
+  public void finishedRide() {
+    if (status == DriverStatus.AVAILABLE)
+      throw new IllegalDomainStateException("Driver is already off the road");
+    this.status = DriverStatus.AVAILABLE;
+    touch();
+  }
+
   public Dates dates() {
     return dates;
+  }
+
+  private void touch() {
+    this.dates = dates.updated();
   }
 
   @Override
