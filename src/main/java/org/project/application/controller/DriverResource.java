@@ -2,6 +2,7 @@ package org.project.application.controller;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.inject.Instance;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
@@ -11,6 +12,9 @@ import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.DriverRideForm;
 import org.project.application.dto.ride.RideDTO;
 import org.project.application.service.DriverService;
+import org.project.domain.ride.enumerations.RideRule;
+
+import java.util.UUID;
 
 @Path("/driver")
 @RolesAllowed("USER")
@@ -43,5 +47,12 @@ public class DriverResource {
     @Path("/create/ride")
     public RideDTO createRide(DriverRideForm rideForm) {
         return service.createRide(jwt.getName(), rideForm);
+    }
+
+    @PATCH
+    @Path("/add/ride-rule")
+    public Response addRideRule(@QueryParam("ride-rule") RideRule rideRule, @QueryParam("rideID") UUID rideID) {
+        service.addRideRule(jwt.getName(), rideRule, rideID);
+        return Response.accepted().build();
     }
 }

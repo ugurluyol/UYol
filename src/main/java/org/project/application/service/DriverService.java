@@ -5,12 +5,14 @@ import jakarta.ws.rs.core.Response;
 import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.DriverRideForm;
 import org.project.application.dto.ride.RideDTO;
+import org.project.application.util.RestUtil;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.repositories.CarRepository;
 import org.project.domain.fleet.repositories.DriverRepository;
 import org.project.domain.fleet.value_objects.*;
 import org.project.domain.ride.entities.Ride;
+import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.repositories.RideRepository;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.value_objects.UserID;
@@ -20,9 +22,9 @@ import org.project.domain.user.repositories.UserRepository;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.UUID;
 
-import static org.project.application.util.RestUtil.required;
-import static org.project.application.util.RestUtil.responseException;
+import static org.project.application.util.RestUtil.*;
 
 @ApplicationScoped
 public class DriverService {
@@ -55,9 +57,7 @@ public class DriverService {
             throw responseException(Response.Status.CONFLICT, "This driver license is already registered.");
 
         Driver driver = Driver.of(new UserID(user.id()), license);
-        driverRepository.save(driver)
-                .orElseThrow(()  -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-                        "Unable to process your request at the moment. Please try again."));
+        driverRepository.save(driver).orElseThrow(RestUtil::unableToProcessRequestException);
     }
 
     public void saveCar(String identifier, CarDTO carDTO) {
@@ -79,9 +79,7 @@ public class DriverService {
                 new SeatCount(carDTO.seatCount())
         );
 
-        carRepository.save(car)
-                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-                        "Unable to process your request at the moment. Please try again."));
+        carRepository.save(car).orElseThrow(RestUtil::unableToProcessRequestException);
     }
 
     public RideDTO createRide(String identified, DriverRideForm rideForm) {
@@ -117,18 +115,27 @@ public class DriverService {
         car.startedRide();
         driver.startedRide();
 
-        rideRepository.save(ride)
-                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-                        "Unable to process your request at the moment. Please try again."));
-
-        carRepository.update(car)
-                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-                        "Unable to process your request at the moment. Please try again."));
-
-        driverRepository.updateStatus(driver)
-                .orElseThrow(() -> responseException(Response.Status.INTERNAL_SERVER_ERROR,
-                        "Unable to process your request at the moment. Please try again."));
-
+        rideRepository.save(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+        carRepository.update(car).orElseThrow(RestUtil::unableToProcessRequestException);
+        driverRepository.updateStatus(driver).orElseThrow(RestUtil::unableToProcessRequestException);
         return RideDTO.from(ride);
+    }
+
+    public void addRideRule(String identifier, RideRule rideRule, UUID rideUUID) {
+        User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
+        UserID userID = new UserID(user.id());
+        Driver driver = driverRepository.findBy(userID)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Driver account is not found."));
+
+        RideID rideID = new RideID(rideUUID);
+        Ride ride = rideRepository.findBy(rideID)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Ride is not found."));
+
+        boolean notADriverOfThisRide = !ride.rideOwner().driverID().equals(driver.id());
+        if (notADriverOfThisRide)
+            throw responseException(Response.Status.FORBIDDEN, "You can`t modify someones ride");
+
+        ride.addRideRule(rideRule);
+        rideRepository.updateRules(ride).orElseThrow(RestUtil::unableToProcessRequestException);
     }
 }

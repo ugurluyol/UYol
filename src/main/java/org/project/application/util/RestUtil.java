@@ -35,4 +35,9 @@ public class RestUtil {
 
 		return field;
 	}
+
+	public static WebApplicationException unableToProcessRequestException() {
+		return responseException(Response.Status.INTERNAL_SERVER_ERROR,
+				"Unable to process your request at the moment. Please try again.");
+	}
 }
