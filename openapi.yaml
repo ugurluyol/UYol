@@ -1,0 +1,722 @@
+---
+openapi: 3.1.0
+components:
+  schemas:
+    CarDTO:
+      type: object
+      properties:
+        licensePlate:
+          type: string
+        carBrand:
+          type: string
+        carModel:
+          type: string
+        carColor:
+          type: string
+        carYear:
+          type: integer
+          format: int32
+        seatCount:
+          type: integer
+          format: int32
+    DriverRideForm:
+      type: object
+      properties:
+        licensePlate:
+          type: string
+        fromLocationDesc:
+          type: string
+        fromLatitude:
+          type: number
+          format: double
+        fromLongitude:
+          type: number
+          format: double
+        toLocationDesc:
+          type: string
+        toLatitude:
+          type: number
+          format: double
+        toLongitude:
+          type: number
+          format: double
+        seatMap:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: "#/components/schemas/SeatStatus"
+        startTime:
+          $ref: "#/components/schemas/LocalDateTime"
+        endTime:
+          $ref: "#/components/schemas/LocalDateTime"
+        price:
+          type: number
+        rideDesc:
+          type: string
+        rideRules:
+          type: array
+          items:
+            $ref: "#/components/schemas/RideRule"
+    Info:
+      type: object
+      properties:
+        info:
+          type: string
+    LocalDate:
+      type: string
+      format: date
+      examples:
+      - 2022-03-10
+    LocalDateTime:
+      type: string
+      format: date-time
+      examples:
+      - 2022-03-10T12:15:50
+    LoginForm:
+      type: object
+      properties:
+        identifier:
+          type: string
+        password:
+          type: string
+    PasswordChangeForm:
+      type: object
+      properties:
+        otp:
+          type: string
+        newPassword:
+          type: string
+        passwordConfirmation:
+          type: string
+    ProfilePictureDTO:
+      type: object
+      properties:
+        profilePicture:
+          type: string
+          format: binary
+        imageType:
+          type: string
+    RegistrationForm:
+      type: object
+      properties:
+        firstname:
+          type: string
+        surname:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        passwordConfirmation:
+          type: string
+        birthDate:
+          $ref: "#/components/schemas/LocalDate"
+    RideDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        driverId:
+          type: string
+        ownerId:
+          type: string
+        fromLocationDesc:
+          type: string
+        fromLatitude:
+          type: number
+          format: double
+        fromLongitude:
+          type: number
+          format: double
+        toLocationDesc:
+          type: string
+        toLatitude:
+          type: number
+          format: double
+        toLongitude:
+          type: number
+          format: double
+        startTime:
+          $ref: "#/components/schemas/LocalDateTime"
+        endTime:
+          $ref: "#/components/schemas/LocalDateTime"
+        price:
+          type: number
+        status:
+          $ref: "#/components/schemas/RideStatus"
+    RideRule:
+      type: string
+      enum:
+      - NO_SMOKING
+      - NO_PETS
+      - LIMITED_LUGGAGE
+    RideStatus:
+      type: string
+      enum:
+      - PENDING
+      - ON_THE_ROAD
+      - CANCELED
+      - ENDED_SUCCESSFULLY
+    SeatStatus:
+      type: string
+      enum:
+      - EMPTY
+      - DRIVER
+      - MALE_OCCUPIED
+      - FEMALE_OCCUPIED
+      - CHILD_OCCUPIED
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+    Tokens:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
+  securitySchemes:
+    SecurityScheme:
+      type: openIdConnect
+      description: Authentication
+paths:
+  /uyol/auth/2FA:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Info"
+        "400":
+          description: Bad Request
+      summary: Initiate 2 FA
+      tags:
+      - Auth Resource
+  /uyol/auth/2FA/verification:
+    patch:
+      parameters:
+      - name: otp
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tokens"
+      summary: Verify 2 FA
+      tags:
+      - Auth Resource
+  /uyol/auth/apply/password/change:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordChangeForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+      summary: Apply Password Change
+      tags:
+      - Auth Resource
+  /uyol/auth/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tokens"
+        "400":
+          description: Bad Request
+      summary: Login
+      tags:
+      - Auth Resource
+  /uyol/auth/oidc:
+    post:
+      parameters:
+      - name: X-ID-TOKEN
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tokens"
+      summary: Oidc Auth
+      tags:
+      - Auth Resource
+  /uyol/auth/refresh-token:
+    patch:
+      parameters:
+      - name: Refresh-Token
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+      summary: Refresh
+      tags:
+      - Auth Resource
+  /uyol/auth/registration:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: Registration
+      tags:
+      - Auth Resource
+  /uyol/auth/resend-otp:
+    get:
+      parameters:
+      - name: identifier
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+      summary: Resend OTP
+      tags:
+      - Auth Resource
+  /uyol/auth/start/password/change:
+    post:
+      parameters:
+      - name: identifier
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Info"
+      summary: Start Password Change
+      tags:
+      - Auth Resource
+  /uyol/auth/verification:
+    patch:
+      parameters:
+      - name: otp
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+      summary: Verification
+      tags:
+      - Auth Resource
+  /uyol/driver/car/save:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      summary: Save Car
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/driver/create/ride:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DriverRideForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RideDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      summary: Create Ride
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/driver/registration:
+    post:
+      parameters:
+      - name: driver_license
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Register Driver
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/owner/car/save:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      summary: Save Car
+      tags:
+      - Owner Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/owner/register:
+    post:
+      parameters:
+      - name: voen
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Register Owner
+      tags:
+      - Owner Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/registered/cars:
+    get:
+      parameters:
+      - name: pageNumber
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CarDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Registered Cars
+      tags:
+      - Registered Cards Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/ride/actual:
+    get:
+      parameters:
+      - name: date
+        in: query
+        schema:
+          type: string
+      - name: endDesc
+        in: query
+        schema:
+          type: string
+      - name: endLat
+        in: query
+        schema:
+          type: number
+          format: double
+      - name: endLon
+        in: query
+        schema:
+          type: number
+          format: double
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: startDesc
+        in: query
+        schema:
+          type: string
+      - name: startLat
+        in: query
+        schema:
+          type: number
+          format: double
+      - name: startLon
+        in: query
+        schema:
+          type: number
+          format: double
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RideDTO"
+      summary: Actual For
+      tags:
+      - Ride Resource
+  /uyol/ride/date:
+    get:
+      parameters:
+      - name: date
+        in: query
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RideDTO"
+      summary: Page Of
+      tags:
+      - Ride Resource
+  /uyol/ride/history/driver-rides:
+    get:
+      parameters:
+      - name: pageNumber
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RideDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Driver Rides
+      tags:
+      - Ride History Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/ride/history/owner-rides:
+    get:
+      parameters:
+      - name: pageNumber
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RideDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Owner Rides
+      tags:
+      - Ride History Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/ride/history/user-rides:
+    get:
+      parameters:
+      - name: pageNumber
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RideDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: User Rides
+      tags:
+      - Ride History Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/user/profile/picture:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePictureDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Picture
+      tags:
+      - User Profile Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/user/profile/picture/change:
+    put:
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Change Picture
+      tags:
+      - User Profile Resource
+      security:
+      - SecurityScheme:
+        - USER
+info:
+  title: UYol API
+  version: 1.0.0-SNAPSHOT
