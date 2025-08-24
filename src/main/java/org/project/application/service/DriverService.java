@@ -122,6 +122,30 @@ public class DriverService {
     }
 
     public void addRideRule(String identifier, RideRule rideRule, UUID rideUUID) {
+        Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+        ride.addRideRule(rideRule);
+        rideRepository.updateRules(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+    }
+
+    public void removeRideRule(String identifier, RideRule rideRule, UUID rideUUID) {
+        Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+        ride.removeRideRule(rideRule);
+        rideRepository.updateRules(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+    }
+
+    public void cancelRide(String identifier, UUID rideUUID) {
+        Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+        ride.cancel();
+        rideRepository.updateStatus(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+    }
+
+    public void finishRide(String identifier, UUID rideUUID) {
+        Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+        ride.finish();
+        rideRepository.updateStatus(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+    }
+
+    private Ride validateAndRetrieveRide(String identifier, UUID rideUUID) {
         User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
         UserID userID = new UserID(user.id());
         Driver driver = driverRepository.findBy(userID)
@@ -134,8 +158,6 @@ public class DriverService {
         boolean notADriverOfThisRide = !ride.rideOwner().driverID().equals(driver.id());
         if (notADriverOfThisRide)
             throw responseException(Response.Status.FORBIDDEN, "You can`t modify someones ride");
-
-        ride.addRideRule(rideRule);
-        rideRepository.updateRules(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+        return ride;
     }
 }

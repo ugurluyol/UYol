@@ -55,4 +55,25 @@ public class DriverResource {
         service.addRideRule(jwt.getName(), rideRule, rideID);
         return Response.accepted().build();
     }
+
+    @PATCH
+    @Path("/remove/ride-rule")
+    public Response removeRideRule(@QueryParam("ride-rule") RideRule rideRule, @QueryParam("rideID") UUID rideID) {
+        service.removeRideRule(jwt.getName(), rideRule, rideID);
+        return Response.accepted().build();
+    }
+
+    @POST
+    @Path("/cancel/ride")
+    public Response cancelRide(@QueryParam("rideID") UUID rideID) {
+        service.cancelRide(jwt.getName(), rideID);
+        return Response.accepted().build();
+    }
+
+    @POST
+    @Path("/finish/ride")
+    public Response finishRide(@QueryParam("rideID") UUID rideID) {
+        service.finishRide(jwt.getName(), rideID);
+        return Response.accepted().build();
+    }
 }
