@@ -4,9 +4,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.project.domain.fleet.enumerations.DriverStatus;
+import org.project.domain.fleet.value_objects.*;
 import org.project.domain.shared.exceptions.IllegalDomainStateException;
 import org.project.domain.shared.value_objects.DriverID;
-import org.project.domain.fleet.value_objects.DriverLicense;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.shared.value_objects.Dates;
 
@@ -15,23 +15,36 @@ import static org.project.domain.shared.util.Utils.required;
 public class Driver {
   private final DriverID id;
   private final UserID userID;
-  private DriverLicense license;
   private Dates dates;
+  private DriverLicense license;
   private DriverStatus status;
+  private TotalRides rides;
+  private DriverRating rating;
 
-  private Driver(DriverID id, UserID userID, DriverLicense license, Dates dates, DriverStatus status) {
+  private Driver(
+          DriverID id,
+          UserID userID,
+          DriverLicense license,
+          Dates dates,
+          DriverStatus status,
+          TotalRides rides,
+          DriverRating rating) {
+
     this.id = id;
     this.userID = userID;
     this.license = license;
     this.dates = dates;
     this.status = status;
+    this.rides = rides;
+    this.rating = rating;
   }
 
   public static Driver of(UserID userID, DriverLicense license) {
     required("userID", userID);
     required("licenseNumber", license);
 
-    return new Driver(new DriverID(UUID.randomUUID()), userID, license, Dates.defaultDates(), DriverStatus.AVAILABLE);
+    return new Driver(new DriverID(UUID.randomUUID()), userID, license,
+            Dates.defaultDates(), DriverStatus.AVAILABLE, TotalRides.defaultRides(), new NoRating());
   }
 
   public static Driver fromRepository(
@@ -39,9 +52,11 @@ public class Driver {
       UserID userID,
       DriverLicense license,
       Dates dates,
-      DriverStatus status) {
+      DriverStatus status,
+      TotalRides rides,
+      DriverRating rating) {
 
-    return new Driver(id, userID, license, dates, status);
+    return new Driver(id, userID, license, dates, status, rides, rating);
   }
 
   public DriverID id() {
@@ -59,6 +74,7 @@ public class Driver {
   public void changeLicense(DriverLicense license) {
     required("licenseNumber", license);
     this.license = license;
+    touch();
   }
 
   public DriverStatus status() {
@@ -76,11 +92,27 @@ public class Driver {
     if (status == DriverStatus.AVAILABLE)
       throw new IllegalDomainStateException("Driver is already off the road");
     this.status = DriverStatus.AVAILABLE;
+    this.rides = rides.newRide();
     touch();
   }
 
   public Dates dates() {
     return dates;
+  }
+
+  public TotalRides rides() {
+    return rides;
+  }
+
+  public DriverRating rating() {
+    return rating;
+  }
+
+  public DriverRating rate(int score) {
+    return switch (rating) {
+      case NoRating nr -> this.rating = Rated.firstRate(score);
+      case Rated rated -> this.rating = rated.newRate(score);
+    };
   }
 
   private void touch() {
