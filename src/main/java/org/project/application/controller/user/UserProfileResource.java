@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.application.dto.profile.ProfilePictureDTO;
+import org.project.application.service.UserProfileDTO;
 import org.project.application.service.UserProfileService;
 import org.project.domain.user.value_objects.ProfilePicture;
 
@@ -26,6 +27,11 @@ public class UserProfileResource {
   UserProfileResource(UserProfileService profile, JsonWebToken jwt) {
     this.profile = profile;
     this.jwt = jwt;
+  }
+
+  @GET
+  public UserProfileDTO profile() {
+    return profile.of(jwt.getName());
   }
 
   @GET

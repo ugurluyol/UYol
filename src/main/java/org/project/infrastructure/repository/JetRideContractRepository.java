@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.project.domain.ride.entities.RideContract;
 import org.project.domain.ride.repositories.RideContractRepository;
 import org.project.domain.ride.value_object.*;
@@ -19,6 +20,7 @@ import static com.hadzhy.jetquerious.sql.QueryForge.insert;
 import static com.hadzhy.jetquerious.sql.QueryForge.select;
 import static org.project.infrastructure.repository.JetOTPRepository.mapTransactionResult;
 
+@ApplicationScoped
 public class JetRideContractRepository implements RideContractRepository {
 
     private final JetQuerious jet;
@@ -47,6 +49,13 @@ public class JetRideContractRepository implements RideContractRepository {
             .all()
             .from("ride_contract")
             .where("ride_id = ?")
+            .limitAndOffset()
+            .sql();
+
+    static final String FIND_BY_USER_ID = select()
+            .all()
+            .from("ride_contract")
+            .where("user_id = ?")
             .limitAndOffset()
             .sql();
 
@@ -80,6 +89,11 @@ public class JetRideContractRepository implements RideContractRepository {
     @Override
     public Result<List<RideContract>, Throwable> findBy(RideID rideID, Pageable page) {
         return mapPageResult(jet.readListOf(FIND_BY_RIDE_ID, this::mapRideContract, rideID, page.limit(), page.offset()));
+    }
+
+    @Override
+    public Result<List<RideContract>, Throwable> findBy(UserID userID, Pageable page) {
+        return mapPageResult(jet.readListOf(FIND_BY_USER_ID, this::mapRideContract, page.limit(), page.offset()));
     }
 
     private RideContract mapRideContract(ResultSet rs) throws SQLException {

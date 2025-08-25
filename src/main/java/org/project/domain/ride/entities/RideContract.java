@@ -6,6 +6,7 @@ import org.project.domain.ride.value_object.RideContractID;
 import org.project.domain.ride.value_object.RideID;
 import org.project.domain.shared.value_objects.UserID;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import static org.project.domain.shared.util.Utils.required;
@@ -53,6 +54,10 @@ public class RideContract {
 
     public Price pricePerSeat() {
         return pricePerSeat;
+    }
+
+    public Price totalPrice() {
+        return new Price(pricePerSeat.amount().multiply(BigDecimal.valueOf(bookedSeats.size())));
     }
 
     public BookedSeats bookedSeats() {

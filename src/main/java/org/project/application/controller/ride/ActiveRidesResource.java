@@ -11,11 +11,11 @@ import org.project.domain.ride.value_object.Location;
 import java.util.List;
 
 @Path("/ride")
-public class RideResource {
+public class ActiveRidesResource {
 
     private final ActiveRidesService ridesService;
 
-    RideResource(ActiveRidesService ridesService) {
+    ActiveRidesResource(ActiveRidesService ridesService) {
         this.ridesService = ridesService;
     }
 
