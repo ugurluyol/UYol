@@ -225,6 +225,10 @@ public class Ride {
     return status == RideStatus.ON_THE_ROAD;
   }
 
+  public boolean isFinished() {
+    return status == RideStatus.ENDED_SUCCESSFULLY;
+  }
+
   public boolean hasRule(RideRule rule) {
     return rideRules.contains(rule);
   }

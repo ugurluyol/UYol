@@ -18,4 +18,6 @@ public interface RideContractRepository {
     Result<List<RideContract>, Throwable> findBy(RideID rideID, Pageable page);
 
     Result<List<RideContract>, Throwable> findBy(UserID userID, Pageable page);
+
+    boolean isExists(UserID userID, RideID rideID);
 }

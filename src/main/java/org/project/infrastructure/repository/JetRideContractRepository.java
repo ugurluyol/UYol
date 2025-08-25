@@ -59,6 +59,14 @@ public class JetRideContractRepository implements RideContractRepository {
             .limitAndOffset()
             .sql();
 
+    static final String IS_EXISTS = select()
+            .count("*")
+            .from("ride_contract")
+            .where("ride_id = ?")
+            .and("user_id = ?")
+            .build()
+            .sql();
+
     JetRideContractRepository() {
         this.jet = JetQuerious.instance();
     }
@@ -94,6 +102,13 @@ public class JetRideContractRepository implements RideContractRepository {
     @Override
     public Result<List<RideContract>, Throwable> findBy(UserID userID, Pageable page) {
         return mapPageResult(jet.readListOf(FIND_BY_USER_ID, this::mapRideContract, page.limit(), page.offset()));
+    }
+
+    @Override
+    public boolean isExists(UserID userID, RideID rideID) {
+        return jet.readObjectOf(IS_EXISTS, Integer.class, rideID, userID)
+                .mapSuccess(count -> count != null && count > 0)
+                .orElse(false);
     }
 
     private RideContract mapRideContract(ResultSet rs) throws SQLException {
