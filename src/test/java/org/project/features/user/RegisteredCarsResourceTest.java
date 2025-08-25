@@ -1,6 +1,5 @@
 package org.project.features.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.common.mapper.TypeRef;
@@ -18,14 +17,11 @@ import org.project.domain.fleet.repositories.OwnerRepository;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
-import org.project.features.util.DBManagementUtils;
 import org.project.features.util.PostgresTestResource;
 import org.project.features.util.TestDataGenerator;
 import org.project.infrastructure.security.JWTUtility;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
@@ -35,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class RegisteredCardsResourceTest {
+class RegisteredCarsResourceTest {
 
     @Inject
     UserRepository userRepository;

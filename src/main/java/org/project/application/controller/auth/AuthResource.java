@@ -1,4 +1,4 @@
-package org.project.application.controller;
+package org.project.application.controller.auth;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

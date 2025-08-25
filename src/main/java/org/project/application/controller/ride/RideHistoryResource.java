@@ -1,4 +1,4 @@
-package org.project.application.controller;
+package org.project.application.controller.ride;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.inject.Instance;

@@ -1,4 +1,4 @@
-package org.project.application.controller;
+package org.project.application.controller.fleet;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.inject.Instance;
@@ -14,13 +14,13 @@ import java.util.List;
 
 @Path("/registered/cars")
 @RolesAllowed("USER")
-public class RegisteredCardsResource {
+public class RegisteredCarsResource {
 
     private final JsonWebToken jwt;
 
     private final RegisteredCarsService carsService;
 
-    RegisteredCardsResource(Instance<JsonWebToken> jwt, RegisteredCarsService carsService) {
+    RegisteredCarsResource(Instance<JsonWebToken> jwt, RegisteredCarsService carsService) {
         this.jwt = jwt.get();
         this.carsService = carsService;
     }

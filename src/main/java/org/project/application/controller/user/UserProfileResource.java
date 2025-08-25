@@ -1,4 +1,4 @@
-package org.project.application.controller;
+package org.project.application.controller.user;
 
 import java.io.InputStream;
 

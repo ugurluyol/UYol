@@ -1,4 +1,4 @@
-package org.project.application.controller;
+package org.project.application.controller.ride;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
