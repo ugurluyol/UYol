@@ -35,7 +35,7 @@ import org.project.infrastructure.repository.JetCarRepository;
 
 @QuarkusTest
 @QuarkusTestResource(PostgresTestResource.class)
-class RideResourceTest {
+class ActiveRidesResourceTest {
 
 	@Inject
 	UserRepository userRepository;
