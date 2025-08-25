@@ -64,6 +64,13 @@ public class DriverResource {
     }
 
     @POST
+    @Path("/start/ride")
+    public Response startRide(@QueryParam("rideID") UUID rideID) {
+        service.startRide(jwt.getName(), rideID);
+        return Response.accepted().build();
+    }
+
+    @POST
     @Path("/cancel/ride")
     public Response cancelRide(@QueryParam("rideID") UUID rideID) {
         service.cancelRide(jwt.getName(), rideID);

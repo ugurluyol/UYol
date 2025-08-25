@@ -133,6 +133,12 @@ public class DriverService {
         rideRepository.updateRules(ride).orElseThrow(RestUtil::unableToProcessRequestException);
     }
 
+    public void startRide(String identifier, UUID rideUUID) {
+        Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+        ride.start();
+        rideRepository.updateStatus(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+    }
+
     public void cancelRide(String identifier, UUID rideUUID) {
         Ride ride = validateAndRetrieveRide(identifier, rideUUID);
         ride.cancel();
