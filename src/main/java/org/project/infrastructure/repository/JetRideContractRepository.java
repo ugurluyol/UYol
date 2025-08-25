@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hadzhy.jetquerious.jdbc.JetQuerious;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.project.domain.ride.entities.RideContract;
 import org.project.domain.ride.repositories.RideContractRepository;
 import org.project.domain.ride.value_object.*;
@@ -19,6 +20,7 @@ import static com.hadzhy.jetquerious.sql.QueryForge.insert;
 import static com.hadzhy.jetquerious.sql.QueryForge.select;
 import static org.project.infrastructure.repository.JetOTPRepository.mapTransactionResult;
 
+@ApplicationScoped
 public class JetRideContractRepository implements RideContractRepository {
 
     private final JetQuerious jet;
