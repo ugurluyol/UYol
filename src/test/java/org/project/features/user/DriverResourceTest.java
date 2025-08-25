@@ -145,7 +145,7 @@ class DriverResourceTest {
 
 		String jwtToken = jwtUtility.generateToken(user);
 
-		LicensePlate plate = new LicensePlate("XYZ-123");
+		LicensePlate plate = TestDataGenerator.generateLicensePlate();
 		Car car = Car.of(driver.userID(), plate, TestDataGenerator.generateCarBrand(),
 				TestDataGenerator.generateCarModel(), TestDataGenerator.generateCarColor(),
 				TestDataGenerator.generateCarYear(), TestDataGenerator.generateSeatCount());
@@ -176,7 +176,7 @@ class DriverResourceTest {
 
 		String jwtToken = jwtUtility.generateToken(user);
 
-		LicensePlate plate = new LicensePlate("XYZ-123");
+		LicensePlate plate = TestDataGenerator.generateLicensePlate();
 		Car car = Car.of(driver.userID(), plate, TestDataGenerator.generateCarBrand(),
 				TestDataGenerator.generateCarModel(), TestDataGenerator.generateCarColor(),
 				TestDataGenerator.generateCarYear(), TestDataGenerator.generateSeatCount());
