@@ -7,8 +7,11 @@ import static com.hadzhy.jetquerious.sql.QueryForge.update;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
+import org.project.application.dto.fleet.DriverDTO;
+import org.project.application.pagination.PageRequest;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.enumerations.DriverStatus;
 import org.project.domain.fleet.repositories.DriverRepository;
@@ -89,6 +92,22 @@ public class JetDriverRepository implements DriverRepository {
 			.build()
 			.sql();
 
+	static final String PAGE = """
+			SELECT
+			    d.id AS id,
+			    d.rides AS rides,
+			    d.total_reviews AS total_reviews,
+			    d.sum_of_scores AS sum_of_scores,
+			    CASE
+			        WHEN d.total_reviews > 0
+			        THEN d.sum_of_scores::decimal / d.total_reviews
+			        ELSE NULL
+			    END AS average
+			FROM driver d
+			ORDER BY average DESC
+			LIMIT ? OFFSET ?;
+			""";
+
 	static final String IS_DRIVER_EXISTS = select().count("user_id")
 			.from("driver").where("user_id = ?").build().sql();
 
@@ -163,6 +182,21 @@ public class JetDriverRepository implements DriverRepository {
 	public Result<Driver, Throwable> findBy(UserID userID) {
 		var result = jet.read(FIND_BY_USER_ID, this::driverMapper, userID);
 		return new Result<>(result.value(), result.throwable(), result.success());
+	}
+
+	@Override
+	public Result<List<DriverDTO>, Throwable> page(PageRequest page) {
+		var result = jet.readListOf(PAGE, this::driverDTOMapper, page.limit(), page.offset());
+		return new Result<>(result.value(), result.throwable(), result.success());
+	}
+
+	private DriverDTO driverDTOMapper(ResultSet rs) throws SQLException {
+		return new DriverDTO(
+				rs.getString("id"),
+				rs.getInt("rides"),
+				rs.getInt("total_reviews"),
+				rs.getDouble("average")
+		);
 	}
 
 	@Override
