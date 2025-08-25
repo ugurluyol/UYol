@@ -52,6 +52,13 @@ public class JetRideContractRepository implements RideContractRepository {
             .limitAndOffset()
             .sql();
 
+    static final String FIND_BY_USER_ID = select()
+            .all()
+            .from("ride_contract")
+            .where("user_id = ?")
+            .limitAndOffset()
+            .sql();
+
     JetRideContractRepository() {
         this.jet = JetQuerious.instance();
     }
@@ -82,6 +89,11 @@ public class JetRideContractRepository implements RideContractRepository {
     @Override
     public Result<List<RideContract>, Throwable> findBy(RideID rideID, Pageable page) {
         return mapPageResult(jet.readListOf(FIND_BY_RIDE_ID, this::mapRideContract, rideID, page.limit(), page.offset()));
+    }
+
+    @Override
+    public Result<List<RideContract>, Throwable> findBy(UserID userID, Pageable page) {
+        return mapPageResult(jet.readListOf(FIND_BY_USER_ID, this::mapRideContract, page.limit(), page.offset()));
     }
 
     private RideContract mapRideContract(ResultSet rs) throws SQLException {
