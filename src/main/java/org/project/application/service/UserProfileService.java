@@ -27,6 +27,10 @@ public class UserProfileService {
     this.pictureRepository = pictureRepository;
   }
 
+  public UserProfileDTO of(String identifier) {
+    return UserProfileDTO.from(userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow());
+  }
+
   public void changeProfilePictureOf(String identifier, InputStream inputStream) {
     required("Picture", inputStream);
     User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
