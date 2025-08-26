@@ -1,4 +1,4 @@
-package org.project.features.user;
+package org.project.features.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

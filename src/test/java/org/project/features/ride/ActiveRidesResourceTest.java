@@ -1,4 +1,4 @@
-package org.project.features.user;
+package org.project.features.ride;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
-import org.project.application.service.ActiveRidesService;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.entities.Owner;

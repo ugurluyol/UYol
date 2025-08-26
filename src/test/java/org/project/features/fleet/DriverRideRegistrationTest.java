@@ -1,4 +1,4 @@
-package org.project.features.user;
+package org.project.features.fleet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;

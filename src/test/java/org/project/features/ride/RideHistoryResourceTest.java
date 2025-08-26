@@ -1,4 +1,4 @@
-package org.project.features.user;
+package org.project.features.ride;
 
 import static io.restassured.RestAssured.given;
 

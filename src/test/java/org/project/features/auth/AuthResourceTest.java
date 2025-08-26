@@ -1,4 +1,4 @@
-package org.project.features.user;
+package org.project.features.auth;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
