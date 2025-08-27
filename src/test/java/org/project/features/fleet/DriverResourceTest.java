@@ -308,6 +308,194 @@ class DriverResourceTest {
 				.post("/uyol/driver/finish/ride").then().statusCode(Response.Status.ACCEPTED.getStatusCode());
 	}
 
+	@Test
+	void cannotCreateRideWithPastDepartureTime() {
+		User user = TestDataGenerator.user();
+		userRepository.save(user);
+		Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
+		driverRepository.save(driver);
+		String jwtToken = jwtUtility.generateToken(user);
 
+		LicensePlate plate = TestDataGenerator.generateLicensePlate();
+		Car car = Car.of(driver.userID(), plate, TestDataGenerator.generateCarBrand(),
+				TestDataGenerator.generateCarModel(), TestDataGenerator.generateCarColor(),
+				TestDataGenerator.generateCarYear(), TestDataGenerator.generateSeatCount());
+		carRepository.save(car);
+
+		DriverRideForm rideForm = TestDataGenerator.driverRideForm(plate);
+		rideForm = new DriverRideForm(
+				rideForm.licensePlate(),
+				rideForm.fromLocationDesc(), rideForm.fromLatitude(), rideForm.fromLongitude(),
+				rideForm.toLocationDesc(), rideForm.toLatitude(), rideForm.toLongitude(),
+				rideForm.seatMap(),
+				LocalDateTime.now().minusHours(2),
+				LocalDateTime.now().minusHours(1),
+				rideForm.price(),
+				rideForm.rideDesc(),
+				rideForm.rideRules()
+		);
+
+		given().header("Authorization", "Bearer " + jwtToken)
+				.contentType(ContentType.JSON)
+				.body(rideForm)
+				.when()
+				.post("/uyol/driver/create/ride")
+				.then()
+				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+	}
+
+	@Test
+	void cannotCreateRideWithArrivalBeforeDeparture() {
+		User user = TestDataGenerator.user();
+		userRepository.save(user);
+		Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
+		driverRepository.save(driver);
+		String jwtToken = jwtUtility.generateToken(user);
+
+		LicensePlate plate = TestDataGenerator.generateLicensePlate();
+		carRepository.save(Car.of(driver.userID(), plate,
+				TestDataGenerator.generateCarBrand(),
+				TestDataGenerator.generateCarModel(),
+				TestDataGenerator.generateCarColor(),
+				TestDataGenerator.generateCarYear(),
+				TestDataGenerator.generateSeatCount()));
+
+		DriverRideForm rideForm = TestDataGenerator.driverRideForm(plate);
+		rideForm = new DriverRideForm(
+				rideForm.licensePlate(),
+				rideForm.fromLocationDesc(), rideForm.fromLatitude(), rideForm.fromLongitude(),
+				rideForm.toLocationDesc(), rideForm.toLatitude(), rideForm.toLongitude(),
+				rideForm.seatMap(),
+				LocalDateTime.now().plusHours(3),
+				LocalDateTime.now().plusHours(2),
+				rideForm.price(),
+				rideForm.rideDesc(),
+				rideForm.rideRules()
+		);
+
+		given().header("Authorization", "Bearer " + jwtToken)
+				.contentType(ContentType.JSON)
+				.body(rideForm)
+				.when()
+				.post("/uyol/driver/create/ride")
+				.then()
+				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+	}
+
+	@Test
+	void cannotStartRideTwice() {
+		User user = TestDataGenerator.user();
+		userRepository.save(user);
+		Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
+		driverRepository.save(driver);
+		String jwtToken = jwtUtility.generateToken(user);
+
+		LicensePlate plate = TestDataGenerator.generateLicensePlate();
+		carRepository.save(Car.of(driver.userID(), plate,
+				TestDataGenerator.generateCarBrand(),
+				TestDataGenerator.generateCarModel(),
+				TestDataGenerator.generateCarColor(),
+				TestDataGenerator.generateCarYear(),
+				TestDataGenerator.generateSeatCount()));
+
+		UUID rideID = given().header("Authorization", "Bearer " + jwtToken)
+				.contentType(ContentType.JSON)
+				.body(TestDataGenerator.driverRideForm(plate))
+				.when()
+				.post("/uyol/driver/create/ride")
+				.then()
+				.statusCode(Response.Status.OK.getStatusCode())
+				.extract()
+				.body().jsonPath().getUUID("id");
+
+		given().header("Authorization", "Bearer " + jwtToken)
+				.queryParam("rideID", rideID)
+				.when()
+				.post("/uyol/driver/start/ride")
+				.then()
+				.statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+		given().header("Authorization", "Bearer " + jwtToken)
+				.queryParam("rideID", rideID)
+				.when()
+				.post("/uyol/driver/start/ride")
+				.then()
+				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+	}
+
+	@Test
+	void cannotFinishRideWithoutStart() {
+		User user = TestDataGenerator.user();
+		userRepository.save(user);
+		Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
+		driverRepository.save(driver);
+		String jwtToken = jwtUtility.generateToken(user);
+
+		LicensePlate plate = TestDataGenerator.generateLicensePlate();
+		carRepository.save(Car.of(driver.userID(), plate,
+				TestDataGenerator.generateCarBrand(),
+				TestDataGenerator.generateCarModel(),
+				TestDataGenerator.generateCarColor(),
+				TestDataGenerator.generateCarYear(),
+				TestDataGenerator.generateSeatCount()));
+
+		UUID rideID = given().header("Authorization", "Bearer " + jwtToken)
+				.contentType(ContentType.JSON)
+				.body(TestDataGenerator.driverRideForm(plate))
+				.when()
+				.post("/uyol/driver/create/ride")
+				.then()
+				.statusCode(Response.Status.OK.getStatusCode())
+				.extract()
+				.body().jsonPath().getUUID("id");
+
+		given().header("Authorization", "Bearer " + jwtToken)
+				.queryParam("rideID", rideID)
+				.when()
+				.post("/uyol/driver/finish/ride")
+				.then()
+				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+	}
+
+	@Test
+	void cannotCancelRideAfterStart() {
+		User user = TestDataGenerator.user();
+		userRepository.save(user);
+		Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
+		driverRepository.save(driver);
+		String jwtToken = jwtUtility.generateToken(user);
+
+		LicensePlate plate = TestDataGenerator.generateLicensePlate();
+		carRepository.save(Car.of(driver.userID(), plate,
+				TestDataGenerator.generateCarBrand(),
+				TestDataGenerator.generateCarModel(),
+				TestDataGenerator.generateCarColor(),
+				TestDataGenerator.generateCarYear(),
+				TestDataGenerator.generateSeatCount()));
+
+		UUID rideID = given().header("Authorization", "Bearer " + jwtToken)
+				.contentType(ContentType.JSON)
+				.body(TestDataGenerator.driverRideForm(plate))
+				.when()
+				.post("/uyol/driver/create/ride")
+				.then()
+				.statusCode(Response.Status.OK.getStatusCode())
+				.extract()
+				.body().jsonPath().getUUID("id");
+
+		given().header("Authorization", "Bearer " + jwtToken)
+				.queryParam("rideID", rideID)
+				.when()
+				.post("/uyol/driver/start/ride")
+				.then()
+				.statusCode(Response.Status.ACCEPTED.getStatusCode());
+
+		given().header("Authorization", "Bearer " + jwtToken)
+				.queryParam("rideID", rideID)
+				.when()
+				.post("/uyol/driver/cancel/ride")
+				.then()
+				.statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+	}
 
 }
