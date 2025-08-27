@@ -1,4 +1,4 @@
-package org.project.application.service;
+package org.project.application.dto.profile;
 
 import org.project.domain.shared.annotations.Nullable;
 import org.project.domain.user.entities.User;

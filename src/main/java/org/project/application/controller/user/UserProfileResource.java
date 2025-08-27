@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.application.dto.profile.ProfilePictureDTO;
-import org.project.application.service.UserProfileDTO;
+import org.project.application.dto.profile.UserProfileDTO;
 import org.project.application.service.UserProfileService;
 import org.project.domain.user.value_objects.ProfilePicture;
 

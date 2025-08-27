@@ -2,6 +2,7 @@ package org.project.application.service;
 
 import java.io.InputStream;
 
+import org.project.application.dto.profile.UserProfileDTO;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.factories.IdentifierFactory;
 import org.project.domain.user.repositories.UserRepository;
