@@ -123,12 +123,12 @@ class RideTest {
         IllegalDomainArgumentException e =
                 assertThrows(IllegalDomainArgumentException.class, () ->
                         ride.book(UserID.newID(), getBookedSeats(index, seatStatus)));
-        assertEquals("Seat must be occupied with valid occupant", e.getMessage());
+        assertEquals("Passenger seat must have occupied status (not EMPTY or DRIVER): DRIVER", e.getMessage());
 
         IllegalDomainArgumentException e1 =
                 assertThrows(IllegalDomainArgumentException.class, () ->
                         ride.book(UserID.newID(), getBookedSeats(index, seatStatus1)));
-        assertEquals("Seat must be occupied with valid occupant", e1.getMessage());
+        assertEquals("Passenger seat must have occupied status (not EMPTY or DRIVER): EMPTY", e1.getMessage());
     }
 
     private static @NotNull BookedSeats getBookedSeats(int index, SeatStatus seatStatus) {

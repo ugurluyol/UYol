@@ -52,7 +52,7 @@ public class RideReservationService {
         Ride ride = rideRepository.findBy(rideID)
                 .orElseThrow(() -> responseException(Response.Status.BAD_REQUEST, "This ride do not exists."));
 
-        RideContract rideContract = ride.book(new UserID(user.id()), new BookedSeats(bookingForm.passengerSeats()));
+        RideContract rideContract = ride.book(new UserID(user.id()), new BookedSeats(bookingForm.bookedSeats()));
 
         rideContractRepository.save(rideContract).orElseThrow(RestUtil::unableToProcessRequestException);
         rideRepository.updateSeats(ride).orElseThrow(RestUtil::unableToProcessRequestException);
