@@ -101,7 +101,7 @@ public class JetRideContractRepository implements RideContractRepository {
 
     @Override
     public Result<List<RideContract>, Throwable> findBy(UserID userID, Pageable page) {
-        return mapPageResult(jet.readListOf(FIND_BY_USER_ID, this::mapRideContract, page.limit(), page.offset()));
+        return mapPageResult(jet.readListOf(FIND_BY_USER_ID, this::mapRideContract, userID, page.limit(), page.offset()));
     }
 
     @Override
