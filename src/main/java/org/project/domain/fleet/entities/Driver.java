@@ -119,6 +119,10 @@ public class Driver {
     this.dates = dates.updated();
   }
 
+  public boolean isAvailable() {
+    return status == DriverStatus.AVAILABLE;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass())
