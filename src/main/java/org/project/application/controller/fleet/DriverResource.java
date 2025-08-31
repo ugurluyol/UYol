@@ -9,7 +9,6 @@ import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.DriverRideForm;
 import org.project.application.dto.ride.RideDTO;
 import org.project.application.dto.ride.RideRequestToDriver;
-import org.project.application.pagination.PageRequest;
 import org.project.application.service.DriverService;
 import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.value_object.RideRequestID;
@@ -93,7 +92,7 @@ public class DriverResource {
 
     @POST
     @Path("/accept/ride-request")
-    public RideDTO acceptRideRequest(@QueryParam("rideID") UUID rideRequestID) {
+    public RideDTO acceptRideRequest(@QueryParam("rideRequestID") UUID rideRequestID) {
         return service.acceptRideRequest(jwt.getName(), new RideRequestID(rideRequestID));
     }
 }
