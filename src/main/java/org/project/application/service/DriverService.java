@@ -213,6 +213,10 @@ public class DriverService {
         boolean notADriverOfThisRide = !ride.rideOwner().driverID().equals(driver.id());
         if (notADriverOfThisRide)
             throw responseException(Response.Status.FORBIDDEN, "You can`t modify someones ride");
+
+        if (ride.isOwnerCreated())
+            throw responseException(Response.Status.FORBIDDEN, "You as a driver cannot modify owner created ride");
+
         return ride;
     }
 }
