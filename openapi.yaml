@@ -2,6 +2,15 @@
 openapi: 3.1.0
 components:
   schemas:
+    BookingForm:
+      type: object
+      properties:
+        rideID:
+          $ref: "#/components/schemas/UUID"
+        bookedSeats:
+          type: array
+          items:
+            $ref: "#/components/schemas/PassengerSeat"
     CarDTO:
       type: object
       properties:
@@ -19,6 +28,20 @@ components:
         seatCount:
           type: integer
           format: int32
+    DriverDTO:
+      type: object
+      properties:
+        driverID:
+          type: string
+        totalRides:
+          type: integer
+          format: int32
+        totalReviews:
+          type: integer
+          format: int32
+        averageScore:
+          type: number
+          format: double
     DriverRideForm:
       type: object
       properties:
@@ -80,6 +103,14 @@ components:
           type: string
         password:
           type: string
+    PassengerSeat:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+        status:
+          $ref: "#/components/schemas/SeatStatus"
     PasswordChangeForm:
       type: object
       properties:
@@ -114,6 +145,23 @@ components:
           type: string
         birthDate:
           $ref: "#/components/schemas/LocalDate"
+    RideContractDTO:
+      type: object
+      properties:
+        rideContractID:
+          type: string
+        userID:
+          type: string
+        rideID:
+          type: string
+        pricePerSeat:
+          type: number
+        totalPrice:
+          type: number
+        passengerSeats:
+          type: array
+          items:
+            $ref: "#/components/schemas/PassengerSeat"
     RideDTO:
       type: object
       properties:
@@ -147,6 +195,47 @@ components:
           type: number
         status:
           $ref: "#/components/schemas/RideStatus"
+    RideRequestToDriver:
+      type: object
+      properties:
+        driverID:
+          $ref: "#/components/schemas/UUID"
+        licensePlate:
+          type: string
+        fromLocationDesc:
+          type: string
+        fromLatitude:
+          type: number
+          format: double
+        fromLongitude:
+          type: number
+          format: double
+        toLocationDesc:
+          type: string
+        toLatitude:
+          type: number
+          format: double
+        toLongitude:
+          type: number
+          format: double
+        seatMap:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: "#/components/schemas/SeatStatus"
+        startTime:
+          $ref: "#/components/schemas/LocalDateTime"
+        endTime:
+          $ref: "#/components/schemas/LocalDateTime"
+        price:
+          type: number
+        rideDesc:
+          type: string
+        rideRules:
+          type: array
+          items:
+            $ref: "#/components/schemas/RideRule"
     RideRule:
       type: string
       enum:
@@ -180,6 +269,27 @@ components:
           type: string
         refreshToken:
           type: string
+    UUID:
+      type: string
+      format: uuid
+      pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+    UserProfileDTO:
+      type: object
+      properties:
+        firstname:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        birthDate:
+          $ref: "#/components/schemas/LocalDate"
+        isVerified:
+          type: boolean
+        is2faEnabled:
+          type: boolean
   securitySchemes:
     SecurityScheme:
       type: openIdConnect
@@ -349,6 +459,106 @@ paths:
       summary: Verification
       tags:
       - Auth Resource
+  /uyol/available/drivers:
+    get:
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DriverDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Available Drivers
+      tags:
+      - Available Drivers Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/driver/accept/ride-request:
+    post:
+      parameters:
+      - name: rideRequestID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RideDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Accept Ride Request
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/driver/add/ride-rule:
+    patch:
+      parameters:
+      - name: ride-rule
+        in: query
+        schema:
+          $ref: "#/components/schemas/RideRule"
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Add Ride Rule
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/driver/cancel/ride:
+    post:
+      parameters:
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Cancel Ride
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
   /uyol/driver/car/save:
     post:
       requestBody:
@@ -399,6 +609,26 @@ paths:
       security:
       - SecurityScheme:
         - USER
+  /uyol/driver/finish/ride:
+    post:
+      parameters:
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Finish Ride
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
   /uyol/driver/registration:
     post:
       parameters:
@@ -416,6 +646,115 @@ paths:
       summary: Register Driver
       tags:
       - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/driver/remove/ride-rule:
+    patch:
+      parameters:
+      - name: ride-rule
+        in: query
+        schema:
+          $ref: "#/components/schemas/RideRule"
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Remove Ride Rule
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/driver/ride-requests:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RideRequestToDriver"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Ride Requests
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/driver/start/ride:
+    post:
+      parameters:
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Start Ride
+      tags:
+      - Driver Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/owner/add/ride-rule:
+    patch:
+      parameters:
+      - name: ride-rule
+        in: query
+        schema:
+          $ref: "#/components/schemas/RideRule"
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Add Ride Rule
+      tags:
+      - Owner Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/owner/cancel/ride:
+    post:
+      parameters:
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Cancel Ride
+      tags:
+      - Owner Resource
       security:
       - SecurityScheme:
         - USER
@@ -442,6 +781,26 @@ paths:
       security:
       - SecurityScheme:
         - USER
+  /uyol/owner/finish/ride:
+    post:
+      parameters:
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Finish Ride
+      tags:
+      - Owner Resource
+      security:
+      - SecurityScheme:
+        - USER
   /uyol/owner/register:
     post:
       parameters:
@@ -457,6 +816,73 @@ paths:
         "403":
           description: Not Allowed
       summary: Register Owner
+      tags:
+      - Owner Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/owner/remove/ride-rule:
+    patch:
+      parameters:
+      - name: ride-rule
+        in: query
+        schema:
+          $ref: "#/components/schemas/RideRule"
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Remove Ride Rule
+      tags:
+      - Owner Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/owner/ride/request:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RideRequestToDriver"
+        required: true
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      summary: Request
+      tags:
+      - Owner Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/owner/start/ride:
+    post:
+      parameters:
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Start Ride
       tags:
       - Owner Resource
       security:
@@ -490,7 +916,7 @@ paths:
           description: Not Allowed
       summary: Registered Cars
       tags:
-      - Registered Cards Resource
+      - Registered Cars Resource
       security:
       - SecurityScheme:
         - USER
@@ -550,7 +976,99 @@ paths:
                   $ref: "#/components/schemas/RideDTO"
       summary: Actual For
       tags:
-      - Ride Resource
+      - Active Rides Resource
+  /uyol/ride/contract:
+    get:
+      parameters:
+      - name: rideContractID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RideContractDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Ride Contract
+      tags:
+      - Ride Contract Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/ride/contract/all:
+    get:
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RideContractDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Ride Contracts
+      tags:
+      - Ride Contract Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/ride/contract/of/ride:
+    get:
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      - name: size
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RideContractDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Ride Contracts
+      tags:
+      - Ride Contract Resource
+      security:
+      - SecurityScheme:
+        - USER
   /uyol/ride/date:
     get:
       parameters:
@@ -579,7 +1097,7 @@ paths:
                   $ref: "#/components/schemas/RideDTO"
       summary: Page Of
       tags:
-      - Ride Resource
+      - Active Rides Resource
   /uyol/ride/history/driver-rides:
     get:
       parameters:
@@ -673,6 +1191,77 @@ paths:
       summary: User Rides
       tags:
       - Ride History Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/ride/reservation/book:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingForm"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RideContractDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+        "400":
+          description: Bad Request
+      summary: Book
+      tags:
+      - Ride Reservation Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/ride/reservation/rate/driver:
+    post:
+      parameters:
+      - name: rideID
+        in: query
+        schema:
+          $ref: "#/components/schemas/UUID"
+      - name: score
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Rate Driver
+      tags:
+      - Ride Reservation Resource
+      security:
+      - SecurityScheme:
+        - USER
+  /uyol/user/profile:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileDTO"
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      summary: Profile
+      tags:
+      - User Profile Resource
       security:
       - SecurityScheme:
         - USER
