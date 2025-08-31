@@ -1,17 +1,31 @@
 package org.project.application.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.core.Response;
+import static org.project.application.util.RestUtil.required;
+import static org.project.application.util.RestUtil.responseException;
+
+import java.util.UUID;
+
 import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.RideRequestToDriver;
+import org.project.application.util.RestUtil;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
 import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.repositories.CarRepository;
 import org.project.domain.fleet.repositories.DriverRepository;
 import org.project.domain.fleet.repositories.OwnerRepository;
-import org.project.domain.fleet.value_objects.*;
+import org.project.domain.fleet.value_objects.CarBrand;
+import org.project.domain.fleet.value_objects.CarColor;
+import org.project.domain.fleet.value_objects.CarModel;
+import org.project.domain.fleet.value_objects.CarYear;
+import org.project.domain.fleet.value_objects.LicensePlate;
+import org.project.domain.fleet.value_objects.SeatCount;
+import org.project.domain.fleet.value_objects.Voen;
+import org.project.domain.ride.entities.Ride;
 import org.project.domain.ride.entities.RideRequest;
+import org.project.domain.ride.enumerations.RideRule;
+import org.project.domain.ride.repositories.RideRepository;
+import org.project.domain.ride.value_object.RideID;
 import org.project.domain.shared.value_objects.DriverID;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.user.entities.User;
@@ -19,8 +33,8 @@ import org.project.domain.user.factories.IdentifierFactory;
 import org.project.domain.user.repositories.UserRepository;
 import org.project.infrastructure.cache.RideRequests;
 
-import static org.project.application.util.RestUtil.required;
-import static org.project.application.util.RestUtil.responseException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class OwnerService {
@@ -35,18 +49,21 @@ public class OwnerService {
 
     private final DriverRepository driverRepository;
 
+	private final RideRepository rideRepository;
+
     OwnerService(
             RideRequests rideRequests,
             UserRepository userRepository,
             OwnerRepository ownerRepository,
             CarRepository carRepository,
-            DriverRepository driverRepository) {
+			DriverRepository driverRepository, RideRepository rideRepository) {
 
         this.rideRequests = rideRequests;
         this.userRepository = userRepository;
         this.ownerRepository = ownerRepository;
         this.carRepository = carRepository;
         this.driverRepository = driverRepository;
+		this.rideRepository = rideRepository;
     }
 
     public void register(String identifier, String voenRaw) {
@@ -118,4 +135,54 @@ public class OwnerService {
 
         rideRequests.put(driver.id(), rideRequest);
     }
+
+	public void addRideRule(String identifier, RideRule rideRule, UUID rideUUID) {
+		Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+		ride.addRideRule(rideRule);
+		rideRepository.updateRules(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+	}
+
+	public void removeRideRule(String identifier, RideRule rideRule, UUID rideUUID) {
+		Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+		ride.removeRideRule(rideRule);
+		rideRepository.updateRules(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+	}
+
+	public void startRide(String identifier, UUID rideUUID) {
+		Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+		ride.start();
+		rideRepository.updateStatus(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+	}
+
+	public void cancelRide(String identifier, UUID rideUUID) {
+		Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+		ride.cancel();
+		rideRepository.updateStatus(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+	}
+
+	public void finishRide(String identifier, UUID rideUUID) {
+		Ride ride = validateAndRetrieveRide(identifier, rideUUID);
+		ride.finish();
+		rideRepository.updateStatus(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+	}
+
+	private Ride validateAndRetrieveRide(String identifier, UUID rideUUID) {
+		User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
+		UserID userID = new UserID(user.id());
+		Owner owner = ownerRepository.findBy(userID)
+				.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Owner account is not found."));
+
+		RideID rideID = new RideID(rideUUID);
+		Ride ride = rideRepository.findBy(rideID)
+				.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Ride is not found."));
+
+		boolean notAnOwnerOfThisRide = !ride.rideOwner().ownerID().equals(owner.id());
+		if (notAnOwnerOfThisRide)
+			throw responseException(Response.Status.FORBIDDEN, "You can`t modify someone else's ride");
+
+		if (!ride.isOwnerCreated())
+			throw responseException(Response.Status.FORBIDDEN, "You as an owner cannot modify driver created ride");
+
+		return ride;
+	}
 }
