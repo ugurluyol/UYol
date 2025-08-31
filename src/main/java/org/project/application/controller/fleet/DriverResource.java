@@ -2,18 +2,18 @@ package org.project.application.controller.fleet;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.inject.Instance;
-import jakarta.ws.rs.PATCH;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.DriverRideForm;
 import org.project.application.dto.ride.RideDTO;
+import org.project.application.dto.ride.RideRequestToDriver;
+import org.project.application.pagination.PageRequest;
 import org.project.application.service.DriverService;
 import org.project.domain.ride.enumerations.RideRule;
 
+import java.util.List;
 import java.util.UUID;
 
 @Path("/driver")
@@ -82,5 +82,11 @@ public class DriverResource {
     public Response finishRide(@QueryParam("rideID") UUID rideID) {
         service.finishRide(jwt.getName(), rideID);
         return Response.accepted().build();
+    }
+
+    @GET
+    @Path("/ride-requests")
+    public List<RideRequestToDriver> rideRequests() {
+        return service.rideRequests(jwt.getName());
     }
 }

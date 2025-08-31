@@ -5,6 +5,8 @@ import jakarta.ws.rs.core.Response;
 import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.DriverRideForm;
 import org.project.application.dto.ride.RideDTO;
+import org.project.application.dto.ride.RideRequestToDriver;
+import org.project.application.pagination.PageRequest;
 import org.project.application.util.RestUtil;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
@@ -19,15 +21,19 @@ import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.factories.IdentifierFactory;
 import org.project.domain.user.repositories.UserRepository;
+import org.project.infrastructure.cache.RideRequests;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 import static org.project.application.util.RestUtil.*;
 
 @ApplicationScoped
 public class DriverService {
+
+    private final RideRequests rideRequests;
 
     private final CarRepository carRepository;
 
@@ -37,13 +43,18 @@ public class DriverService {
 
     private final DriverRepository driverRepository;
 
-    DriverService(UserRepository userRepository, DriverRepository driverRepository,
-                  CarRepository carRepository, RideRepository rideRepository) {
+    DriverService(
+            RideRequests rideRequests,
+            CarRepository carRepository,
+            RideRepository rideRepository,
+            UserRepository userRepository,
+            DriverRepository driverRepository) {
 
-        this.userRepository = userRepository;
-        this.driverRepository = driverRepository;
+        this.rideRequests = rideRequests;
         this.carRepository = carRepository;
         this.rideRepository = rideRepository;
+        this.userRepository = userRepository;
+        this.driverRepository = driverRepository;
     }
 
     public void register(String identifier, String driverLicense) {
@@ -80,6 +91,17 @@ public class DriverService {
         );
 
         carRepository.save(car).orElseThrow(RestUtil::unableToProcessRequestException);
+    }
+
+    public List<RideRequestToDriver> rideRequests(String identifier) {
+        User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
+        UserID userID = new UserID(user.id());
+        Driver driver = driverRepository.findBy(userID)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Driver account is not found."));
+
+        return rideRequests.pageOf(driver.id()).stream()
+                .map(RideRequestToDriver::from)
+                .toList();
     }
 
     public RideDTO createRide(String identified, DriverRideForm rideForm) {
