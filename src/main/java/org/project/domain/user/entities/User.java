@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.project.domain.shared.annotations.Nullable;
 import org.project.domain.shared.enumerations.UserRole;
 import org.project.domain.shared.exceptions.IllegalDomainStateException;
+import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.user.exceptions.BannedUserException;
 import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.user.value_objects.KeyAndCounter;
@@ -71,6 +72,10 @@ public class User {
 
     public UUID id() {
         return id;
+    }
+
+    public UserID userID() {
+        return new UserID(id);
     }
 
     public PersonalData personalData() {
