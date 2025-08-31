@@ -237,6 +237,10 @@ public class Ride {
     return isModifiable() && seatMap.hasAvailableSeats();
   }
 
+  public boolean isOwnerCreated() {
+    return rideOwner.ownerID().isPresent();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;

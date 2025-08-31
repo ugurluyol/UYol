@@ -92,13 +92,14 @@ public class OwnerService {
 
     public void request(String identifier, RideRequestToDriver rideForm) {
         required("rideForm", rideForm);
-        RideRequest rideRequest = rideForm.toRideRequest();
 
         User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
         UserID userID = new UserID(user.id());
 
-        if (!ownerRepository.isOwnerExists(userID))
-            throw responseException(Response.Status.NOT_FOUND, "Owner account is not found.");
+        Owner owner = ownerRepository.findBy(userID)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Owner account is not found."));
+
+        RideRequest rideRequest = rideForm.toRideRequest(owner.id());
 
         Car car = carRepository.findBy(new LicensePlate(rideForm.licensePlate()))
                 .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Car by this driver account is not found."));

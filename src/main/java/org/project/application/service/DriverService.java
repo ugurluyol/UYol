@@ -6,7 +6,6 @@ import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.DriverRideForm;
 import org.project.application.dto.ride.RideDTO;
 import org.project.application.dto.ride.RideRequestToDriver;
-import org.project.application.pagination.PageRequest;
 import org.project.application.util.RestUtil;
 import org.project.domain.fleet.entities.Car;
 import org.project.domain.fleet.entities.Driver;
@@ -14,6 +13,7 @@ import org.project.domain.fleet.repositories.CarRepository;
 import org.project.domain.fleet.repositories.DriverRepository;
 import org.project.domain.fleet.value_objects.*;
 import org.project.domain.ride.entities.Ride;
+import org.project.domain.ride.entities.RideRequest;
 import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.repositories.RideRepository;
 import org.project.domain.ride.value_object.*;
@@ -102,6 +102,33 @@ public class DriverService {
         return rideRequests.pageOf(driver.id()).stream()
                 .map(RideRequestToDriver::from)
                 .toList();
+    }
+
+    public RideDTO acceptRideRequest(String identifier, RideRequestID rideRequestID) {
+        User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
+        UserID userID = new UserID(user.id());
+        Driver driver = driverRepository.findBy(userID)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Driver account is not found."));
+
+        RideRequest rideRequest = rideRequests.del(driver.id(), rideRequestID)
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Ride request is not found."));
+
+        Car car = carRepository.findBy(rideRequest.licensePlate())
+                .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Car is not found."));
+
+        Ride ride = Ride.of(
+                car.id(),
+                new RideOwner(driver.id(), rideRequest.ownerID()),
+                rideRequest.route(),
+                rideRequest.rideTime(),
+                rideRequest.price(),
+                rideRequest.seatMap(),
+                rideRequest.rideDesc(),
+                rideRequest.rideRules()
+        );
+        rideRepository.save(ride).orElseThrow(RestUtil::unableToProcessRequestException);
+
+        return RideDTO.from(ride);
     }
 
     public RideDTO createRide(String identified, DriverRideForm rideForm) {

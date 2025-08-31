@@ -6,6 +6,7 @@ import org.project.domain.ride.enumerations.RideRule;
 import org.project.domain.ride.enumerations.SeatStatus;
 import org.project.domain.ride.value_object.*;
 import org.project.domain.shared.value_objects.DriverID;
+import org.project.domain.shared.value_objects.OwnerID;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,10 +29,11 @@ public record RideRequestToDriver(
         String rideDesc,
         RideRule[] rideRules
 ) {
-    public RideRequest toRideRequest() {
+    public RideRequest toRideRequest(OwnerID ownerID) {
         return new RideRequest(
                 new RideRequestID(UUID.randomUUID()),
                 new DriverID(driverID),
+                ownerID,
                 new LicensePlate(licensePlate()),
                 new Route(
                         new Location(fromLocationDesc(), fromLatitude(), fromLongitude()),

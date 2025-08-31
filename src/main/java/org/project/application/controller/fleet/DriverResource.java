@@ -12,6 +12,7 @@ import org.project.application.dto.ride.RideRequestToDriver;
 import org.project.application.pagination.PageRequest;
 import org.project.application.service.DriverService;
 import org.project.domain.ride.enumerations.RideRule;
+import org.project.domain.ride.value_object.RideRequestID;
 
 import java.util.List;
 import java.util.UUID;
@@ -88,5 +89,11 @@ public class DriverResource {
     @Path("/ride-requests")
     public List<RideRequestToDriver> rideRequests() {
         return service.rideRequests(jwt.getName());
+    }
+
+    @POST
+    @Path("/accept/ride-request")
+    public RideDTO acceptRideRequest(@QueryParam("rideID") UUID rideRequestID) {
+        return service.acceptRideRequest(jwt.getName(), new RideRequestID(rideRequestID));
     }
 }
