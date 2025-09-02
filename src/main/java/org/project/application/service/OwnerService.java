@@ -167,22 +167,22 @@ public class OwnerService {
 	}
 
 	private Ride validateAndRetrieveRide(String identifier, UUID rideUUID) {
-		User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
-		UserID userID = new UserID(user.id());
+	    User user = userRepository.findBy(IdentifierFactory.from(identifier))
+	            .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "User not found"));
+	    UserID userID = new UserID(user.id());
 		Owner owner = ownerRepository.findBy(userID)
 				.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Owner account is not found."));
+	    Ride ride = rideRepository.findBy(new RideID(rideUUID))
+	            .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Ride is not found."));
 
-		RideID rideID = new RideID(rideUUID);
-		Ride ride = rideRepository.findBy(rideID)
-				.orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Ride is not found."));
+	    boolean notAnOwnerOfThisRide = ride.rideOwner().ownerID()
+	            .map(ownerId -> !ownerId.equals(userID))
+	            .orElse(true);
 
-		boolean notAnOwnerOfThisRide = !ride.rideOwner().ownerID().equals(owner.id());
-		if (notAnOwnerOfThisRide)
-			throw responseException(Response.Status.FORBIDDEN, "You can`t modify someone else's ride");
+	    if (notAnOwnerOfThisRide) {
+	        throw responseException(Response.Status.FORBIDDEN, "You can't modify someone else's ride");
+	    }
 
-		if (!ride.isOwnerCreated())
-			throw responseException(Response.Status.FORBIDDEN, "You as an owner cannot modify driver created ride");
-
-		return ride;
-	}
+	    return ride;
+}
 }

@@ -4,6 +4,10 @@ import static io.restassured.RestAssured.given;
 
 import org.junit.jupiter.api.Test;
 import org.project.application.dto.fleet.CarDTO;
+import org.project.domain.fleet.repositories.CarRepository;
+import org.project.domain.fleet.repositories.DriverRepository;
+import org.project.domain.fleet.repositories.OwnerRepository;
+import org.project.domain.ride.repositories.RideRepository;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
 import org.project.features.util.PostgresTestResource;
@@ -21,6 +25,18 @@ class OwnerResourceTest {
 
     @Inject
 	UserRepository userRepository;
+
+	@Inject
+	DriverRepository driverRepository;
+
+	@Inject
+	CarRepository carRepository;
+
+	@Inject
+	OwnerRepository ownerRepository;
+
+	@Inject
+	RideRepository rideRepository;
 
 	@Inject
 	JWTUtility jwtUtility;
