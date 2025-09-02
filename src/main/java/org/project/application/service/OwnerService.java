@@ -176,7 +176,7 @@ public class OwnerService {
 	            .orElseThrow(() -> responseException(Response.Status.NOT_FOUND, "Ride is not found."));
 
 	    boolean notAnOwnerOfThisRide = ride.rideOwner().ownerID()
-	            .map(ownerId -> !ownerId.equals(userID))
+				.map(ownerId -> !ownerId.equals(owner.id()))
 	            .orElse(true);
 
 	    if (notAnOwnerOfThisRide) {
