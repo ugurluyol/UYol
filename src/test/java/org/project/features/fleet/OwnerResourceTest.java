@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.project.application.dto.fleet.CarDTO;
 import org.project.application.dto.ride.RideRequestToDriver;
 import org.project.domain.fleet.entities.Driver;
+import org.project.domain.fleet.entities.Owner;
 import org.project.domain.fleet.repositories.CarRepository;
 import org.project.domain.fleet.repositories.DriverRepository;
 import org.project.domain.fleet.repositories.OwnerRepository;
@@ -22,7 +23,6 @@ import org.project.domain.ride.value_object.RideRequestID;
 import org.project.domain.ride.value_object.RideTime;
 import org.project.domain.ride.value_object.Route;
 import org.project.domain.ride.value_object.SeatMap;
-import org.project.domain.shared.value_objects.OwnerID;
 import org.project.domain.shared.value_objects.UserID;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.repositories.UserRepository;
@@ -181,234 +181,43 @@ class OwnerResourceTest {
 	/////////////
 
 	@Test
-	    void successfullyAddRideRule() {
-			User user = TestDataGenerator.user();
-			userRepository.save(user);
+	void successfullyAddRideRule() {
+		User user = TestDataGenerator.user();
+		userRepository.save(user);
 
-			Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
-			driverRepository.save(driver);
+		Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
+		driverRepository.save(driver);
 
-			String jwtToken = jwtUtility.generateToken(user);
+		Owner owner = Owner.of(new UserID(user.id()), TestDataGenerator.voen());
+		ownerRepository.save(owner);
 
-			RideRequest rideRequest = new RideRequest(new RideRequestID(UUID.randomUUID()), driver.id(),
-					new OwnerID(user.id()), TestDataGenerator.generateLicensePlate(),
-					new Route(new Location("From place", 40.123, 49.123), new Location("To place", 40.321, 49.321)),
-					new RideTime(LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2)),
-					TestDataGenerator.generatePrice(),
-					new SeatMap(new SeatStatus[][] { { SeatStatus.DRIVER, SeatStatus.FEMALE_OCCUPIED },
-							{ SeatStatus.FEMALE_OCCUPIED, SeatStatus.FEMALE_OCCUPIED } }),
-					TestDataGenerator.generateRideDesc(), Set.of(RideRule.NO_SMOKING), LocalDateTime.now());
+		String jwtToken = jwtUtility.generateToken(user);
 
-			RideRequestToDriver rideForm = new RideRequestToDriver(rideRequest.driverID().value(),
-					rideRequest.licensePlate().value(), rideRequest.route().from().description(),
-					rideRequest.route().from().latitude(), rideRequest.route().from().longitude(),
-					rideRequest.route().to().description(), rideRequest.route().to().latitude(),
-					rideRequest.route().to().longitude(), rideRequest.seatMap().seats(),
-					rideRequest.rideTime().startOfTheTrip(), rideRequest.rideTime().endOfTheTrip(),
-					rideRequest.price().amount(), rideRequest.rideDesc().value(),
-					rideRequest.rideRules().toArray(new RideRule[0]));
+		RideRequest rideRequest = new RideRequest(new RideRequestID(UUID.randomUUID()), driver.id(), owner.id(),
+				TestDataGenerator.generateLicensePlate(),
+				new Route(new Location("From place", 40.123, 49.123), new Location("To place", 40.321, 49.321)),
+				new RideTime(LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(2)),
+				TestDataGenerator.generatePrice(),
+				new SeatMap(new SeatStatus[][] { { SeatStatus.DRIVER, SeatStatus.FEMALE_OCCUPIED },
+						{ SeatStatus.FEMALE_OCCUPIED, SeatStatus.FEMALE_OCCUPIED } }),
+				TestDataGenerator.generateRideDesc(), Set.of(RideRule.NO_SMOKING), LocalDateTime.now());
 
-	        UUID rideID = given().header("Authorization", "Bearer " + jwtToken)
-	                .contentType(ContentType.JSON)
-	                .body(rideForm)
-					.when().post("uyol/owner/ride/request")
-	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode())
-	                .extract().body().jsonPath().getUUID("id");
+		RideRequestToDriver rideForm = new RideRequestToDriver(rideRequest.driverID().value(),
+				rideRequest.licensePlate().value(), rideRequest.route().from().description(),
+				rideRequest.route().from().latitude(), rideRequest.route().from().longitude(),
+				rideRequest.route().to().description(), rideRequest.route().to().latitude(),
+				rideRequest.route().to().longitude(), rideRequest.seatMap().seats(),
+				rideRequest.rideTime().startOfTheTrip(), rideRequest.rideTime().endOfTheTrip(),
+				rideRequest.price().amount(), rideRequest.rideDesc().value(),
+				rideRequest.rideRules().toArray(new RideRule[0]));
 
+		UUID rideID = given().header("Authorization", "Bearer " + jwtToken).contentType(ContentType.JSON).body(rideForm)
+				.when().post("/uyol/owner/ride/request").then().statusCode(Response.Status.ACCEPTED.getStatusCode())
+				.extract().body().jsonPath().getUUID("id");
 
-	        given().header("Authorization", "Bearer " + jwtToken)
-	                .queryParam("ride-rule", RideRule.NO_SMOKING)
-	                .queryParam("rideID", rideID)
-					.when().patch("uyol/owner/add/ride-rule")
-	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode());
-	    }
-
-//	    @Test
-//	    void successfullyRemoveRideRule() {
-//	        User user = TestDataGenerator.user();
-//	        userRepository.save(user);
-//	        String jwtToken = jwtUtility.generateToken(user);
-//
-//	        Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
-//	        driverRepository.save(driver);
-//
-//	        LicensePlate plate = TestDataGenerator.generateLicensePlate();
-//	        Car car = Car.of(driver.userID(), plate,
-//	                TestDataGenerator.generateCarBrand(),
-//	                TestDataGenerator.generateCarModel(),
-//	                TestDataGenerator.generateCarColor(),
-//	                TestDataGenerator.generateCarYear(),
-//	                TestDataGenerator.generateSeatCount());
-//	        carRepository.save(car);
-//
-//	        RideRequestToDriver rideForm = new RideRequestToDriver(
-//	                driver.id(),
-//	                plate.value(),
-//	                "From location", 40.0, 50.0,
-//	                "To location", 41.0, 51.0,
-//	                new SeatStatus[][] {{SeatStatus.DRIVER, SeatStatus.EMPTY},
-//	                                    {SeatStatus.EMPTY, SeatStatus.EMPTY}},
-//	                LocalDateTime.now().plusHours(1),
-//	                LocalDateTime.now().plusHours(2),
-//	                BigDecimal.valueOf(10.0),
-//	                "Test ride",
-//	                new RideRule[] {RideRule.NO_SMOKING}
-//	        );
-//
-//	        UUID rideID = given().header("Authorization", "Bearer " + jwtToken)
-//	                .contentType(ContentType.JSON)
-//	                .body(rideForm)
-//	                .when().post("/uyol/owner/ride/request")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode())
-//	                .extract().body().jsonPath().getUUID("id");
-//
-//	        given().header("Authorization", "Bearer " + jwtToken)
-//	                .queryParam("ride-rule", RideRule.NO_SMOKING)
-//	                .queryParam("rideID", rideID)
-//	                .when().patch("/uyol/owner/remove/ride-rule")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode());
-//	    }
-//
-//	    @Test
-//	    void successfullyStartRide() {
-//	        User user = TestDataGenerator.user();
-//	        userRepository.save(user);
-//	        String jwtToken = jwtUtility.generateToken(user);
-//
-//	        Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
-//	        driverRepository.save(driver);
-//
-//	        LicensePlate plate = TestDataGenerator.generateLicensePlate();
-//	        Car car = Car.of(driver.userID(), plate,
-//	                TestDataGenerator.generateCarBrand(),
-//	                TestDataGenerator.generateCarModel(),
-//	                TestDataGenerator.generateCarColor(),
-//	                TestDataGenerator.generateCarYear(),
-//	                TestDataGenerator.generateSeatCount());
-//	        carRepository.save(car);
-//
-//	        RideRequestToDriver rideForm = new RideRequestToDriver(
-//	                driver.id(),
-//	                plate.value(),
-//	                "From location", 40.0, 50.0,
-//	                "To location", 41.0, 51.0,
-//	                new SeatStatus[][] {{SeatStatus.DRIVER, SeatStatus.EMPTY},
-//	                                    {SeatStatus.EMPTY, SeatStatus.EMPTY}},
-//	                LocalDateTime.now().plusHours(1),
-//	                LocalDateTime.now().plusHours(2),
-//	                BigDecimal.valueOf(15.0),
-//	                "Test ride",
-//	                new RideRule[] {}
-//	        );
-//
-//	        UUID rideID = given().header("Authorization", "Bearer " + jwtToken)
-//	                .contentType(ContentType.JSON)
-//	                .body(rideForm)
-//	                .when().post("/uyol/owner/ride/request")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode())
-//	                .extract().body().jsonPath().getUUID("id");
-//
-//	        given().header("Authorization", "Bearer " + jwtToken)
-//	                .queryParam("rideID", rideID)
-//	                .when().post("/uyol/owner/start/ride")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode());
-//	    }
-//
-//	    @Test
-//	    void successfullyCancelRide() {
-//	        User user = TestDataGenerator.user();
-//	        userRepository.save(user);
-//	        String jwtToken = jwtUtility.generateToken(user);
-//
-//	        Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
-//	        driverRepository.save(driver);
-//
-//	        LicensePlate plate = TestDataGenerator.generateLicensePlate();
-//	        Car car = Car.of(driver.userID(), plate,
-//	                TestDataGenerator.generateCarBrand(),
-//	                TestDataGenerator.generateCarModel(),
-//	                TestDataGenerator.generateCarColor(),
-//	                TestDataGenerator.generateCarYear(),
-//	                TestDataGenerator.generateSeatCount());
-//	        carRepository.save(car);
-//
-//	        RideRequestToDriver rideForm = new RideRequestToDriver(
-//	                driver.id(),
-//	                plate.value(),
-//	                "From location", 40.0, 50.0,
-//	                "To location", 41.0, 51.0,
-//	                new SeatStatus[][] {{SeatStatus.DRIVER, SeatStatus.EMPTY},
-//	                                    {SeatStatus.EMPTY, SeatStatus.EMPTY}},
-//	                LocalDateTime.now().plusHours(1),
-//	                LocalDateTime.now().plusHours(2),
-//	                BigDecimal.valueOf(15.0),
-//	                "Test ride",
-//	                new RideRule[] {}
-//	        );
-//
-//	        UUID rideID = given().header("Authorization", "Bearer " + jwtToken)
-//	                .contentType(ContentType.JSON)
-//	                .body(rideForm)
-//	                .when().post("/uyol/owner/ride/request")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode())
-//	                .extract().body().jsonPath().getUUID("id");
-//
-//	        given().header("Authorization", "Bearer " + jwtToken)
-//	                .queryParam("rideID", rideID)
-//	                .when().post("/uyol/owner/cancel/ride")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode());
-//	    }
-//
-//	    @Test
-//	    void successfullyFinishRide() {
-//	        User user = TestDataGenerator.user();
-//	        userRepository.save(user);
-//	        String jwtToken = jwtUtility.generateToken(user);
-//
-//	        Driver driver = Driver.of(new UserID(user.id()), TestDataGenerator.driverLicense());
-//	        driverRepository.save(driver);
-//
-//	        LicensePlate plate = TestDataGenerator.generateLicensePlate();
-//	        Car car = Car.of(driver.userID(), plate,
-//	                TestDataGenerator.generateCarBrand(),
-//	                TestDataGenerator.generateCarModel(),
-//	                TestDataGenerator.generateCarColor(),
-//	                TestDataGenerator.generateCarYear(),
-//	                TestDataGenerator.generateSeatCount());
-//	        carRepository.save(car);
-//
-//	        RideRequestToDriver rideForm = new RideRequestToDriver(
-//	                driver.id(),
-//	                plate.value(),
-//	                "From location", 40.0, 50.0,
-//	                "To location", 41.0, 51.0,
-//	                new SeatStatus[][] {{SeatStatus.DRIVER, SeatStatus.EMPTY},
-//	                                    {SeatStatus.EMPTY, SeatStatus.EMPTY}},
-//	                LocalDateTime.now().plusHours(1),
-//	                LocalDateTime.now().plusHours(2),
-//	                BigDecimal.valueOf(15.0),
-//	                "Test ride",
-//	                new RideRule[] {}
-//	        );
-//
-//	        UUID rideID = given().header("Authorization", "Bearer " + jwtToken)
-//	                .contentType(ContentType.JSON)
-//	                .body(rideForm)
-//	                .when().post("/uyol/owner/ride/request")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode())
-//	                .extract().body().jsonPath().getUUID("id");
-//
-//	        given().header("Authorization", "Bearer " + jwtToken)
-//	                .queryParam("rideID", rideID)
-//	                .when().post("/uyol/owner/start/ride")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode());
-//
-//	        given().header("Authorization", "Bearer " + jwtToken)
-//	                .queryParam("rideID", rideID)
-//	                .when().post("/uyol/owner/finish/ride")
-//	                .then().statusCode(Response.Status.ACCEPTED.getStatusCode());
-//	    }
-//	}
-
+		given().header("Authorization", "Bearer " + jwtToken).queryParam("ride-rule", RideRule.NO_SMOKING)
+				.queryParam("rideID", rideID).when().patch("/uyol/owner/add/ride-rule").then()
+				.statusCode(Response.Status.ACCEPTED.getStatusCode());
+	}
 
 }
