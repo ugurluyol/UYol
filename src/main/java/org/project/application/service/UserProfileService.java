@@ -3,6 +3,10 @@ package org.project.application.service;
 import java.io.InputStream;
 
 import org.project.application.dto.profile.UserProfileDTO;
+import org.project.domain.fleet.entities.Driver;
+import org.project.domain.fleet.entities.Owner;
+import org.project.domain.fleet.repositories.DriverRepository;
+import org.project.domain.fleet.repositories.OwnerRepository;
 import org.project.domain.user.entities.User;
 import org.project.domain.user.factories.IdentifierFactory;
 import org.project.domain.user.repositories.UserRepository;
@@ -21,15 +25,29 @@ public class UserProfileService {
 
   private final UserRepository userRepository;
 
+  private final OwnerRepository ownerRepository;
+
+  private final DriverRepository driverRepository;
+
   private final ProfilePictureRepository pictureRepository;
 
-  UserProfileService(UserRepository userRepository, ProfilePictureRepository pictureRepository) {
+  UserProfileService(
+          UserRepository userRepository,
+          OwnerRepository ownerRepository,
+          DriverRepository driverRepository,
+          ProfilePictureRepository pictureRepository) {
+
     this.userRepository = userRepository;
+    this.ownerRepository = ownerRepository;
+    this.driverRepository = driverRepository;
     this.pictureRepository = pictureRepository;
   }
 
   public UserProfileDTO of(String identifier) {
-    return UserProfileDTO.from(userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow());
+    User user = userRepository.findBy(IdentifierFactory.from(identifier)).orElseThrow();
+    Driver driver = driverRepository.findBy(user.userID()).orElse(null);
+    Owner owner = ownerRepository.findBy(user.userID()).orElse(null);
+    return UserProfileDTO.from(user, driver, owner);
   }
 
   public void changeProfilePictureOf(String identifier, InputStream inputStream) {

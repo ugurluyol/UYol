@@ -2,6 +2,7 @@ package org.project.application.controller.user;
 
 import java.io.InputStream;
 
+import jakarta.enterprise.inject.Instance;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.project.application.dto.profile.ProfilePictureDTO;
 import org.project.application.dto.profile.UserProfileDTO;
@@ -24,9 +25,9 @@ public class UserProfileResource {
 
   private final UserProfileService profile;
 
-  UserProfileResource(UserProfileService profile, JsonWebToken jwt) {
+  UserProfileResource(UserProfileService profile, Instance<JsonWebToken> jwt) {
     this.profile = profile;
-    this.jwt = jwt;
+    this.jwt = jwt.get();
   }
 
   @GET
