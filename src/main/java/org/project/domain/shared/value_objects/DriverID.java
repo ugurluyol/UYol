@@ -16,4 +16,8 @@ public record DriverID(UUID value) {
     public static DriverID fromString(String driverId) {
         return new DriverID(UUID.fromString(driverId));
     }
+
+    public UserID toUserID() {
+        return new UserID(this.value);
+    }
 }
