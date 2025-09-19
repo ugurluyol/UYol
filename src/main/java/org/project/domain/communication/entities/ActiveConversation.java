@@ -5,6 +5,7 @@ import org.project.domain.communication.value_objects.ConversationID;
 import org.project.domain.communication.value_objects.MessageContent;
 import org.project.domain.communication.value_objects.Participant;
 import org.project.domain.ride.value_object.RideID;
+import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.shared.value_objects.DriverID;
 
 import java.time.LocalDateTime;
@@ -17,18 +18,18 @@ public record ActiveConversation(
         RideID rideID,
         Participant participant,
         DriverID driverID,
-        LocalDateTime creationDate) implements Conversation {
+        Dates dates) implements Conversation {
 
     public ActiveConversation {
         required("conversationID", conversationID);
         required("rideID", rideID);
         required("participant", participant);
         required("driverID", driverID);
-        required("creationDate", creationDate);
+        required("dates", ActiveConversation.this.dates);
     }
 
     public static ActiveConversation create(RideID rideID, Participant participant, DriverID driverID) {
-        return new ActiveConversation(new ConversationID(UUID.randomUUID()), rideID, participant, driverID, LocalDateTime.now());
+        return new ActiveConversation(new ConversationID(UUID.randomUUID()), rideID, participant, driverID, Dates.defaultDates());
     }
 
     public ConversationStatus status() {
@@ -44,10 +45,10 @@ public record ActiveConversation(
     }
 
     public BlockedConversation block() {
-        return new BlockedConversation(conversationID, rideID, participant, driverID, creationDate);
+        return new BlockedConversation(conversationID, rideID, participant, driverID, dates.updated());
     }
 
     public ClosedConversation close() {
-        return new ClosedConversation(conversationID, rideID, participant, driverID, creationDate);
+        return new ClosedConversation(conversationID, rideID, participant, driverID, dates.updated());
     }
 }
