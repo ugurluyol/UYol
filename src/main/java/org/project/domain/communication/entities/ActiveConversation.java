@@ -5,10 +5,10 @@ import org.project.domain.communication.value_objects.ConversationID;
 import org.project.domain.communication.value_objects.MessageContent;
 import org.project.domain.communication.value_objects.Participant;
 import org.project.domain.ride.value_object.RideID;
+import org.project.domain.shared.exceptions.IllegalDomainArgumentException;
 import org.project.domain.shared.value_objects.Dates;
 import org.project.domain.shared.value_objects.DriverID;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.project.domain.shared.util.Utils.required;
@@ -42,6 +42,14 @@ public record ActiveConversation(
 
     public Message driverWrites(MessageContent message) {
         return Message.create(conversationID, driverID.toUserID(), message);
+    }
+
+    public Message edit(Message message, MessageContent newMessage) {
+        required("message", message);
+        if (!message.conversationID().equals(conversationID))
+            throw new IllegalDomainArgumentException("This particular message do not belong to this conversation");
+
+        return message.edit(newMessage);
     }
 
     public BlockedConversation block() {
