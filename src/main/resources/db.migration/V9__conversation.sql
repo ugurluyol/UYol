@@ -1,4 +1,4 @@
-CREATE TABLE conversations (
+CREATE TABLE conversation (
     id CHAR(36) NOT NULL,
     ride_id CHAR(36) NOT NULL,
     participant CHAR(36) NOT NULL,
@@ -24,6 +24,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_check_participant
-    BEFORE INSERT OR UPDATE ON conversations
+    BEFORE INSERT OR UPDATE ON conversation
         FOR EACH ROW
         EXECUTE FUNCTION check_participant_exists();
