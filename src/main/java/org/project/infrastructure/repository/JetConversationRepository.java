@@ -67,7 +67,7 @@ public class JetConversationRepository implements ConversationRepository {
             .limitAndOffset()
             .sql();
 
-    public JetConversationRepository() {
+    JetConversationRepository() {
         this.jet = JetQuerious.instance();
     }
 
