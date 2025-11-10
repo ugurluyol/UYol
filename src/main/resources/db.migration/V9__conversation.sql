@@ -2,6 +2,7 @@ CREATE TABLE conversation (
     id CHAR(36) NOT NULL,
     ride_id CHAR(36) NOT NULL,
     participant CHAR(36) NOT NULL,
+    participant_type VARCHAR(5) CHECK ( participant_type IN ('OWNER', 'USER') AND NOT NULL),
     driver_id CHAR(36) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP,

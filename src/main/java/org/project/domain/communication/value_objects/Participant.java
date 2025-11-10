@@ -9,9 +9,19 @@ public sealed interface Participant {
 
     UserID userID();
 
+    ParticipantType type();
+
+    enum ParticipantType {
+        OWNER, USER
+    }
+
     record OwnerParticipant(OwnerID ownerID) implements Participant {
         public OwnerParticipant {
             required("ownerID", ownerID);
+        }
+
+        public ParticipantType type() {
+            return ParticipantType.OWNER;
         }
 
         @Override
@@ -23,6 +33,10 @@ public sealed interface Participant {
     record UserParticipant(UserID userID) implements Participant {
         public UserParticipant {
             required("userID", userID);
+        }
+
+        public ParticipantType type() {
+            return ParticipantType.USER;
         }
     }
 }
