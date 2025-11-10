@@ -9,9 +9,9 @@ public sealed interface Participant {
 
     UserID userID();
 
-    ParticipantType type();
+    Type type();
 
-    enum ParticipantType {
+    enum Type {
         OWNER, USER
     }
 
@@ -20,8 +20,8 @@ public sealed interface Participant {
             required("ownerID", ownerID);
         }
 
-        public ParticipantType type() {
-            return ParticipantType.OWNER;
+        public Type type() {
+            return Type.OWNER;
         }
 
         @Override
@@ -35,8 +35,8 @@ public sealed interface Participant {
             required("userID", userID);
         }
 
-        public ParticipantType type() {
-            return ParticipantType.USER;
+        public Type type() {
+            return Type.USER;
         }
     }
 }
