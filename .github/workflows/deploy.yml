@@ -2,7 +2,11 @@ name: Deploy
 
 on:
   push:
-    branches: ["master"]
+    branches:
+      - master
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -12,5 +16,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Say hi
-        run: echo "Next step: server deploy 👋"
+        run: echo "GitHub Actions işləyir ✅"
+
 
