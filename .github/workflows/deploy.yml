@@ -8,5 +8,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Just test workflow
-        run: echo "GitHub Actions is working 🎉"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Say hi
+        run: echo "Next step: server deploy 👋"
+
