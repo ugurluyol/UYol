@@ -11,6 +11,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
@@ -18,13 +19,14 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          port: 22
           script: |
             set -e
+
             cd ${{ secrets.DEPLOY_PATH }}
 
-            # Use token for git pull over HTTPS
-            git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ugurluyol/UYol.git
+            # repo-nu TOKEN ile (HTTPS) cek
+            git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/fuad0595/UYol.git
             git pull
 
             docker compose -f docker-compose.prod.yaml up -d --build
-
