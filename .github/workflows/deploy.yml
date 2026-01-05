@@ -21,7 +21,10 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
-            git pull
-            docker compose -f docker-compose.prod.yaml up -d --build
 
+            # Use token for git pull over HTTPS
+            git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ugurluyol/UYol.git
+            git pull
+
+            docker compose -f docker-compose.prod.yaml up -d --build
 
